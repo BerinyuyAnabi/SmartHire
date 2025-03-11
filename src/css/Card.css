@@ -1,0 +1,171 @@
+.card {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Upload Section */
+.uploads {
+    display: flex;
+    justify-content: space-between;
+    gap: 70px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Upload Button */
+.upload-btn {
+    background-color: #fff;
+    height: 150px;
+    width: 150px;
+    color: #070442;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 3px solid #1b10ec;
+    font: bold 20px Arial;
+    transition: 0.3s;
+}
+
+.upload-btn:hover {
+    background-color: #070442;
+    color: #fff;
+}
+
+/* Candidate Details */
+.candidate-details {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    gap: 60px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.candidate-address, .candidate-names {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    justify-content: space-between;
+    margin: 10px;
+    align-items: center;
+}
+
+/* Input Fields */
+input {
+    width: 375px;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    border: 1px solid #070442;
+    background-color: #fff;
+}
+
+/* Candidate Buttons */
+.candidate-btns {
+    display: flex;
+    justify-content: space-between;
+    gap: 300px;
+    margin: 10px;
+    flex-wrap: wrap;
+}
+.role-btn{
+    background-color: #070442;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    font: bold 20px Arial;
+    transition: 0.3s;
+}
+.submit-btn{
+    background-color: #150bd6;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 15px;
+    cursor: pointer;
+    border: none;
+    font: bold 20px Arial;
+    transition: 0.3s;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+    .uploads {
+        justify-content: center;
+        gap: 40px;
+    }
+
+    .candidate-details {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .candidate-address, .candidate-names {
+        width: 100%;
+        align-items: stretch;
+    }
+
+    .candidate-btns {
+        justify-content: center;
+        gap: 50px;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .uploads {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .upload-btn {
+        width: 120px;
+        height: 120px;
+        font-size: 16px;
+    }
+
+    .candidate-details {
+        gap: 20px;
+    }
+
+    input {
+        width: 90%;
+    }
+
+    .candidate-btns {
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .uploads {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .upload-btn {
+        width: 100px;
+        height: 100px;
+        font-size: 14px;
+    }
+
+    input {
+        width: 100%;
+    }
+
+    .candidate-btns {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

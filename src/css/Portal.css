@@ -1,0 +1,104 @@
+.portal {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 2rem;
+}
+
+/* Small italic text */
+.portal h6 {
+    font-size: 0.8rem;
+    margin-top: 1rem;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Question Card */
+.question {
+    width: 50vh;
+    max-width: 600px;
+    margin-top: 2rem;
+    background-color: aliceblue;
+    border-radius: 10px;
+    padding: 2rem;
+    color: black;
+    border: 3px solid #1b10ec;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.question h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 3px solid black;
+    padding-bottom: 4px;
+}
+
+/* Input with button inside */
+.input-container {
+    position: relative;
+    width: 40rem;
+    max-width: 90%;
+    display: flex;
+    align-items: center;
+}
+
+.input-container input {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #1b10ec;
+    font-size: 1rem;
+    padding-right: 3rem; /* Space for button */
+}
+
+/* Button inside input */
+.input-container button {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #1b10ec;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.input-container button:hover {
+    background-color: #0e0869;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .question {
+        width: 60%;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .question {
+        width: 80%;
+        padding: 1.5rem;
+    }
+
+    .input-container {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .question {
+        width: 90%;
+        padding: 1rem;
+    }
+
+    .input-container button {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}
