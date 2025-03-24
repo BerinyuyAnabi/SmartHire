@@ -6,8 +6,9 @@ function NavBar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <NavLink to="/">
-          <img className="logo" src={image} alt="logo" />
+        <NavLink to="/" className="brand-link">
+          <p>Smart</p>
+          <p className="nav_name">Hire</p>
         </NavLink>
       </div>
 
@@ -15,15 +16,9 @@ function NavBar() {
         <NavLink to="/apply" className={({ isActive }) => (isActive ? "nav-link active-link" : "nav-link")}>
           Apply
         </NavLink>
-        <NavLink to="/portal" className={({ isActive }) => (isActive ? "nav-link active-link" : "nav-link")}>
-          Portal
-        </NavLink>
-        <NavLink to="/admin" className={({ isActive }) => (isActive ? "nav-link active-link" : "nav-link")}>
-          Admin
-        </NavLink>
+        
+        <button className="logout-btn">HR view</button>
       </div>
-
-      <button className="logout-btn">Logout</button>
     </nav>
   );
 }

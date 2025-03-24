@@ -1,0 +1,147 @@
+.jobposting {
+  margin: auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  max-width: 900px; /* Ensures the form doesn't stretch too much */
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.gen-info {
+  margin-bottom: 25px;
+  /* margin-right: 250px; */
+  text-align: left;
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.general-info,
+.other-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.section-mini-title {
+  margin-top: 12px;
+  margin-left: 18px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #007bff;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 10px 15px;
+  background-color: white;
+  color: #122331;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #008080;
+}
+
+.submit-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.submit-button {
+  padding: 12px 250px;
+  font-size: 16px;
+  background-color: #ffc107;
+}
+
+.submit-button:hover {
+  background-color: #008080;
+}
+
+/* -------- Responsive Design -------- */
+
+/* For screens wider than 1024px (Large Screens) */
+@media (min-width: 1024px) {
+  .content {
+    gap: 80px; /* Increase spacing */
+  }
+
+  .jobposting {
+    max-width: 1100px; /* Allow more width */
+  }
+
+  .submit-button {
+    padding: 12px 300px;
+  }
+}
+
+/* For screens smaller than 768px (Tablets & Mobile) */
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .submit-button {
+    width: 100%;
+    padding: 12px;
+  }
+}

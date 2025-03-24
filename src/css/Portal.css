@@ -24,8 +24,9 @@
     border-radius: 10px;
     padding: 2rem;
     color: black;
-    border: 3px solid #1b10ec;
+    border: 3px solid #008080;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .question h2 {
@@ -42,24 +43,25 @@
     max-width: 90%;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .input-container input {
     width: 100%;
     padding: 1rem;
     border-radius: 10px;
-    border: 1px solid #1b10ec;
+    border: 1px solid #008080;
     font-size: 1rem;
-    padding-right: 3rem; /* Space for button */
+    padding-right: 3rem;
 }
 
 /* Button inside input */
 .input-container button {
     position: absolute;
-    right: 15px;
-    top: 50%;
+    right: 20px;
+    top: 45%;
     transform: translateY(-50%);
-    background-color: #1b10ec;
+    background-color: #008080;
     color: white;
     border: none;
     border-radius: 8px;
@@ -69,7 +71,7 @@
 }
 
 .input-container button:hover {
-    background-color: #0e0869;
+    background-color: #FFC107;
 }
 
 /* Responsive Design */

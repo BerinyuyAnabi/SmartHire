@@ -1,46 +1,75 @@
 .navbar {
-  background-color: #070442;
+  background-color: white;
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 50px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.navbar-brand {
-  font-size: 1.5rem;
-  font-weight: bold;
+  flex-wrap: nowrap; /* Ensures everything stays in a row */
 }
 
-.navbar-links {
+.navbar-brand {
   display: flex;
-  color: #ffffff;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  /* transition: background-color 0.2s; */
+  align-items: center;
+  gap: 1.5rem; /* Adds spacing between brand and links */
 }
+
+.navbar-brand .brand-link {
+  font-weight: bold;
+  display: flex;
+  color: #008080;
+  gap: 0.2rem;
+}
+
+.brand-link .nav_name {
+  background-color: #008080;
+  width: 55px;
+  color: white;
+  border-radius: 5px;
+  border: 1px solid #FFC107;
+  text-align: center;
+}
+
+.navbar-brand .navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem; 
+  margin-left: 10px;
+}
+
 .nav-link {
-  color: #ffffff;
+  font-weight: bold;
+  color: #008080;
   font-size: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
   transition: 0.2s;
 }
-/* .nav-link:hover {
-  background-color: #b5a8d5;
-} */
-.active-link {
-  border-bottom: 3px solid #ffffff;
-  padding-bottom: 5px;
-}
-.logout-btn {
-  background-color: rgb(14, 127, 233);
-  height: 50px;
-  text-align: center;
-  font-size: 15px;
-  height: 35px;
+
+.nav-link:hover {
+  color: #FFC107;
 }
 
+.active-link {
+  border-bottom: 3px solid #008080;
+  padding-bottom: 5px;
+}
+
+.logout-btn {
+  background-color: #008080;
+  border-radius: 30px;
+  text-align: center;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  margin-left: 15px; 
+}
+
+.logout-btn:hover {
+  background-color: #FFC107;
+}
+
+/* -------- Responsive Design -------- */
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem;
@@ -51,6 +80,7 @@
   }
 
   .navbar-links {
+    margin-left: 15px;
     gap: 1rem;
   }
 
