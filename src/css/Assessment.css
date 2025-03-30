@@ -1,0 +1,136 @@
+.portal {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+  }
+  
+  .header-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .progress-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .progress-bar {
+    flex-grow: 1;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.3s ease;
+  }
+  .progress-percentage{
+    color: black;
+  }
+  
+  .preview-btn {
+    padding: 0.5rem 1rem;
+    background-color: blue;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+  }
+  
+  .question-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .timer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f44336;
+    font-weight: bold;
+  }
+  
+  .question {
+    color: black;
+    padding: 1.5rem;
+    /* margin: 1rem 0; */
+  }
+  
+  .answer-section {
+    margin: 1rem 0;
+    color: black;
+  }
+  
+  .input-container textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+  }
+  
+  .options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .option:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .option.selected {
+    background-color: #e3f2fd;
+    border-color: #2196F3;
+  }
+  
+  .option-letter {
+    font-weight: bold;
+    color: #2196F3;
+  }
+  
+  .navigation-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 2rem;
+  }
+  
+  .navigation-buttons button {
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  
+  .navigation-buttons button:disabled {
+    background-color: #b0bec5;
+    cursor: not-allowed;
+  }

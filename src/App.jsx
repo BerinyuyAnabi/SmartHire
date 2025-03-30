@@ -2,7 +2,7 @@ import './App.css'
 import NavBar from './components/NavBar'
 import Apply from "./pages/Apply"
 import Home from "./pages/Home"
-import Portal from "./pages/Portal"
+import Assessment from "./pages/Assessment"
 import Admin from "./pages/Admin"
 import JobPosting from "./pages/JobPosting"
 import JobDescription from "./pages/JobDescription"
@@ -18,7 +18,7 @@ function App() {
     <Routes>
     <Route path='/' element = {<Home />}/>
     <Route path='/apply' element = {<JobPosting />}/>
-    <Route path='/portal' element = {<Portal />}/>
+    <Route path='/assessment' element = {<Assessment />}/>
     <Route path = '/admin' element = {<Admin/>}/>
     {/* <Route path = '/applicant-details' element = {<ApplicantDetails/>}/> */}
     <Route path = '/job-description' element = {<JobDescription/>}/>
