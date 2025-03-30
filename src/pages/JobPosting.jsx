@@ -1,64 +1,39 @@
-import "../css/JobPosting.css";
-
+// import "../css/JobPosting.css";
+import SmartHireCard from "../components/ReuseableCard.jsx"
 function JobPosting() {
-  return (
-    <div className="jobposting">
-      <p className="page-title">Job Description</p>
-      <p className="gen-info">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis ea,
-        consectetur, eius porro blanditiis a consequuntur alias exercitationem
-        tempore beatae aperiam quaerat tenetur magni maxime laudantium, quidem
-        quo qui at.
-      </p>
-
-      <div className="content">
-        {/* General Info Section */}
-        <div className="general-info">
-          <p className="section-title">General Information</p>
-
-          <input type="text" placeholder="Enter your first name" />
-
-          <input type="text" placeholder="Enter your last name" />
-
-          <input type="email" placeholder="Enter your email address" />
-
-          <p>Gender</p>
-          <div className="radio-group">
-            <label>
-              <input type="radio" name="gender" value="Male" />
-              Male
-            </label>
-            <label>
-              <input type="radio" name="gender" value="Female" />
-              Female
-            </label>
-          </div>
-        </div>
-
-        {/* Other Information Section */}
-        <div className="other-info">
-          <p className="section-mini-title">
-            Submit document in PDF. Ensure you name them properly
-            (SurnameLastname)
-          </p>
-
-          <div className="buttons">
-            <button>Upload CV</button>
-            <button>Upload Cover Letter</button>
-          </div>
-
-          <input type="text" placeholder="Enter your phone number" />
-
-          <input type="text" placeholder="Enter your qualifications" />
-        </div>
-      </div>
-
-      {/* Submit Button Centered at Bottom */}
-      <div className="submit-container">
-        <button className="submit-button">Submit</button>
-      </div>
-    </div>
-  );
+  return (<SmartHireCard
+    type="job"
+    data={{
+      title: "Product Designer",
+      company: "Mckenzie Media",
+      salary: "120 apples",
+      salaryRange: "400-1000 monthly",
+      employmentType: "Full-time",
+      locationType: "Remote",
+      location: "Delhi, India",
+      overviewTags: ["Opensecurity", "UUX", "UI Design", "IT Specialist", "Metron Graphics"],
+      responsibilities: [
+        "Conduct their research to understand customer needs, pain points, and behaviours.",
+        "Design and prototype intuitive user interfaces for web and mobile applications.",
+        // ... more responsibilities
+      ],
+      requirements: [
+        "2 × years of experience in UUUX design, preferably within a SaaS or tech company.",
+        "Proficiency in design tools such as Fiping, Adobe App, or Sketch.",
+        // ... more requirements
+      ],
+      preferredQualifications: [
+        "Experience in designing for B2B SaaS products.",
+        "Finalizatory with designing for mobile applications (iOS/Android).",
+        // ... more preferred qualifications
+      ],
+      benefits: [
+        "A dynamic and innovative work environment.",
+        "Opportunity to have a direct impact on the user experience of a growing product.",
+        // ... more benefits
+      ]
+    }}
+  />  );
 }
 
 export default JobPosting;

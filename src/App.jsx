@@ -7,6 +7,7 @@ import Admin from "./pages/Admin"
 import JobPosting from "./pages/JobPosting"
 import JobDescription from "./pages/JobDescription"
 import {Routes, Route} from "react-router-dom";
+import ApplicantDetails from "./components/ApplicantDetails"
 function App() {
   
 
@@ -19,8 +20,9 @@ function App() {
     <Route path='/apply' element = {<JobPosting />}/>
     <Route path='/portal' element = {<Portal />}/>
     <Route path = '/admin' element = {<Admin/>}/>
-    {/* <Route path = '/hr-view' element = {<Apply/>}/> */}
+    {/* <Route path = '/applicant-details' element = {<ApplicantDetails/>}/> */}
     <Route path = '/job-description' element = {<JobDescription/>}/>
+    <Route path="/applicant/:id" element={<ApplicantDetails />} />
     </Routes>
     </main>
     </>

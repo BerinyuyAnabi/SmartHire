@@ -1,0 +1,136 @@
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.admin-container h3{
+    color: black;
+    margin-bottom: 15px;
+}
+.applicant-navbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.app-btn {
+  border: 2px solid blue;
+  color: black;
+  background-color: white;
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.app-btn:hover {
+  background-color: blue;
+  color: white;
+}
+
+.applicant {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.applicant:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.applicant img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+}
+
+.applicant-details {
+  flex: 1;
+}
+
+.applicant-name {
+  color: #333;
+  font-weight: bold;
+  font-size: 18px;
+  margin: 0 0 5px 0;
+}
+
+.institution {
+  color: #555;
+  margin: 0 0 10px 0;
+}
+
+.credentials {
+  display: flex;
+  gap: 15px;
+  margin: 10px 0;
+  color: #666;
+}
+
+.keywords {
+  color: #666;
+}
+
+.keyword span {
+  font-weight: bold !important;
+  color: gray !important;
+}
+
+.ap-btn {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.ap-btn button:first-child {
+  background-color: black;
+  width: 110px;
+  border-radius: 50px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.ap-btn button:last-child {
+  background-color: white;
+  color: black;
+  border-radius: 50px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border: 1px solid black;
+}
+
+.ap-btn button:hover {
+  background-color: blue;
+  color: white;
+}
+.action-buttons {
+  display: flex;
+  flex-direction: column !important;
+  gap: 10px;
+}
+
+.action-buttons button {
+  padding: 10px 20px;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+}
+
+.action-buttons button:first-child {
+  /* margin-bottom: 10px; */
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.action-buttons button:last-child {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
