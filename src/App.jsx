@@ -17,7 +17,7 @@ function App() {
     <main className="main-content">
     <Routes>
     <Route path='/' element = {<Home />}/>
-    <Route path='/apply' element = {<JobPosting />}/>
+    <Route path='/job-posting' element = {<JobPosting />}/>
     <Route path='/assessment' element = {<Assessment />}/>
     <Route path = '/admin' element = {<Admin/>}/>
     {/* <Route path = '/applicant-details' element = {<ApplicantDetails/>}/> */}

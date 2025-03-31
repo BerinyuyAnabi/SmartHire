@@ -1,8 +1,11 @@
 import "../css/Assessment.css";
 import { useState, useEffect } from 'react';
 import { preAssessmentData } from '../data/preAssessment'; 
+import { useLocation } from "react-router-dom";
 
 function Assessment() {
+  const location = useLocation;
+  const {formData, jobDetails} = location.state || {};
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(4 * 60 + 34); // 4 minutes 34 seconds in seconds
