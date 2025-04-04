@@ -9,7 +9,7 @@ function Home() {
           Find the Perfect <br /> <span className="highlight">Talent</span> with
           AI-
           <br />
-          Powered<span className="highlight">Precision</span>
+          Powered<span className="highlight"> Precision</span>
         </p>
 
         <div className="home-subtitle">
