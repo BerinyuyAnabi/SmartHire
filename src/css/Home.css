@@ -1,186 +1,216 @@
 /* General Styling */
+:root {
+  --yellow: #FFCA35;
+  --white: white;
+  --blue: #122331;
+  --dark_green: #0f5858;
+  --medium_green:#008080;
+  --light_green:#01a0a0;
+}
+
 .home {
-    margin: auto;
+  margin: auto;
+  max-width: 1200px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
-.home-header {
-    display: flex;
-    align-items: center;
-    gap: 65px;
-    /* margin-top: 12%; */
-    text-align: center;
-}
-
+/* Typography */
 .home-title {
-    font-size: 3.5rem;
-    font-weight: bold;
-    color: gray;
-    margin-bottom: 1rem;
-    line-height: 1.2;
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: var(--dark_green);
+  line-height: 1.2;
+  text-align: left;
 }
 
 .subtitle {
-    text-align: left;
-    font-size: 1.5rem;
-    color: #555;
+  text-align: left;
+  font-size: 1.5rem;
+  color: var(--medium_green);
 }
 
 .subtitle-text {
-    font-size: 1.2rem;
-    text-align: left;
-
+  font-size: 1.2rem;
+  text-align: left;
+  color: #727171;
 }
+
+.highlight {
+  color: #FFCA35;
+}
+
+/* Image Section */
 .home-image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 2rem;
-    flex-wrap: wrap;
-    position: relative; 
-}
-.image-wrapper {
-    position: relative;
-    display: inline-block;
+  margin-top: 2rem;
 }
 
+.image-wrapper {
+  position: relative;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.home-image, .home-image2 {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+  object-fit: cover;
+}
+
+.home-image {
+  height: 400px;
+}
+
+.home-image2 {
+  height: 400px;
+}
+
+/* Buttons */
 .image-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #FFC107;
-    color: white;
-    border-radius: 25px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--white);
+  color: var(--blue);
+  border-radius: 25px;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.4s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .image-btn:hover {
-    background-color: #008080;
+  background-color: #008080;
+  color: var(--white);
 }
 
-.image-btn svg {
-    margin-left: 5px;
+.arrow_icon {
+  width: 40px;
 }
 
-
-.home-image{
-    width: 300px;
-    height: 400px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
-}
-.home-image2{
-    width: 400px;
-    height: 400px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
-}
-
-
-.highlight {
-    color: #FFC107;
-}
-
-/* Responsive Typography */
-@media (max-width: 1024px) {
-    .home-title {
-        font-size: 2.8rem;
-    }
-    .subtitle {
-        font-size: 1.8rem;
-    }
-    .subtitle-text {
-        font-size: 1.1rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .home-title {
-        font-size: 2.2rem;
-    }
-    .subtitle {
-        font-size: 1.6rem;
-    }
-    .subtitle-text {
-        font-size: 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .home-title {
-        font-size: 1.8rem;
-    }
-    .subtitle {
-        font-size: 1.4rem;
-    }
-    .subtitle-text {
-        font-size: 0.9rem;
-    }
-}
-
-/* Button Styling */
 .home-btns {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    flex-wrap: wrap;
-    justify-content: center;
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+  justify-content: left;
 }
 
 .home-btn {
-    background-color: #FFC107;
+  background: #006d6d;
+  color: white;
+  border-radius: 40px;
+  padding: 6px 15px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  min-width: 150px;
+  text-align: center;
+}
+
+.home-btn-1 {
+    background: #01a0a0;
     color: white;
-    border-radius: 35px;
-    padding: 12px 24px;
+    border-radius: 40px;
+    padding: 6px 15px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: background 0.3s ease, transform 0.2s ease;
     min-width: 150px;
     text-align: center;
+  }
+.logout-btn {
+  background-color: transparent;
+  color: #333;
+  border: 2px solid #FFCA35;
+  border-radius: 35px;
+  padding: 10px 22px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
-.home-btn:hover {
-    background-color: #008080;
-    transform: scale(1.05);
-}
-
-@media (max-width: 768px) {
-    .home-btn {
-        font-size: 14px;
-        padding: 10px 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    .home-btn {
-        font-size: 12px;
-        padding: 8px 16px;
-        min-width: 120px;
-    }
+.home-btn:hover, .home-btn-1:hover, .logout-btn:hover {
+  /* background-color: #008080; */
+  border:none;
+  color: white;
+  transform: scale(1.05);
 }
 
 /* Animation */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .home-title, .subtitle, .subtitle-text, .home-btns {
-    animation: fadeIn 0.6s ease;
+  animation: fadeIn 0.6s ease;
+}
+
+/* Bootstrap Responsive Overrides */
+@media (max-width: 1200px) {
+  .home-title {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .home-title {
+    font-size: 2.5rem;
+  }
+  .subtitle {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-title {
+    font-size: 2.2rem;
+    text-align: center;
+  }
+  .subtitle, .subtitle-text {
+    text-align: center;
+  }
+  .home-btns {
+    justify-content: center;
+  }
+  .home-btn, .logout-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .home-title {
+    font-size: 1.8rem;
+  }
+  .subtitle {
+    font-size: 1.2rem;
+  }
+  .subtitle-text {
+    font-size: 1rem;
+  }
+  .home-btn, .logout-btn {
+    min-width: 120px;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
 }
