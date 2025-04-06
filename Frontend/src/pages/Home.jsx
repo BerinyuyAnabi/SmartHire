@@ -103,11 +103,11 @@ function Home() {
             <div className="home-btns">
               <button className="home-btn">
                 <span>Apply</span>
-                <img className="arrow_icon ms-2" src="src/assets/arrow.png" alt="" />
+                <img className="arrow_icon ms-2" src="static/images/arrow.png" alt="" />
               </button>
               <button className=" home-btn-1">
                 <span>HR view</span>
-                <img className="arrow_icon ms-2" src="src/assets/arrow.png" alt="" />
+                <img className="arrow_icon ms-2" src="static/images/arrow.png" alt="" />
               </button>
             </div>
           </div>
@@ -118,7 +118,7 @@ function Home() {
       <div className="row home-image-container justify-content-center">
         <div className="col-md-6 col-lg-4 mb-4">
           <div className="image-wrapper">
-            <img src="src/assets/home.png" alt="home" className="img-fluid home-image rounded" />
+            <img src="static/images/home.png" alt="home" className="img-fluid home-image rounded" />
             <button className="image-btn">
               AI-Powered Talent Matching <FaArrowRight />
             </button>
@@ -127,7 +127,7 @@ function Home() {
         
         <div className="col-md-6 col-lg-4 mb-4">
           <div className="image-wrapper">
-            <img src="src/assets/home.png" alt="home" className="img-fluid home-image rounded" />
+            <img src="static/images/home.png" alt="home" className="img-fluid home-image rounded" />
             <button className="image-btn">
               Automated Screening & Insights <FaArrowRight />
             </button>
@@ -136,7 +136,7 @@ function Home() {
         
         <div className="col-md-12 col-lg-4 mb-4">
           <div className="image-wrapper">
-            <img src="src/assets/home.png" alt="home" className="img-fluid home-image2 rounded" />
+            <img src="static/images/home.png" alt="home" className="img-fluid home-image2 rounded" />
             <button className="image-btn">
               Seamless & Efficient Hiring <FaArrowRight />
             </button>
