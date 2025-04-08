@@ -29,7 +29,7 @@ function NavBar() {
 
         <div className="navbar-links d-flex align-items-center">
           <NavLink 
-            to="/apply" 
+            to="/job-posting" 
             className={({ isActive }) => 
               isActive 
                 ? "nav-link active-link me-3 text-decoration-none" 
@@ -39,7 +39,9 @@ function NavBar() {
             Apply
           </NavLink>
           
-          <button className="HR_view">HR view</button>
+          <a href="/admin">
+              <button className="HR_view">HR view</button>
+          </a>
         </div>
       </div>
     </nav>

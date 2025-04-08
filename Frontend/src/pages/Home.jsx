@@ -101,14 +101,21 @@ function Home() {
               time-to-hire, and make data-driven decisions with confidence.
             </p>
             <div className="home-btns">
-              <button className="home-btn">
-                <span>Apply</span>
-                <img className="arrow_icon ms-2" src="static/images/arrow.png" alt="" />
-              </button>
-              <button className=" home-btn-1">
-                <span>HR view</span>
-                <img className="arrow_icon ms-2" src="static/images/arrow.png" alt="" />
-              </button>
+              <a href="/job-posting">
+                <button className="home-btn">
+                  <span>Apply</span>
+                  <img className="arrow_icon ms-2" src="static/images/arrow.png" alt="" />
+                </button>
+              </a>
+              
+              
+              <a href="/admin">
+                <button className=" home-btn-1">
+                  <span>HR view</span>
+                  <img className="arrow_icon ms-2" src="static/images/arrow.png" alt="" />
+                </button>
+              </a>
+
             </div>
           </div>
         </div>
