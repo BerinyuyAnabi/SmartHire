@@ -1,52 +1,48 @@
 /* Main container structure */
 .smart-hire-container {
-
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-
   padding: 20px;
   color: #333;
-  display: flex;
-  gap: 35px;
-}
-
-.job-board {
-  flex: 1;
-  /* padding: 20px 0; */
 }
 
 .job-board h2 {
-  font-size: 22px;
-  margin-bottom: 20px;
+  font-size: 24px;
   color: #2c3e50;
-  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.back-button {
+  text-decoration: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.back-button:hover {
+  opacity: 0.8;
 }
 
 /* Job details content */
 .job-details-content {
   background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  color: black; /* Ensure text is black on white */
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  color: black;
+  width: 100%;
 }
 
 /* Job header with arrows */
 .job-header-container {
-  margin-bottom: 20px;
-}
-
-.job-title-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: 24px;
 }
 
 .job-title-wrapper h3 {
-  font-size: 22px;
+  font-size: 24px;
+  font-weight: 600;
   margin: 0;
-  color: black;
+  color: #000;
 }
 
 .arrow-buttons {
@@ -54,41 +50,66 @@
   gap: 10px;
 }
 
-.arrow-buttons button {
+.navigation-btn {
   background: none;
-  border: 1px solid #ddd;
-  border-radius: 15px;
-  padding: 5px 15px;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  color: black;
-  font-size: 16px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.arrow-buttons button:disabled {
+.navigation-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
+.nav-arrow {
+  width: 30px;
+  height: 30px;
+  margin: 0 5px;
+  transition: transform 0.2s;
+}
+
+.nav-arrow:hover:not(.opacity-50) {
+  transform: scale(1.1);
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.rotate-180:hover:not(.opacity-50) {
+  transform: rotate(180deg) scale(1.1);
+}
+
 .company-name {
-  color: #666;
-  margin: 0;
+  color: #6c757d;
+  font-weight: 500;
+  font-size: 16px;
 }
 
 /* Buttons */
 .ap-btn-container {
   display: flex;
   gap: 15px;
-  margin: 20px 0;
+  margin: 24px 0;
 }
 
 .butn {
-  border-radius: 15px;
-  width: 115px;
+  border-radius: 50px; /* Pill shape */
+  width: 120px;
   padding: 10px 0;
   font-weight: 500;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .apply-btn {
@@ -99,6 +120,8 @@
 
 .apply-btn:hover {
   background-color: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .save-btn {
@@ -108,22 +131,23 @@
 }
 
 .save-btn:hover {
-  background-color: #f5f5f5;
+  background-color: #f8f9fa;
+  transform: translateY(-2px);
 }
 
 /* Job stats */
 .jb-detail {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  font-size: 14px;
-  color: black;
-  margin-bottom: 25px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.jb-detail span {
+.detail-item {
   display: flex;
   align-items: center;
+  font-size: 14px;
+  color: #495057;
+  padding: 6px 0;
 }
 
 /* Content sections */
@@ -132,43 +156,97 @@
 }
 
 .section {
-  margin-bottom: 25px;
+  margin-bottom: 28px;
 }
 
-.section h5 {
-  font-size: 18px;
-  margin-bottom: 10px;
-  color: black;
+.section-title {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #212529;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.section-title:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 3px;
+  background-color: #000;
 }
 
 .section ul {
-  padding-left: 20px;
+  padding-left: 22px;
   margin: 0;
 }
 
 .section li {
-  margin-bottom: 8px;
-  line-height: 1.5;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  color: #495057;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
+/* Ensure the card maintains size on larger screens */
+@media (min-width: 992px) {
+  .job-details-content {
+    min-width: 800px;
+    width: 100%;
+  }
+  
+  .job-board {
+    width: 100%;
+  }
+}
+
+/* Responsive improvements */
+@media (max-width: 991px) {
   .smart-hire-container {
-    flex-direction: column;
-    gap: 20px;
+    padding: 15px;
+  }
+  
+  .job-details-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .job-header-container {
+    margin-bottom: 16px;
   }
   
   .job-title-wrapper {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+    margin-bottom: 12px;
   }
   
-  .arrow-buttons {
-    align-self: flex-end;
+  .ap-btn-container {
+    margin: 16px 0;
+  }
+}
+
+@media (max-width: 575px) {
+  .job-details-content {
+    padding: 16px;
+    border-radius: 8px;
   }
   
-  .jb-detail {
-    gap: 10px;
+  .job-title-wrapper h3 {
+    font-size: 20px;
+  }
+  
+  .butn {
+    width: 110px;
+    font-size: 14px;
+  }
+  
+  .detail-item {
+    font-size: 13px;
+  }
+  
+  .section li {
+    margin-bottom: 8px;
+    line-height: 1.5;
   }
 }
