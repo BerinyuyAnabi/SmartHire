@@ -1,77 +1,102 @@
+:root {
+  --primary: #122331;
+  --secondary: #0f5858;
+  --accent: #01a0a0;
+  --white: #ffffff;
+  --light-gray: #f8f9fa;
+  --medium-gray: #e9ecef;
+  --text-gray: #6c757d;
+  --dark-gray: #495057;
+  --card-bg: #fdfdfd;
+  --body-bg: #f5f7f9;
+  --border-color: #eaeef3;
+  --hover-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
+  --transition: all 0.25s ease-in-out;
+}
+
+/* Global styles */
+body {
+  background-color: var(--body-bg);
+}
+
 /* Main container structure */
 .smart-hire-container {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 20px;
-  color: #333;
+  color: var(--dark-gray);
+  display: flex;
+  justify-content: center;
+}
+
+.main-content-wrapper {
+  max-width: 1000px; /* Increased from 1200px */
+  width: 100%;
 }
 
 .job-board h2 {
-  font-size: 24px;
-  color: #2c3e50;
+  font-size: 1.75rem;
+  color: var(--primary);
   margin-bottom: 0;
+  letter-spacing: -0.5px;
 }
 
 .back-button {
   text-decoration: none;
-  font-size: 16px;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
+  color: var(--primary);
+  transition: var(--transition);
 }
 
 .back-button:hover {
   opacity: 0.8;
+  transform: translateX(-3px);
 }
 
 /* Job details content */
 .job-details-content {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-  color: black;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
+  color: #000;
   width: 100%;
+  border: 1px solid var(--border-color);
+  transition: box-shadow 0.3s ease;
+  margin: 0 auto; /* Center the card */
+}
+
+.job-details-content:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 /* Job header with arrows */
 .job-header-container {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  padding-bottom: 8px;
 }
 
 .job-title-wrapper h3 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 1.75rem;
+  font-weight: 700;
   margin: 0;
-  color: #000;
+  color: var(--primary);
+  letter-spacing: -0.5px;
 }
 
 .arrow-buttons {
   display: flex;
-  gap: 10px;
-}
-
-.navigation-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.navigation-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
 .nav-arrow {
-  width: 30px;
-  height: 30px;
-  margin: 0 5px;
-  transition: transform 0.2s;
+  width: 34px;
+  height: 34px;
+  transition: transform 0.2s, opacity 0.2s;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.1));
 }
 
 .nav-arrow:hover:not(.opacity-50) {
@@ -87,85 +112,96 @@
 }
 
 .company-name {
-  color: #6c757d;
+  color: var(--text-gray);
   font-weight: 500;
-  font-size: 16px;
+  font-size: 1rem;
+  margin-top: 6px;
 }
 
 /* Buttons */
 .ap-btn-container {
   display: flex;
-  gap: 15px;
-  margin: 24px 0;
+  gap: 16px;
+  margin: 28px 0;
 }
 
 .butn {
-  border-radius: 50px; /* Pill shape */
-  width: 120px;
-  padding: 10px 0;
-  font-weight: 500;
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 15px;
-  transition: all 0.2s;
+  font-size: 0.95rem;
+  transition: var(--transition);
   display: flex;
   justify-content: center;
   align-items: center;
+  min-width: 140px;
+  letter-spacing: 0.3px;
 }
 
 .apply-btn {
-  background-color: black;
-  color: white;
+  background-color: var(--primary);
+  color: var(--white);
   border: none;
+  box-shadow: 0 4px 12px rgba(18, 35, 49, 0.15);
 }
 
 .apply-btn:hover {
-  background-color: #333;
+  background-color: #1a3649;
   transform: translateY(-2px);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 15px rgba(18, 35, 49, 0.2);
 }
 
 .save-btn {
-  background-color: white;
-  color: black;
-  border: 1px solid black;
+  background-color: var(--white);
+  color: var(--primary);
+  border: 1px solid var(--border-color);
 }
 
 .save-btn:hover {
   background-color: #f8f9fa;
   transform: translateY(-2px);
+  border-color: #d0d7de;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* Job stats */
 .jb-detail {
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .detail-item {
   display: flex;
   align-items: center;
-  font-size: 14px;
-  color: #495057;
-  padding: 6px 0;
+  font-size: 0.9rem;
+  color: var(--dark-gray);
+  padding: 8px 0;
+  font-weight: 500;
+}
+
+.detail-item img {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 /* Content sections */
 .content {
-  color: black;
+  color: var(--dark-gray);
 }
 
 .section {
-  margin-bottom: 28px;
+  margin-bottom: 36px;
 }
 
 .section-title {
-  font-size: 19px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #212529;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--primary);
   position: relative;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
+  letter-spacing: -0.3px;
 }
 
 .section-title:after {
@@ -173,31 +209,116 @@
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 40px;
+  width: 48px;
   height: 3px;
-  background-color: #000;
+  background-color: var(--accent);
+  border-radius: 2px;
 }
 
 .section ul {
-  padding-left: 22px;
+  padding-left: 24px;
   margin: 0;
 }
 
 .section li {
-  margin-bottom: 10px;
-  line-height: 1.6;
-  color: #495057;
+  margin-bottom: 12px;
+  line-height: 1.7;
+  color: var(--dark-gray);
+  position: relative;
+}
+
+.section li::marker {
+  color: var(--accent);
+}
+
+/* Skeleton loading styles */
+.skeleton-container {
+  width: 100%;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.skeleton-title, 
+.skeleton-subtitle,
+.skeleton-arrows,
+.skeleton-buttons,
+.skeleton-detail-item,
+.skeleton-section-title,
+.skeleton-list-item {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 400px 100%;
+  animation: skeleton-loading 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+.skeleton-title {
+  height: 32px;
+  width: 70%;
+  margin-bottom: 12px;
+}
+
+.skeleton-subtitle {
+  height: 20px;
+  width: 40%;
+}
+
+.skeleton-arrows {
+  height: 34px;
+  width: 90px;
+  margin-left: auto;
+}
+
+.skeleton-buttons {
+  height: 48px;
+  width: 300px;
+  margin: 28px 0;
+  border-radius: 24px;
+}
+
+.skeleton-detail-item {
+  height: 22px;
+  width: 90%;
+  margin: 8px 0;
+}
+
+.skeleton-section-title {
+  height: 28px;
+  width: 40%;
+  margin-bottom: 20px;
+}
+
+.skeleton-list-item {
+  height: 16px;
+  margin-bottom: 14px;
+  width: 95%;
+}
+
+.skeleton-list-item:nth-child(odd) {
+  width: 85%;
+}
+
+/* Center job board content */
+.job-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.job-board > div:first-child {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
 /* Ensure the card maintains size on larger screens */
 @media (min-width: 992px) {
   .job-details-content {
-    min-width: 800px;
     width: 100%;
-  }
-  
-  .job-board {
-    width: 100%;
+    max-width: 1200px; /* Control the maximum width of the card itself */
   }
 }
 
@@ -208,45 +329,50 @@
   }
   
   .job-details-content {
-    padding: 20px;
+    padding: 24px;
   }
 }
 
 @media (max-width: 767px) {
   .job-header-container {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
   
   .job-title-wrapper {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
   
   .ap-btn-container {
-    margin: 16px 0;
+    margin: 20px 0;
+  }
+  
+  .job-title-wrapper h3 {
+    font-size: 1.5rem;
   }
 }
 
 @media (max-width: 575px) {
   .job-details-content {
-    padding: 16px;
-    border-radius: 8px;
-  }
-  
-  .job-title-wrapper h3 {
-    font-size: 20px;
+    padding: 20px;
+    border-radius: 12px;
   }
   
   .butn {
-    width: 110px;
-    font-size: 14px;
+    min-width: 120px;
+    font-size: 0.9rem;
+    padding: 8px 16px;
   }
   
   .detail-item {
-    font-size: 13px;
+    font-size: 0.85rem;
+  }
+  
+  .section-title {
+    font-size: 1.15rem;
   }
   
   .section li {
-    margin-bottom: 8px;
-    line-height: 1.5;
+    margin-bottom: 10px;
+    line-height: 1.6;
   }
 }
