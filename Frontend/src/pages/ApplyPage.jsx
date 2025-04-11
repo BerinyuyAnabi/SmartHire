@@ -84,7 +84,7 @@ function ApplyPage({ job, onBack }) {
         box-shadow: var(--hover-shadow);
       }
       
-      .section-title {
+      .section-title-application {
         color: var(--primary);
         font-weight: 600;
         margin-bottom: 1.5rem;
@@ -439,7 +439,7 @@ function ApplyPage({ job, onBack }) {
 
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <h4 className="section-title">Personal Information</h4>
+                <h4 className="section-title-application">Personal Information</h4>
                 
                 <div className="row g-4">
                   <div className="col-md-6">
@@ -507,7 +507,7 @@ function ApplyPage({ job, onBack }) {
               </div>
 
               <div className="mb-4">
-                <h4 className="section-title">Contact Information</h4>
+                <h4 className="section-title-application">Contact Information</h4>
                 
                 <div className="row g-4">
                   <div className="col-md-6">
@@ -555,7 +555,7 @@ function ApplyPage({ job, onBack }) {
               </div>
 
               <div className="mb-4">
-                <h4 className="section-title">Documents</h4>
+                <h4 className="section-title-application">Documents</h4>
                 <p className="text-secondary mb-4">
                   Upload 1 supported PDF or Word document per field. Maximum size: 100MB
                 </p>

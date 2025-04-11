@@ -194,7 +194,7 @@ body {
   margin-bottom: 36px;
 }
 
-.section-title {
+.section-title-details {
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 20px;
@@ -204,7 +204,7 @@ body {
   letter-spacing: -0.3px;
 }
 
-.section-title:after {
+.section-title-details:after {
   content: '';
   position: absolute;
   left: 0;
@@ -367,7 +367,7 @@ body {
     font-size: 0.85rem;
   }
   
-  .section-title {
+  .section-title-details{
     font-size: 1.15rem;
   }
   

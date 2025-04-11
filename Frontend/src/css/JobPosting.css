@@ -11,11 +11,13 @@
   --dark-gray: #495057;
   --card_bg: #fdfdfd;
   --body-bg: #f5f7f9;
+  --alt-bg: #1c1f24;
+
 }
 
 
 body {
-  background-color: var(--body-bg) !important;
+  background-color:  var(--body-bg) !important;
   color: var(--dark-gray);
 }
 

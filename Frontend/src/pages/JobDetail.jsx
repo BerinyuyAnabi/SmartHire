@@ -182,7 +182,7 @@ function JobDetails({ initialJob, onBack, onApply }) {
 
                   <div className="content mt-4">
                     <div className="section">
-                      <h5 className="section-title">Responsibilities</h5>
+                      <h5 className="section-title-details">Responsibilities</h5>
                       <ul className="responsibility-list">
                         {job?.responsibilities?.map((item, index) => (
                           <li key={index}>{item}</li>
@@ -191,7 +191,7 @@ function JobDetails({ initialJob, onBack, onApply }) {
                     </div>
 
                     <div className="section">
-                      <h5 className="section-title">Preferred Qualifications</h5>
+                      <h5 className="section-title-details">Preferred Qualifications</h5>
                       <ul className="qualification-list">
                         {job?.qualifications?.map((item, index) => (
                           <li key={index}>{item}</li>
@@ -200,7 +200,7 @@ function JobDetails({ initialJob, onBack, onApply }) {
                     </div>
 
                     <div className="section">
-                      <h5 className="section-title">What We Offer</h5>
+                      <h5 className="section-title-details">What We Offer</h5>
                       <ul className="offers-list">
                         {job?.offers?.map((item, index) => (
                           <li key={index}>{item}</li>
