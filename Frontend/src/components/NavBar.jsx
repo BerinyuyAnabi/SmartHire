@@ -166,7 +166,8 @@ function NavBar() {
             <li className="nav-item">
               <NavLink to="/Login" className="btn-link">
                 <button className="hr-btn">
-                  HR View <i className="fas fa-arrow-right"></i>
+                HR View <i className="fas fa-arrow-right" style={{ marginLeft: '8px' }}></i>
+
                 </button>
               </NavLink>
             </li>

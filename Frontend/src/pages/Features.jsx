@@ -452,9 +452,9 @@ function Features() {
                   <p className="cta-text fade-in">Transform your hiring process today with our AI-powered recruitment platform.</p>
                 </div>
                 <div className="col-lg-4 text-center text-lg-end">
-                  <Link to="/demo" className="btn-link">
+                  <Link to="/Login" className="btn-link">
                     <button className="cta-button fade-in">
-                      Schedule a Demo <i className="fas fa-arrow-right ms-2"></i>
+                      HR View <i className="fas fa-arrow-right ms-2"></i>
                     </button>
                   </Link>
                 </div>

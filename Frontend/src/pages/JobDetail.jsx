@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../css/JobDetail.css";
 import { jobData } from "../data/jobposting";
 
-function JobDetails({ initialJob, onBack, onApply }) {
+function JobDetail({ job: initialJob, onBack, onApply }) {
   // Dynamically load Bootstrap and FontAwesome CSS from CDN if not already loaded
   useEffect(() => {
     if (!document.getElementById('bootstrap-cdn')) {
@@ -32,6 +32,7 @@ function JobDetails({ initialJob, onBack, onApply }) {
     initialIndex >= 0 ? initialIndex : 0
   );
   const [loading, setLoading] = useState(true);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => {
     // Simulate loading data
@@ -53,165 +54,174 @@ function JobDetails({ initialJob, onBack, onApply }) {
     setCurrentIndex(newIndex);
   };
 
+  const toggleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+  };
+
   const job = jobData[currentIndex];
 
   return (
-    <div className="smart-hire-container container-fluid">
-      <div className="main-content-wrapper mx-auto">
-        <div className="row">
-          <main className="job-board col-12">
-            <div className="d-flex justify-content-between align-items-center mb-4 w-100">
-              <h2 className="fw-bold">Job Postings</h2>
-              <button 
-                onClick={onBack} 
-                className="btn btn-link text-dark fw-bold p-0 back-button"
-              >
-                <i className="fas fa-arrow-left me-2"></i>Back
-              </button>
-            </div>
-
-            <div className="job-details-content">
-              {loading ? (
-                <JobDetailsSkeleton />
-              ) : (
-                <>
-                  <div className="job-header-container">
-                    <div className="job-title-wrapper row align-items-center">
-                      <div className="col-md-8">
-                        <h3 className="mb-1">{job?.jobName || "Job Title"}</h3>
-                        <h5 className="company-name mb-0">{job?.company || "Company Name"}</h5>
-                      </div>
-                      <div className="col-md-4 text-md-end mt-3 mt-md-0">
-                        <div className="arrow-buttons">
-                          <img 
-                            src="static/images/arrow_circle_left.png" 
-                            alt="Previous" 
-                            className={`nav-arrow ${currentIndex === 0 ? 'opacity-50' : 'cursor-pointer'}`}
-                            onClick={() => currentIndex > 0 && navigateJobPosting("prev")}
-                            style={{ cursor: currentIndex > 0 ? 'pointer' : 'default' }}
-                            title="Previous job"
-                          />
-                          <img 
-                            src="static/images/arrow_circle_left.png" 
-                            alt="Next" 
-                            className={`nav-arrow rotate-180 ${currentIndex === jobData.length - 1 ? 'opacity-50' : 'cursor-pointer'}`}
-                            onClick={() => currentIndex < jobData.length - 1 && navigateJobPosting("next")}
-                            style={{ cursor: currentIndex < jobData.length - 1 ? 'pointer' : 'default' }}
-                            title="Next job"
-                          />
-                        </div>
-                      </div>
+    <div className="job-detail-page">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-lg-10">
+            {loading ? (
+              <JobDetailSkeleton />
+            ) : (
+              <div className="job-detail-container fade-in">
+                {/* Header */}
+                <div className="job-detail-header">
+                  <button onClick={onBack} className="back-button">
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  
+                  <h1 className="job-detail-title">{job.jobName}</h1>
+                  
+                  <div className="job-detail-company">
+                    <div className="job-detail-company-logo">
+                      <img src="static/images/qualifications.png" alt="" width="20" height="20" />
+                    </div>
+                    {job.company}
+                  </div>
+                  
+                  <div className="job-detail-info">
+                    <div className="job-detail-info-item">
+                      <i className="fas fa-users job-detail-info-icon"></i>
+                      {job.applicants} applicants
+                    </div>
+                    <div className="job-detail-info-item">
+                      <i className="fas fa-dollar-sign job-detail-info-icon"></i>
+                      {job.salary}
+                    </div>
+                    <div className="job-detail-info-item">
+                      <i className="fas fa-briefcase job-detail-info-icon"></i>
+                      {job.type}
+                    </div>
+                    <div className="job-detail-info-item">
+                      <i className="fas fa-home job-detail-info-icon"></i>
+                      {job.remote}
+                    </div>
+                    <div className="job-detail-info-item">
+                      <i className="fas fa-map-marker-alt job-detail-info-icon"></i>
+                      {job.location}
                     </div>
                   </div>
-
-                  <div className="ap-btn-container">
-                    <button className="butn apply-btn" onClick={onApply}>
-                      <i className="fas fa-paper-plane me-2"></i>Apply
+                  
+                  <div className="job-detail-actions">
+                    <button onClick={onApply} className="job-detail-apply-button">
+                      <i className="fas fa-paper-plane"></i> Apply Now
                     </button>
-                    <button className="butn save-btn">
-                      <i className="fas fa-bookmark me-2"></i>Save
+                    <button onClick={toggleBookmark} className="job-detail-save-button">
+                      <i className={`${isBookmarked ? 'fas' : 'far'} fa-bookmark`}></i>
+                      {isBookmarked ? ' Saved' : ' Save'}
                     </button>
                   </div>
-
-                  <div className="jb-detail row row-cols-2 row-cols-md-3 row-cols-lg-5 gx-4 gy-3">
-                    <div className="col">
-                      <div className="detail-item">
-                        <img
-                          src="static/images/applied.png" 
-                          alt="" 
-                          className="me-2" 
-                          width="18" 
-                          height="18" 
-                        />
-                        <span>{job?.applicants || 0} applicants</span>
-                      </div>
+                  
+                  <div className="job-detail-navigation">
+                    <button 
+                      className={`nav-button ${currentIndex === 0 ? 'disabled' : ''}`}
+                      onClick={() => currentIndex > 0 && navigateJobPosting("prev")}
+                      disabled={currentIndex === 0}
+                    >
+                      <i className="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <span className="job-position-indicator">{currentIndex + 1} / {jobData.length}</span>
+                    <button 
+                      className={`nav-button ${currentIndex === jobData.length - 1 ? 'disabled' : ''}`}
+                      onClick={() => currentIndex < jobData.length - 1 && navigateJobPosting("next")}
+                      disabled={currentIndex === jobData.length - 1}
+                    >
+                      Next <i className="fas fa-chevron-right"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Content */}
+                <div className="job-detail-content">
+                  {/* Job Description */}
+                  <div className="job-detail-section">
+                    <h2 className="job-detail-section-title">
+                      <i className="fas fa-file-alt job-detail-section-icon"></i> Job Description
+                    </h2>
+                    <div className="job-detail-description">
+                      {job.description || "No description available."}
                     </div>
-
-                    <div className="col">
-                      <div className="detail-item">
-                        <img 
-                          src="static/images/salary.png" 
-                          alt="" 
-                          className="me-2" 
-                          width="18" 
-                          height="18" 
-                        />
-                        <span>{job?.salary || "N/A"}</span>
+                    
+                    {/* Tags */}
+                    {job.tags && job.tags.length > 0 && (
+                      <div className="job-tags mt-4">
+                        {job.tags.map((tag, index) => (
+                          <span key={index} className="job-tag">{tag}</span>
+                        ))}
                       </div>
-                    </div>
-
-                    <div className="col">
-                      <div className="detail-item">
-                        <img 
-                          src="static/images/qualifications.png" 
-                          alt="" 
-                          className="me-2" 
-                          width="18" 
-                          height="18" 
-                        />
-                        <span>{job?.type || "N/A"}</span>
-                      </div>
-                    </div>
-
-                    <div className="col">
-                      <div className="detail-item">
-                        <img 
-                          src="static/images/remote.png" 
-                          alt="" 
-                          className="me-2" 
-                          width="18" 
-                          height="18" 
-                        />
-                        <span>{job?.remote ? "Remote" : "On-site"}</span>
-                      </div>
-                    </div>
-
-                    <div className="col">
-                      <div className="detail-item">
-                        <img 
-                          src="static/images/location.png" 
-                          alt="" 
-                          className="me-2" 
-                          width="18" 
-                          height="18" 
-                        />
-                        <span>{job?.location || "N/A"}</span>
-                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Responsibilities */}
+                  <div className="job-detail-section">
+                    <h2 className="job-detail-section-title">
+                      <i className="fas fa-tasks job-detail-section-icon"></i> Responsibilities
+                    </h2>
+                    <ul className="job-detail-requirements-list">
+                      {job.responsibilities?.map((item, index) => (
+                        <li key={index} className="job-detail-list-item">{item}</li>
+                      )) || <li className="job-detail-list-item">No responsibilities listed.</li>}
+                    </ul>
+                  </div>
+                  
+                  {/* Qualifications */}
+                  <div className="job-detail-section">
+                    <h2 className="job-detail-section-title">
+                      <i className="fas fa-graduation-cap job-detail-section-icon"></i> Preferred Qualifications
+                    </h2>
+                    <ul className="job-detail-requirements-list">
+                      {job.qualifications?.map((item, index) => (
+                        <li key={index} className="job-detail-list-item">{item}</li>
+                      )) || <li className="job-detail-list-item">No qualifications listed.</li>}
+                    </ul>
+                  </div>
+                  
+                  {/* Benefits */}
+                  <div className="job-detail-section">
+                    <h2 className="job-detail-section-title">
+                      <i className="fas fa-gift job-detail-section-icon"></i> What We Offer
+                    </h2>
+                    <ul className="job-detail-benefits-list">
+                      {job.offers?.map((item, index) => (
+                        <li key={index} className="job-detail-list-item">{item}</li>
+                      )) || <li className="job-detail-list-item">No benefits listed.</li>}
+                    </ul>
+                  </div>
+                  
+                  {/* Company Overview - Additional Section */}
+                  <div className="job-detail-section">
+                    <h2 className="job-detail-section-title">
+                      <i className="fas fa-building job-detail-section-icon"></i> About {job.company}
+                    </h2>
+                    <div className="job-detail-company-overview">
+                      <p>
+                        {job.companyDescription || 
+                          `${job.company} is a leading organization in its field, committed to innovation, 
+                          excellence, and creating a positive impact. Join our team to be part of a dynamic 
+                          and inclusive workplace where your skills can thrive and your career can grow.`}
+                      </p>
                     </div>
                   </div>
-
-                  <div className="content mt-4">
-                    <div className="section">
-                      <h5 className="section-title-details">Responsibilities</h5>
-                      <ul className="responsibility-list">
-                        {job?.responsibilities?.map((item, index) => (
-                          <li key={index}>{item}</li>
-                        )) || <li>No responsibilities listed.</li>}
-                      </ul>
+                  
+                  {/* Apply CTA at bottom */}
+                  <div className="job-detail-apply-cta">
+                    <div className="job-detail-apply-cta-content">
+                      <h3>Ready to join our team?</h3>
+                      <p>Don't miss this opportunity to be part of something great</p>
                     </div>
-
-                    <div className="section">
-                      <h5 className="section-title-details">Preferred Qualifications</h5>
-                      <ul className="qualification-list">
-                        {job?.qualifications?.map((item, index) => (
-                          <li key={index}>{item}</li>
-                        )) || <li>No qualifications listed.</li>}
-                      </ul>
-                    </div>
-
-                    <div className="section">
-                      <h5 className="section-title-details">What We Offer</h5>
-                      <ul className="offers-list">
-                        {job?.offers?.map((item, index) => (
-                          <li key={index}>{item}</li>
-                        )) || <li>No offers listed.</li>}
-                      </ul>
-                    </div>
+                    <button onClick={onApply} className="job-detail-apply-button-large">
+                      Apply Now <i className="fas fa-arrow-right"></i>
+                    </button>
                   </div>
-                </>
-              )}
-            </div>
-          </main>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -219,45 +229,62 @@ function JobDetails({ initialJob, onBack, onApply }) {
 }
 
 // Skeleton loading component
-function JobDetailsSkeleton() {
+function JobDetailSkeleton() {
   return (
-    <div className="skeleton-container">
-      <div className="job-header-container">
-        <div className="row align-items-center">
-          <div className="col-md-8">
-            <div className="skeleton-title"></div>
-            <div className="skeleton-subtitle"></div>
-          </div>
-          <div className="col-md-4 text-md-end">
-            <div className="skeleton-arrows"></div>
-          </div>
+    <div className="job-detail-container">
+      <div className="job-detail-header skeleton-header">
+        <div className="skeleton-button"></div>
+        <div className="skeleton-title"></div>
+        <div className="skeleton-company"></div>
+        
+        <div className="job-detail-info">
+          {[...Array(5)].map((_, index) => (
+            <div key={index} className="skeleton-info-item"></div>
+          ))}
+        </div>
+        
+        <div className="job-detail-actions">
+          <div className="skeleton-button-large"></div>
+          <div className="skeleton-button-medium"></div>
+        </div>
+        
+        <div className="job-detail-navigation">
+          <div className="skeleton-nav-buttons"></div>
         </div>
       </div>
-
-      <div className="skeleton-buttons"></div>
-
-      <div className="jb-detail row row-cols-2 row-cols-md-3 row-cols-lg-5 gx-4 gy-3">
-        {[...Array(5)].map((_, i) => (
-          <div className="col" key={i}>
-            <div className="skeleton-detail-item"></div>
-          </div>
-        ))}
-      </div>
-
-      <div className="content mt-4">
-        {[...Array(3)].map((_, i) => (
-          <div className="section" key={i}>
+      
+      <div className="job-detail-content">
+        {[...Array(4)].map((_, sectionIndex) => (
+          <div key={sectionIndex} className="job-detail-section">
             <div className="skeleton-section-title"></div>
-            <div className="skeleton-list">
-              {[...Array(4)].map((_, j) => (
-                <div className="skeleton-list-item" key={j}></div>
-              ))}
-            </div>
+            {sectionIndex === 0 ? (
+              // Description section
+              <>
+                <div className="skeleton-text-line"></div>
+                <div className="skeleton-text-line"></div>
+                <div className="skeleton-text-line" style={{ width: '75%' }}></div>
+                
+                <div className="skeleton-tags">
+                  {[...Array(4)].map((_, tagIndex) => (
+                    <div key={tagIndex} className="skeleton-tag"></div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              // List sections
+              <div className="skeleton-list">
+                {[...Array(4)].map((_, itemIndex) => (
+                  <div key={itemIndex} className="skeleton-list-item"></div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
+        
+        <div className="skeleton-apply-cta"></div>
       </div>
     </div>
   );
 }
 
-export default JobDetails;
+export default JobDetail;

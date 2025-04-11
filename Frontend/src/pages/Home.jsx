@@ -137,14 +137,14 @@ function Home() {
         <div className="row g-0 hero-section align-items-center">
           <div className="col-lg-6">
             {isLoading ? (
-              <div className="skeleton-container">
-                <div className="skeleton-title"></div>
-                <div className="skeleton-subtitle"></div>
-                <div className="skeleton-text"></div>
-                <div className="skeleton-text"></div>
-                <div className="skeleton-buttons">
-                  <div className="skeleton-button"></div>
-                  <div className="skeleton-button"></div>
+              <div className="skeleton-container-home">
+                <div className="skeleton-title-home"></div>
+                <div className="skeleton-subtitle-home"></div>
+                <div className="skeleton-text-home"></div>
+                <div className="skeleton-text-home"></div>
+                <div className="skeleton-buttons-home">
+                  <div className="skeleton-button-home"></div>
+                  <div className="skeleton-button-home"></div>
                 </div>
               </div>
             ) : (
@@ -176,7 +176,7 @@ function Home() {
           </div>
           <div className="col-lg-6">
             {isLoading ? (
-              <div className="skeleton-image"></div>
+              <div className="skeleton-image-home"></div>
             ) : (
               <div className="hero-image-container fade-in">
                 <img src="static/images/home.png" alt="AI Hiring" className="hero-image" />
@@ -192,6 +192,7 @@ function Home() {
         <div className="row">
           <div className="col-12 text-center">
             <h2 className="section-title fade-in-up">Our Advanced Solutions</h2>
+            <div className="section-divider-home"></div>
           </div>
         </div>
         
@@ -199,24 +200,24 @@ function Home() {
           {isLoading ? (
             <>
               <div className="col-md-4">
-                <div className="skeleton-feature">
-                  <div className="skeleton-feature-icon"></div>
-                  <div className="skeleton-feature-title"></div>
-                  <div className="skeleton-feature-text"></div>
+                <div className="skeleton-feature-home">
+                  <div className="skeleton-feature-icon-home"></div>
+                  <div className="skeleton-feature-title-home"></div>
+                  <div className="skeleton-feature-text-home"></div>
                 </div>
               </div>
               <div className="col-md-4">
-                <div className="skeleton-feature">
-                  <div className="skeleton-feature-icon"></div>
-                  <div className="skeleton-feature-title"></div>
-                  <div className="skeleton-feature-text"></div>
+                <div className="skeleton-feature-home">
+                  <div className="skeleton-feature-icon-home"></div>
+                  <div className="skeleton-feature-title-home"></div>
+                  <div className="skeleton-feature-text-home"></div>
                 </div>
               </div>
               <div className="col-md-4">
-                <div className="skeleton-feature">
-                  <div className="skeleton-feature-icon"></div>
-                  <div className="skeleton-feature-title"></div>
-                  <div className="skeleton-feature-text"></div>
+                <div className="skeleton-feature-home">
+                  <div className="skeleton-feature-icon-home"></div>
+                  <div className="skeleton-feature-title-home"></div>
+                  <div className="skeleton-feature-text-home"></div>
                 </div>
               </div>
             </>
@@ -232,7 +233,7 @@ function Home() {
                     Our proprietary algorithms match candidates to positions with unprecedented accuracy.
                   </p>
                   <Link to="/features" className="feature-link">
-                    Learn more <i className="fas fa-chevron-right"></i>
+                    Learn more <i className="fas fa-chevron-right ms-2"></i>
                   </Link>
                 </div>
               </div>
@@ -247,7 +248,7 @@ function Home() {
                     Save hours with intelligent resume parsing and candidate evaluation.
                   </p>
                   <Link to="/features" className="feature-link">
-                    Learn more <i className="fas fa-chevron-right"></i>
+                    Learn more <i className="fas fa-chevron-right ms-2"></i>
                   </Link>
                 </div>
               </div>
@@ -262,7 +263,7 @@ function Home() {
                     End-to-end solution that transforms your recruitment pipeline.
                   </p>
                   <Link to="/features" className="feature-link">
-                    Learn more <i className="fas fa-chevron-right"></i>
+                    Learn more <i className="fas fa-chevron-right ms-2"></i>
                   </Link>
                 </div>
               </div>
@@ -277,7 +278,7 @@ function Home() {
           <div className="row">
             <div className="col-12 text-center">
               <h2 className="section-title">What Our Clients Say</h2>
-          
+              <div className="section-divider-home"></div>
             </div>
           </div>
           
@@ -285,10 +286,10 @@ function Home() {
             {isLoading ? (
               <>
                 <div className="col-md-6">
-                  <div className="skeleton-testimonial"></div>
+                  <div className="skeleton-testimonial-home"></div>
                 </div>
                 <div className="col-md-6">
-                  <div className="skeleton-testimonial"></div>
+                  <div className="skeleton-testimonial-home"></div>
                 </div>
               </>
             ) : (
@@ -324,7 +325,7 @@ function Home() {
           <div className="row align-items-center">
             {isLoading ? (
               <div className="col-12">
-                <div className="skeleton-cta"></div>
+                <div className="skeleton-cta-home"></div>
               </div>
             ) : (
               <>
@@ -333,9 +334,9 @@ function Home() {
                   <p className="cta-text fade-in">Join thousands of companies that are already experiencing the power of AI-driven talent acquisition.</p>
                 </div>
                 <div className="col-lg-4 text-center text-lg-end">
-                  <Link to="/demo" className="btn-link">
+                  <Link to="Login" className="btn-link">
                     <button className="cta-button fade-in">
-                      Request a Demo <i className="fas fa-arrow-right ms-2"></i>
+                      HR View <i className="fas fa-arrow-right ms-2"></i>
                     </button>
                   </Link>
                 </div>

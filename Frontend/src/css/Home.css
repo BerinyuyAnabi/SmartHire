@@ -218,7 +218,7 @@ body {
   margin-bottom: 1rem;
 }
 
-.section-divider {
+.section-divider-home {
   height: 4px;
   width: 80px;
   background: var(--primary);
@@ -226,7 +226,7 @@ body {
   position: relative;
 }
 
-.section-divider::before {
+.section-divider-home::before {
   content: '';
   position: absolute;
   left: 50%;
@@ -433,15 +433,16 @@ body {
 }
 
 /* Loading Skeletons */
-.skeleton-container {
+.skeleton-container-home {
   padding: 2rem;
-  max-width: 600px;
+  width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
-.skeleton-title {
+.skeleton-title-home {
   height: 3.5rem;
-  width: 80%;
+  width: 60%;
   background: linear-gradient(90deg, var(--gray-200) 0%, var(--gray-300) 50%, var(--gray-200) 100%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
@@ -449,7 +450,7 @@ body {
   margin-bottom: 2rem;
 }
 
-.skeleton-subtitle {
+.skeleton-subtitle-home {
   height: 1.5rem;
   width: 60%;
   background: linear-gradient(90deg, var(--gray-200) 0%, var(--gray-300) 50%, var(--gray-200) 100%);
@@ -459,23 +460,23 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.skeleton-text {
+.skeleton-text-home {
   height: 1rem;
-  width: 100%;
+  width: 40%;
   background: linear-gradient(90deg, var(--gray-200) 0%, var(--gray-300) 50%, var(--gray-200) 100%);
   background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
+  animation: skeleton-loading 2.5s infinite;
   border-radius: 6px;
   margin-bottom: 0.75rem;
 }
 
-.skeleton-buttons {
+.skeleton-buttons-home {
   display: flex;
   gap: 1rem;
   margin-top: 2rem;
 }
 
-.skeleton-button {
+.skeleton-button-home {
   height: 2.5rem;
   width: 150px;
   background: linear-gradient(90deg, var(--gray-200) 0%, var(--gray-300) 50%, var(--gray-200) 100%);
@@ -484,7 +485,7 @@ body {
   border-radius: 50px;
 }
 
-.skeleton-image {
+.skeleton-image-home {
   width: 100%;
   height: 400px;
   border-radius: var(--border-radius-xl);
@@ -494,7 +495,7 @@ body {
   margin: 2rem;
 }
 
-.skeleton-feature {
+.skeleton-feature-home {
   background: var(--white);
   border-radius: var(--border-radius-lg);
   padding: 2.5rem 2rem;
@@ -503,7 +504,7 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-.skeleton-feature-icon {
+.skeleton-feature-icon-home {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -513,7 +514,7 @@ body {
   margin: 0 auto 1.5rem;
 }
 
-.skeleton-feature-title {
+.skeleton-feature-title-home {
   height: 1.3rem;
   width: 70%;
   background: linear-gradient(90deg, var(--gray-200) 0%, var(--gray-300) 50%, var(--gray-200) 100%);
@@ -523,17 +524,17 @@ body {
   margin: 0 auto 1rem;
 }
 
-.skeleton-feature-text {
+.skeleton-feature-text-home {
   height: 1rem;
   width: 90%;
   background: linear-gradient(90deg, var(--gray-200) 0%, var(--gray-300) 50%, var(--gray-200) 100%);
   background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
+  animation: skeleton-loading 2.5s infinite;
   border-radius: 6px;
   margin: 0 auto;
 }
 
-.skeleton-testimonial {
+.skeleton-testimonial-home {
   background: var(--white);
   border-radius: var(--border-radius-lg);
   padding: 2rem;
@@ -544,31 +545,31 @@ body {
   justify-content: space-between;
 }
 
-.skeleton-testimonial::before {
+.skeleton-testimonial-home::before {
   content: '';
   height: 1rem;
   width: 90%;
   background: linear-gradient(90deg, var(--gray-200) 0%, var(--gray-300) 50%, var(--gray-200) 100%);
   background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
+  animation: skeleton-loading 2.5s infinite;
   border-radius: 6px;
   margin-bottom: 0.5rem;
   display: block;
 }
 
-.skeleton-testimonial::after {
+.skeleton-testimonial-home::after {
   content: '';
   height: 1rem;
   width: 70%;
   background: linear-gradient(90deg, var(--gray-200) 0%, var(--gray-300) 50%, var(--gray-200) 100%);
   background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
+  animation: skeleton-loading 2.5s infinite;
   border-radius: 6px;
   display: block;
   align-self: flex-end;
 }
 
-.skeleton-cta {
+.skeleton-cta-home {
   height: 150px;
   width: 100%;
   background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 100%);
@@ -577,7 +578,7 @@ body {
   border-radius: var(--border-radius);
 }
 
-@keyframes skeleton-loading {
+@keyframes skeleton-loading-home {
   0% {
     background-position: -200% 0;
   }
@@ -639,7 +640,7 @@ body {
     padding: 4rem 0;
   }
   
-  .hero-content, .skeleton-container {
+  .hero-content, .skeleton-container-home {
     padding: 0 1rem;
   }
   
@@ -666,11 +667,11 @@ body {
     padding: 3rem 0;
   }
   
-  .hero-content, .skeleton-container {
+  .hero-content, .skeleton-container-home {
     text-align: center;
   }
   
-  .hero-image-container, .skeleton-image {
+  .hero-image-container, .skeleton-image-home {
     margin-top: 2rem;
   }
   
@@ -683,7 +684,7 @@ body {
     margin-bottom: 2rem;
   }
   
-  .skeleton-title, .skeleton-subtitle, .skeleton-text {
+  .skeleton-title-home, .skeleton-subtitle-home, .skeleton-text-home {
     margin-left: auto;
     margin-right: auto;
   }
