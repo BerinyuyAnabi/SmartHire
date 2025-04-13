@@ -1,64 +1,14 @@
-// import React from "react";
-// import { NavLink } from "react-router-dom";
-
-// import "../css/NavBar.css";
-
-// function NavBar() {
-//   // Add useEffect to inject Bootstrap CDN link if not already added in Home component
-//   React.useEffect(() => {
-//     if (!document.getElementById('bootstrap-cdn')) {
-//       const link = document.createElement('link');
-//       link.id = 'bootstrap-cdn';
-//       link.rel = 'stylesheet';
-//       link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';
-//       link.integrity = 'sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN';
-//       link.crossOrigin = 'anonymous';
-//       document.head.appendChild(link);
-//     }
-//   }, []);
-
-//   return (
-//     <nav className="navbar navbar-expand-lg">
-//       <div className="container">
-//         <div className="navbar-brand">
-//           <NavLink to="/" className="brand-link text-decoration-none">
-//             <p className="mb-0 d-inline">Smart</p>
-//             <p className="nav_name mb-0 d-inline">Hire</p>
-//           </NavLink>
-//         </div>
-
-//         <div className="navbar-links d-flex align-items-center">
-//           <NavLink 
-//             to="/job-posting" 
-//             className={({ isActive }) => 
-//               isActive 
-//                 ? "nav-link active-link me-3 text-decoration-none" 
-//                 : "nav-link me-3 text-decoration-none"
-//             }
-//           >
-//             Apply
-//           </NavLink>
-          
-//           <a href="/admin">
-//               <button className="HR_view">HR view</button>
-//           </a>
-//         </div>
-//       </div>
-//     </nav>
-//   );
-// }
-
-// export default NavBar;
-
-
 import React, { useState, useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "../css/NavBar.css";
 
 function NavBar() {
   const [scrolled, setScrolled] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Add useEffect to inject Bootstrap CDN link if not already added in Home component
   useEffect(() => {
@@ -94,6 +44,30 @@ function NavBar() {
     
     window.addEventListener('scroll', handleScroll);
     
+    // Check authentication status
+    const checkAuthStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/check', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setIsAuthenticated(true);
+          setUser(data.user);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error checking authentication status:', error);
+        setIsAuthenticated(false);
+        setUser(null);
+      }
+    };
+    
+    checkAuthStatus();
+    
     // Clean up event listener
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -104,6 +78,23 @@ function NavBar() {
   useEffect(() => {
     setExpanded(false);
   }, [location]);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        setIsAuthenticated(false);
+        setUser(null);
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
 
   return (
     <nav className={`navbar navbar-expand-lg fixed-top ${scrolled ? 'navbar-scrolled' : ''}`}>
@@ -163,11 +154,60 @@ function NavBar() {
                 <span className="nav-link-text">Apply</span>
               </NavLink>
             </li>
+            
+            {isAuthenticated ? (
+              <>
+                <li className="nav-item dropdown">
+                  <a 
+                    className="nav-link dropdown-toggle" 
+                    href="#" 
+                    id="navbarDropdown" 
+                    role="button" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                  >
+                    <i className="fas fa-user-circle me-1"></i>
+                    {user?.name || 'Account'}
+                  </a>
+                  <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li>
+                      <NavLink to="/profile" className="dropdown-item">
+                        <i className="fas fa-user me-2"></i> Profile
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/dashboard" className="dropdown-item">
+                        <i className="fas fa-tachometer-alt me-2"></i> Dashboard
+                      </NavLink>
+                    </li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <button onClick={handleLogout} className="dropdown-item text-danger">
+                        <i className="fas fa-sign-out-alt me-2"></i> Logout
+                      </button>
+                    </li>
+                  </ul>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <NavLink to="/login" className="nav-link">
+                    <i className="fas fa-sign-in-alt me-1"></i> Login
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink to="/signup" className="nav-link">
+                    <i className="fas fa-user-plus me-1"></i> Sign Up
+                  </NavLink>
+                </li>
+              </>
+            )}
+            
             <li className="nav-item">
-              <NavLink to="/Login" className="btn-link">
+              <NavLink to="/admin" className="btn-link">
                 <button className="hr-btn">
-                HR View <i className="fas fa-arrow-right" style={{ marginLeft: '8px' }}></i>
-
+                  HR View <i className="fas fa-arrow-right" style={{ marginLeft: '8px' }}></i>
                 </button>
               </NavLink>
             </li>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Assuming you're using React Router
+import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../../pages/AuthLayout';
+import { useAuth } from '../../context/AuthContext';
 import '../../css/Auth.css';
 
 const Signup = () => {
@@ -13,6 +14,16 @@ const Signup = () => {
     agreeToTerms: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { register, isAuthenticated } = useAuth();
+  
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -38,15 +49,25 @@ const Signup = () => {
     }
     
     setIsSubmitting(true);
+    setError('');
     
     try {
-      // Your registration logic here
-      // await registerUser(formData);
+      // Use the register function from AuthContext
+      await register({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role
+      });
       
-      // Redirect on success
-      // history.push('/login');
+      // Registration successful
+      console.log('Registration successful');
+      
+      // Redirect to login page
+      navigate('/login', { state: { message: 'Account created successfully. Please login.' } });
     } catch (error) {
       console.error('Registration failed:', error);
+      setError(error.message || 'Registration failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -67,6 +88,8 @@ const Signup = () => {
         <div className={`step-line ${step > 1 ? 'completed' : ''}`}></div>
         <div className={`step ${step >= 2 ? 'active' : ''}`}>2</div>
       </div>
+      
+      {error && <div className="error-message">{error}</div>}
       
       <form className="auth-form" onSubmit={handleSubmit}>
         {step === 1 ? (
@@ -171,7 +194,6 @@ const Signup = () => {
           ) : (
             <>
               Create Account
-      
             </>
           )}
         </button>
