@@ -30,16 +30,11 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/logout" element={<Logout />} />
+      <Route path='/job-posting' element={<JobPosting />} />
+      <Route path='/applicant/:id' element={<ApplicantDetails />} />
       
-      {/* Protected routes */}
+      {/* Protected routes - only HR View requires authentication */}
       <Route element={<ProtectedRoute />}>
-        <Route path='/job-posting' element={<JobPosting />} />
-        <Route path='/assessment' element={<Assessment />} />
-        <Route path='/applicant/:id' element={<ApplicantDetails />} />
-      </Route>
-      
-      {/* Admin routes - only accessible by admin users */}
-      <Route element={<ProtectedRoute roles={['admin']} />}>
         <Route path='/admin' element={<Admin />} />
       </Route>
       

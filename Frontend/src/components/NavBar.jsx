@@ -44,10 +44,12 @@ function NavBar() {
     
     window.addEventListener('scroll', handleScroll);
     
-    // Check authentication status
+    // Check authentication status - using the correct endpoint
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch('/api/auth/check', {
+        // Use the correct endpoint that exists in your Flask backend
+        const response = await fetch('/api/login', {
+          method: 'GET',
           credentials: 'include'
         });
         
@@ -81,7 +83,7 @@ function NavBar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/auth/logout', {
+      const response = await fetch('/api/logout', {
         method: 'POST',
         credentials: 'include'
       });

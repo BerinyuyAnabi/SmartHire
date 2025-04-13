@@ -155,8 +155,51 @@ def user_signup():
             "error": str(e)
         }), 500
 
-@app.route('/api/login', methods=['POST'])
+@app.route('/api/login', methods=['POST', 'GET'])
 def user_login():
+    # Handle GET request to check authentication status
+    if request.method == 'GET':
+        if 'user_id' in session:
+            try:
+                conn = get_db_connection()
+                cursor = conn.cursor(dictionary=True)
+                
+                # Get user data from database
+                cursor.execute("SELECT id, full_name, email, role FROM users WHERE id = %s", (session['user_id'],))
+                user = cursor.fetchone()
+                
+                cursor.close()
+                conn.close()
+                
+                if user:
+                    return jsonify({
+                        "success": True,
+                        "message": "User is authenticated",
+                        "user": {
+                            "id": user['id'],
+                            "name": user['full_name'],
+                            "email": user['email'],
+                            "role": user['role']
+                        }
+                    }), 200
+                else:
+                    return jsonify({
+                        "success": False,
+                        "message": "User not found"
+                    }), 404
+            except Exception as e:
+                app.logger.error(f"Error checking authentication: {str(e)}")
+                return jsonify({
+                    "success": False,
+                    "message": "Error checking authentication"
+                }), 500
+        else:
+            return jsonify({
+                "success": False,
+                "message": "User is not authenticated"
+            }), 401
+    
+    # Handle POST request for login (existing code)
     try:
         data = request.get_json()
         
