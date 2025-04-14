@@ -1,4 +1,3 @@
-
 from flask import Flask, send_from_directory
 
 app = Flask(__name__, static_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist/static', template_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist')

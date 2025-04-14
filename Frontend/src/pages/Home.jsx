@@ -165,7 +165,7 @@ function Home() {
                       Apply <i className="fas fa-arrow-right ms-2"></i>
                     </button>
                   </Link>
-                  <Link to="/hr" className="btn-link">
+                  <Link to="/Login" className="btn-link">
                     <button className="home-btn-1">
                       HR view <i className="fas fa-arrow-right ms-2"></i>
                     </button>
