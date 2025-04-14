@@ -6,6 +6,7 @@ import os
 import mysql.connector
 import logging
 import json
+from flask_cors import CORS
 
 # Configure logging
 logging.basicConfig(
@@ -16,7 +17,15 @@ logging.basicConfig(
 )
 
 app = Flask(__name__, static_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist/static', template_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist')
-app.secret_key = os.urandom(24)
+# Use a fixed secret key instead of a random one
+app.secret_key = 'smarthire-secret-key-2023'
+# Enable CORS with credentials support
+CORS(app, supports_credentials=True)
+
+# Configure session cookie settings
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # or 'None' if cross-site
 
 # Configure upload folder
 UPLOAD_FOLDER = 'static/uploads'
@@ -159,6 +168,9 @@ def user_signup():
 def user_login():
     # Handle GET request to check authentication status
     if request.method == 'GET':
+        app.logger.debug(f"GET /api/login - Session data: {session}")
+        app.logger.debug(f"GET /api/login - Request cookies: {request.cookies}")
+        
         if 'user_id' in session:
             try:
                 conn = get_db_connection()
@@ -172,6 +184,7 @@ def user_login():
                 conn.close()
                 
                 if user:
+                    app.logger.debug(f"User authenticated: {user}")
                     return jsonify({
                         "success": True,
                         "message": "User is authenticated",
@@ -183,6 +196,7 @@ def user_login():
                         }
                     }), 200
                 else:
+                    app.logger.debug("User not found in database")
                     return jsonify({
                         "success": False,
                         "message": "User not found"
@@ -194,6 +208,7 @@ def user_login():
                     "message": "Error checking authentication"
                 }), 500
         else:
+            app.logger.debug("No user_id in session")
             return jsonify({
                 "success": False,
                 "message": "User is not authenticated"
@@ -202,6 +217,7 @@ def user_login():
     # Handle POST request for login (existing code)
     try:
         data = request.get_json()
+        app.logger.debug(f"POST /api/login - Request data: {data}")
         
         # Extract login credentials
         email = data.get('email')
@@ -224,6 +240,7 @@ def user_login():
         user = cursor.fetchone()
         
         if not user:
+            app.logger.debug(f"User not found with email: {email}")
             return jsonify({
                 "success": False,
                 "message": "Invalid email or password"
@@ -241,6 +258,7 @@ def user_login():
         
         # Verify password
         if not verify_password(user['password_hash'], password, salt):
+            app.logger.debug(f"Password verification failed for user: {email}")
             return jsonify({
                 "success": False,
                 "message": "Invalid email or password"
@@ -255,6 +273,8 @@ def user_login():
         # Set session expiry based on remember me
         if remember_me:
             session.permanent = True
+        
+        app.logger.debug(f"Login successful - Session data: {session}")
         
         # Close database connection
         cursor.close()
