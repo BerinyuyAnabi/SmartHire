@@ -44,10 +44,9 @@ function NavBar() {
     
     window.addEventListener('scroll', handleScroll);
     
-    // Check authentication status - using the correct endpoint
+    // Check authentication status
     const checkAuthStatus = async () => {
       try {
-        // Use the correct endpoint that exists in your Flask backend
         const response = await fetch('/api/login', {
           method: 'GET',
           credentials: 'include'
