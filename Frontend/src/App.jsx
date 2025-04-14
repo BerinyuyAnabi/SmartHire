@@ -8,11 +8,8 @@ import Features from "./pages/Features"
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import ForgotPassword from './components/auth/ForgotPassword';
-import Logout from './components/auth/Logout';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import Unauthorized from './pages/Unauthorized';
 
-import {Routes, Route, Navigate} from "react-router-dom";
+import {Routes, Route} from "react-router-dom";
 import ApplicantDetails from "./components/ApplicantDetails"
 
 function App() {
@@ -22,24 +19,16 @@ function App() {
     <NavBar/>
     <main className="main-content">
     <Routes>
-      {/* Public routes */}
-      <Route path='/' element={<Home />} />
-      <Route path='/features' element={<Features />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
-      <Route path="/logout" element={<Logout />} />
-      <Route path='/job-posting' element={<JobPosting />} />
-      <Route path='/applicant/:id' element={<ApplicantDetails />} />
-      
-      {/* Protected routes - only HR View requires authentication */}
-      <Route element={<ProtectedRoute />}>
-        <Route path='/admin' element={<Admin />} />
-      </Route>
-      
-      {/* Catch-all route */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+    <Route path='/' element = {<Home />}/>
+    <Route path='/job-posting' element = {<JobPosting />}/>
+    <Route path='/assessment' element = {<Assessment />}/>
+    <Route path = '/admin' element = {<Admin/>}/>
+    <Route path = '/features' element = {<Features/>}/>
+    <Route path="/login" element={<Login />} />
+    <Route path="/signup" element={<Signup />} />
+    <Route path="/forgot-password" element={<ForgotPassword />} />
+    {/* <Route path="*" element={<Navigate to="/login" replace />} /> */}
+    <Route path="/applicant/:id" element={<ApplicantDetails />} />
     </Routes>
     </main>
     </>

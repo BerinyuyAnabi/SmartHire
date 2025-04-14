@@ -21,7 +21,7 @@ const Signup = () => {
   // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate('/admin');
+      navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
   

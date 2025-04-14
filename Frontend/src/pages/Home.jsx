@@ -179,7 +179,7 @@ function Home() {
               <div className="skeleton-image-home"></div>
             ) : (
               <div className="hero-image-container fade-in">
-                <img src="/static/images/home.png" alt="AI Hiring" className="hero-image" />
+                <img src="static/images/home.png" alt="AI Hiring" className="hero-image" />
                 <div className="hero-overlay"></div>
               </div>
             )}
