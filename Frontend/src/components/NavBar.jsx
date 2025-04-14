@@ -1,148 +1,219 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "../css/NavBar.css";
-import { useAuth } from '../context/AuthContext';
 
 function NavBar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false);
-  const { isAuthenticated, logout } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Inject Bootstrap and Font Awesome CDN links
+  // Add useEffect to inject Bootstrap CDN link if not already added in Home component
   useEffect(() => {
-    // Bootstrap CSS
     if (!document.getElementById('bootstrap-cdn')) {
-      const bootstrapLink = document.createElement('link');
-      bootstrapLink.id = 'bootstrap-cdn';
-      bootstrapLink.rel = 'stylesheet';
-      bootstrapLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';
-      bootstrapLink.integrity = 'sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN';
-      bootstrapLink.crossOrigin = 'anonymous';
-      document.head.appendChild(bootstrapLink);
+      const link = document.createElement('link');
+      link.id = 'bootstrap-cdn';
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';
+      link.integrity = 'sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN';
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
     }
-
-    // Bootstrap JS
-    if (!document.getElementById('bootstrap-js')) {
-      const bootstrapScript = document.createElement('script');
-      bootstrapScript.id = 'bootstrap-js';
-      bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';
-      bootstrapScript.integrity = 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL';
-      bootstrapScript.crossOrigin = 'anonymous';
-      document.body.appendChild(bootstrapScript);
+    
+    // Load Font Awesome if not already loaded
+    if (!document.getElementById('fontawesome-cdn')) {
+      const script = document.createElement('script');
+      script.id = 'fontawesome-cdn';
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js';
+      script.integrity = 'sha512-Tn2m0TIpgVyTzzvmxLNuqbSJH3JP8jm+Cy3hvHrW7ndTDcJ1w5mBiksqDBb8GpE2ksktFvDB/ykZ0mDpsZj20w==';
+      script.crossOrigin = 'anonymous';
+      script.defer = true;
+      document.head.appendChild(script);
     }
-
-    // Font Awesome
-    if (!document.getElementById('font-awesome')) {
-      const fontAwesomeScript = document.createElement('script');
-      fontAwesomeScript.id = 'font-awesome';
-      fontAwesomeScript.src = 'https://kit.fontawesome.com/a076d05399.js';
-      fontAwesomeScript.crossOrigin = 'anonymous';
-      document.body.appendChild(fontAwesomeScript);
-    }
-
-    // Cleanup function
-    return () => {
-      const bootstrapLink = document.getElementById('bootstrap-cdn');
-      const bootstrapScript = document.getElementById('bootstrap-js');
-      const fontAwesomeScript = document.getElementById('font-awesome');
-      
-      if (bootstrapLink) document.head.removeChild(bootstrapLink);
-      if (bootstrapScript) document.body.removeChild(bootstrapScript);
-      if (fontAwesomeScript) document.body.removeChild(fontAwesomeScript);
-    };
-  }, []);
-
-  // Handle scroll effect
-  useEffect(() => {
+    
+    // Handle scroll event to change navbar style
     const handleScroll = () => {
       if (window.scrollY > 50) {
-        setIsScrolled(true);
+        setScrolled(true);
       } else {
-        setIsScrolled(false);
+        setScrolled(false);
       }
     };
-
+    
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    // Check authentication status - using the correct endpoint
+    const checkAuthStatus = async () => {
+      try {
+        // Use the correct endpoint that exists in your Flask backend
+        const response = await fetch('/api/login', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setIsAuthenticated(true);
+          setUser(data.user);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error checking authentication status:', error);
+        setIsAuthenticated(false);
+        setUser(null);
+      }
+    };
+    
+    checkAuthStatus();
+    
+    // Clean up event listener
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
+  
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setExpanded(false);
+  }, [location]);
 
-  // Handle logout
   const handleLogout = async () => {
     try {
-      await logout();
-      navigate('/');
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        setIsAuthenticated(false);
+        setUser(null);
+        navigate('/');
+      }
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Error during logout:', error);
     }
   };
 
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsMenuExpanded(false);
-  }, [location]);
-
   return (
-    <nav className={`navbar navbar-expand-lg fixed-top ${isScrolled ? 'scrolled' : ''}`}>
+    <nav className={`navbar navbar-expand-lg fixed-top ${scrolled ? 'navbar-scrolled' : ''}`}>
       <div className="container">
-        <NavLink className="navbar-brand" to="/">
-          <img src="/static/images/logo.png" alt="SmartHire Logo" className="logo" />
-          SmartHire
+        <NavLink to="/" className="navbar-brand">
+          <div className="brand-wrapper">
+            <span className="brand-text">Smart</span>
+            <span className="brand-highlight">Hire</span>
+            <div className="brand-glow"></div>
+          </div>
         </NavLink>
         
-        <button
-          className="navbar-toggler"
-          type="button"
-          onClick={() => setIsMenuExpanded(!isMenuExpanded)}
-          aria-expanded={isMenuExpanded}
+        <button 
+          className={`navbar-toggler ${expanded ? '' : 'collapsed'}`}
+          type="button" 
+          aria-controls="navbarNav" 
+          aria-expanded={expanded ? 'true' : 'false'} 
           aria-label="Toggle navigation"
+          onClick={() => setExpanded(!expanded)}
         >
-          <span className="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon">
+            <i className={`fas ${expanded ? 'fa-times' : 'fa-bars'}`}></i>
+          </span>
         </button>
         
-        <div className={`collapse navbar-collapse ${isMenuExpanded ? 'show' : ''}`}>
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+        <div className={`collapse navbar-collapse ${expanded ? 'show' : ''}`} id="navbarNav">
+          <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <NavLink className="nav-link" to="/" end>
-                <i className="fas fa-home"></i> Home
+              <NavLink 
+                to="/" 
+                className={({isActive}) => 
+                  isActive ? "nav-link active" : "nav-link"
+                }
+                end
+              >
+                Home
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/features">
-                <i className="fas fa-star"></i> Features
+              <NavLink 
+                to="/features" 
+                className={({isActive}) => 
+                  isActive ? "nav-link active" : "nav-link"
+                }
+              >
+                Features
               </NavLink>
             </li>
+            
             <li className="nav-item">
-              <NavLink className="nav-link" to="/job-posting">
-                <i className="fas fa-briefcase"></i> Job Posting
+              <NavLink 
+                to="/job-posting" 
+                className={({isActive}) => 
+                  isActive ? "nav-link active apply-link" : "nav-link apply-link"
+                }
+              >
+                <span className="nav-link-text">Apply</span>
               </NavLink>
             </li>
-            {isAuthenticated && (
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/hr-view">
-                  <i className="fas fa-user-tie"></i> HR View
-                </NavLink>
-              </li>
-            )}
-          </ul>
-          
-          <div className="d-flex">
+            
             {isAuthenticated ? (
-              <button className="btn btn-outline-light" onClick={handleLogout}>
-                <i className="fas fa-sign-out-alt"></i> Logout
-              </button>
+              <>
+                <li className="nav-item dropdown">
+                  <a 
+                    className="nav-link dropdown-toggle" 
+                    href="#" 
+                    id="navbarDropdown" 
+                    role="button" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                  >
+                    <i className="fas fa-user-circle me-1"></i>
+                    {user?.name || 'Account'}
+                  </a>
+                  <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li>
+                      <NavLink to="/profile" className="dropdown-item">
+                        <i className="fas fa-user me-2"></i> Profile
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/dashboard" className="dropdown-item">
+                        <i className="fas fa-tachometer-alt me-2"></i> Dashboard
+                      </NavLink>
+                    </li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <button onClick={handleLogout} className="dropdown-item text-danger">
+                        <i className="fas fa-sign-out-alt me-2"></i> Logout
+                      </button>
+                    </li>
+                  </ul>
+                </li>
+              </>
             ) : (
               <>
-                <NavLink to="/login" className="btn btn-outline-light me-2">
-                  <i className="fas fa-sign-in-alt"></i> Login
-                </NavLink>
-                <NavLink to="/signup" className="btn btn-primary">
-                  <i className="fas fa-user-plus"></i> Sign Up
-                </NavLink>
+                <li className="nav-item">
+                  <NavLink to="/login" className="nav-link">
+                    <i className="fas fa-sign-in-alt me-1"></i> Login
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink to="/signup" className="nav-link">
+                    <i className="fas fa-user-plus me-1"></i> Sign Up
+                  </NavLink>
+                </li>
               </>
             )}
-          </div>
+            
+            <li className="nav-item">
+              <NavLink to="/admin" className="btn-link">
+                <button className="hr-btn">
+                  HR View <i className="fas fa-arrow-right" style={{ marginLeft: '8px' }}></i>
+                </button>
+              </NavLink>
+            </li>
+          </ul>
         </div>
       </div>
     </nav>

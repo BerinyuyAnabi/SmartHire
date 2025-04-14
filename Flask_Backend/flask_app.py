@@ -97,7 +97,7 @@ def user_signup():
         full_name = data.get('fullName')
         email = data.get('email')
         password = data.get('password')
-        role = 'HR'
+        role = data.get('role')
         
         # Validate required fields
         if not all([full_name, email, password, role]):

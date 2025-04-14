@@ -16,27 +16,17 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // Check authentication status with the backend
-        const response = await fetch('/api/login', {
-          method: 'GET',
-          credentials: 'include'
-        });
+        // You could add an API endpoint to check if the user is authenticated
+        // For now, we'll just check if there's a user in localStorage
+        const storedUser = localStorage.getItem('user');
         
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
           setIsAuthenticated(true);
-        } else {
-          // Clear any stale data
-          setUser(null);
-          setIsAuthenticated(false);
-          localStorage.removeItem('user');
         }
       } catch (error) {
         console.error('Auth status check failed:', error);
-        setUser(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('user');
       } finally {
         setLoading(false);
       }
@@ -53,7 +43,6 @@ export const AuthProvider = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify({
           email,
           password,
@@ -88,7 +77,6 @@ export const AuthProvider = ({ children }) => {
     try {
       await fetch('/api/logout', {
         method: 'POST',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -111,7 +99,6 @@ export const AuthProvider = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify(userData),
       });
 
