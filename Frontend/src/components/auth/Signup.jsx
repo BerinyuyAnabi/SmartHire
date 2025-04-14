@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Assuming you're using React Router
 import AuthLayout from '../../pages/AuthLayout';
-import { useAuth } from '../../context/AuthContext';
 import '../../css/Auth.css';
 
 const Signup = () => {
@@ -14,9 +13,6 @@ const Signup = () => {
     agreeToTerms: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { signup } = useAuth();
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -42,17 +38,15 @@ const Signup = () => {
     }
     
     setIsSubmitting(true);
-    setError('');
     
     try {
-      // Use the signup function from AuthContext
-      await signup(formData);
+      // Your registration logic here
+      // await registerUser(formData);
       
       // Redirect on success
-      navigate('/admin');
+      // history.push('/login');
     } catch (error) {
       console.error('Registration failed:', error);
-      setError(error.message || 'Registration failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -73,8 +67,6 @@ const Signup = () => {
         <div className={`step-line ${step > 1 ? 'completed' : ''}`}></div>
         <div className={`step ${step >= 2 ? 'active' : ''}`}>2</div>
       </div>
-      
-      {error && <div className="error-message">{error}</div>}
       
       <form className="auth-form" onSubmit={handleSubmit}>
         {step === 1 ? (

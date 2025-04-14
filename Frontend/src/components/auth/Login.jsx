@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Assuming you're using React Router
 import AuthLayout from '../../pages/AuthLayout';
-import { useAuth } from '../../context/AuthContext';
 import '../../css/Auth.css';
 
 const Login = () => {
@@ -9,24 +8,19 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { login } = useAuth();
   
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
     
     try {
-      // Use the login function from AuthContext
-      await login(email, password, rememberMe);
+      // Your login logic here
+      // await loginUser(email, password);
       
       // Redirect on success
-      navigate('/admin');
+      // history.push('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
-      setError(error.message || 'Invalid email or password. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -41,8 +35,6 @@ const Login = () => {
         <h1 className="auth-title">Login In</h1>
         <p className="auth-subtitle">Welcome back! Please enter your details.</p>
       </div>
-      
-      {error && <div className="error-message">{error}</div>}
       
       <div className="social-buttons">
         <button className="social-button google">
