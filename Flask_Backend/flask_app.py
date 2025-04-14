@@ -1,53 +1,6 @@
-from flask import Flask, send_from_directory, request, jsonify, session, redirect, url_for, render_template
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
-import base64
-import os
-import mysql.connector
-import logging
-import json
-
-# Configure logging
-logging.basicConfig(
-    filename='form_debug.log',
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    encoding='utf-8',  # Ensure correct encoding
-)
+from flask import Flask, send_from_directory, request, jsonify, redirect, url_for, session, render_template
 
 app = Flask(__name__, static_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist/static', template_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist')
-app.secret_key = os.urandom(24)
-
-# Configure upload folder
-UPLOAD_FOLDER = 'static/uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host='ashesihiring.mysql.pythonanywhere-services.com',
-        user='ashesihiring',
-        password='beginninghiring2002',
-        database="ashesihiring$default"
-    )
-
-# Password hashing using cryptography (PBKDF2)
-def hash_password(password: str, salt: bytes) -> str:
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=100000,
-    )
-    return base64.urlsafe_b64encode(kdf.derive(password.encode())).decode()
-
-# Verify password with the stored hash
-def verify_password(stored_password: str, password: str, salt: bytes) -> bool:
-    # Log hashed attempts to ensure the verification works correctly
-    hashed_attempt = hash_password(password, salt)
-    app.logger.debug(f"Stored hashed password: {stored_password}")
-    app.logger.debug(f"Hashed password attempt: {hashed_attempt}")
-    return stored_password == hashed_attempt
 
 # Route to serve the index.html
 @app.route('/')
@@ -87,169 +40,65 @@ def serve_static(filename):
 def catch_all(path):
     return send_from_directory('/home/smarthiringorg/SmartHire/Flask_Backend/dist', 'index.html')
 
-# API Routes for Authentication
-@app.route('/api/signup', methods=['POST'])
-def user_signup():
-    try:
-        data = request.get_json()
-        
-        # Extract user data from request
-        full_name = data.get('fullName')
-        email = data.get('email')
-        password = data.get('password')
-        role = data.get('role')
-        
-        # Validate required fields
-        if not all([full_name, email, password, role]):
-            return jsonify({
-                "success": False,
-                "message": "All fields are required"
-            }), 400
-        
-        # Check if email already exists
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
-        existing_user = cursor.fetchone()
-        
-        if existing_user:
-            return jsonify({
-                "success": False,
-                "message": "Email already registered"
-            }), 409
-        
-        # Hash password
-        salt = os.urandom(16)
-        hashed_password = hash_password(password, salt)
-        
-        # Store user in database
-        cursor.execute(
-            "INSERT INTO users (full_name, email, password_hash, salt, role) VALUES (%s, %s, %s, %s, %s)",
-            (full_name, email, hashed_password, base64.b64encode(salt).decode(), role)
-        )
-        conn.commit()
-        
-        # Get the user ID for the newly created user
-        user_id = cursor.lastrowid
-        
-        # Close database connection
-        cursor.close()
-        conn.close()
-        
-        return jsonify({
-            "success": True,
-            "message": "Account created successfully",
-            "user": {
-                "id": user_id,
-                "fullName": full_name,
-                "email": email,
-                "role": role
-            }
-        }), 201
-        
-    except Exception as e:
-        app.logger.error(f"Signup error: {str(e)}")
-        return jsonify({
-            "success": False,
-            "message": "An error occurred during signup",
-            "error": str(e)
-        }), 500
+if __name__ == '__main__':
+    app.run(debug=True)
 
-@app.route('/api/login', methods=['POST'])
-def user_login():
-    try:
-        data = request.get_json()
-        
-        # Extract login credentials
-        email = data.get('email')
-        password = data.get('password')
-        remember_me = data.get('rememberMe', False)
-        
-        # Validate required fields
-        if not all([email, password]):
-            return jsonify({
-                "success": False,
-                "message": "Email and password are required"
-            }), 400
-        
-        # Connect to database
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        
-        # Find user by email
-        cursor.execute("SELECT id, full_name, email, password_hash, salt, role FROM users WHERE email = %s", (email,))
-        user = cursor.fetchone()
-        
-        if not user:
-            return jsonify({
-                "success": False,
-                "message": "Invalid email or password"
-            }), 401
-        
-        # Decode the salt
-        try:
-            salt = base64.b64decode(user["salt"])
-        except Exception as e:
-            app.logger.error(f"Salt decoding error: {str(e)}")
-            return jsonify({
-                "success": False,
-                "message": "Authentication error"
-            }), 500
-        
-        # Verify password
-        if not verify_password(user['password_hash'], password, salt):
-            return jsonify({
-                "success": False,
-                "message": "Invalid email or password"
-            }), 401
-        
-        # Set session data
-        session['user_id'] = user['id']
-        session['user_name'] = user['full_name']
-        session['user_role'] = user['role']
-        session['logged_in'] = True
-        
-        # Set session expiry based on remember me
-        if remember_me:
-            session.permanent = True
-        
-        # Close database connection
-        cursor.close()
-        conn.close()
-        
-        return jsonify({
-            "success": True,
-            "message": "Login successful",
-            "user": {
-                "id": user['id'],
-                "fullName": user['full_name'],
-                "email": user['email'],
-                "role": user['role']
-            }
-        }), 200
-        
-    except Exception as e:
-        app.logger.error(f"Login error: {str(e)}")
-        return jsonify({
-            "success": False,
-            "message": "An error occurred during login",
-            "error": str(e)
-        }), 500
 
-@app.route('/api/logout', methods=['POST'])
-def user_logout():
-    # Clear the session data
-    session.pop('user_id', None)
-    session.pop('user_name', None)
-    session.pop('user_role', None)
-    session.pop('logged_in', None)
-    
-    return jsonify({
-        "success": True,
-        "message": "Logged out successfully"
-    }), 200
 
-# Faculty routes (keeping existing code)
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+import base64
+import os
+import mysql.connector
+import logging
+
+
+# Configure logging
+logging.basicConfig(
+    filename='form_debug.log',
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    encoding='utf-8',  # Ensure correct encoding
+)
+
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
+
+
+# Configure upload folder
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def get_db_connection():
+    return mysql.connector.connect(
+        host='ashesihiring.mysql.pythonanywhere-services.com',
+        user='ashesihiring',
+        password='beginninghiring2002',
+        database="ashesihiring$default"
+    )
+
+
+# Login and Sign up
+# Password hashing using cryptography (PBKDF2)
+def hash_password(password: str, salt: bytes) -> str:
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+    )
+    return base64.urlsafe_b64encode(kdf.derive(password.encode())).decode()
+
+
+# Verify password with the stored hash
+def verify_password(stored_password: str, password: str, salt: bytes) -> bool:
+    # Log hashed attempts to ensure the verification works correctly
+    hashed_attempt = hash_password(password, salt)
+    app.logger.debug(f"Stored hashed password: {stored_password}")
+    app.logger.debug(f"Hashed password attempt: {hashed_attempt}")
+    return stored_password == hashed_attempt
+
 @app.route('/faculty_signup', methods=['GET', 'POST'])
 def faculty_signup():
     if request.method == 'POST':
@@ -331,6 +180,8 @@ def faculty_login():
 
     return render_template('faculty_login.html')
 
+#---------END OF PAGE ROUTES
+
 @app.route('/logout')
 def logout():
     # Clear the session data
@@ -341,6 +192,157 @@ def logout():
 
     # Redirect to the login page or homepage
     return redirect(url_for('login'))
+# End of login and sign up
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# API Routes for Authentication
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    try:
+        data = request.json
+        full_name = data.get('fullName')
+        email = data.get('email')
+        password = data.get('password')
+        role = data.get('role')
+        
+        # Validate required fields
+        if not all([full_name, email, password, role]):
+            return jsonify({"error": "All fields are required"}), 400
+        
+        # Check if user already exists
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
+        existing_user = cursor.fetchone()
+        
+        if existing_user:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Email already registered"}), 409
+        
+        # Hash password
+        salt = os.urandom(16)
+        hashed_password = hash_password(password, salt)
+        
+        # Store user in database
+        cursor.execute(
+            "INSERT INTO users (full_name, email, password_hash, salt, role) VALUES (%s, %s, %s, %s, %s)",
+            (full_name, email, hashed_password, base64.b64encode(salt).decode(), role)
+        )
+        conn.commit()
+        
+        # Get the user ID for the response
+        user_id = cursor.lastrowid
+        
+        cursor.close()
+        conn.close()
+        
+        # Create session
+        session['user_id'] = user_id
+        session['user_name'] = full_name
+        session['user_role'] = role
+        session['logged_in'] = True
+        
+        return jsonify({
+            "success": True,
+            "message": "Account created successfully",
+            "user": {
+                "id": user_id,
+                "fullName": full_name,
+                "email": email,
+                "role": role
+            }
+        }), 201
+        
+    except Exception as e:
+        app.logger.error(f"Signup error: {str(e)}")
+        return jsonify({"error": "An error occurred during signup"}), 500
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        data = request.json
+        email = data.get('email')
+        password = data.get('password')
+        remember_me = data.get('rememberMe', False)
+        
+        # Validate required fields
+        if not all([email, password]):
+            return jsonify({"error": "Email and password are required"}), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("SELECT id, full_name, email, password_hash, salt, role FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Invalid email or password"}), 401
+        
+        # Decode the salt
+        try:
+            salt = base64.b64decode(user["salt"])
+        except Exception as e:
+            app.logger.error(f"Salt decoding error: {str(e)}")
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Authentication error"}), 500
+        
+        # Verify password
+        if not verify_password(user['password_hash'], password, salt):
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Invalid email or password"}), 401
+        
+        # Set session
+        session['user_id'] = user['id']
+        session['user_name'] = user['full_name']
+        session['user_role'] = user['role']
+        session['logged_in'] = True
+        
+        # Set session expiry based on remember me
+        if remember_me:
+            session.permanent = True
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Login successful",
+            "user": {
+                "id": user['id'],
+                "fullName": user['full_name'],
+                "email": user['email'],
+                "role": user['role']
+            }
+        }), 200
+        
+    except Exception as e:
+        app.logger.error(f"Login error: {str(e)}")
+        return jsonify({"error": "An error occurred during login"}), 500
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    # Clear the session data
+    session.pop('user_id', None)
+    session.pop('user_name', None)
+    session.pop('user_role', None)
+    session.pop('logged_in', None)
+    
+    return jsonify({"success": True, "message": "Logged out successfully"}), 200
+
+@app.route('/api/check-auth', methods=['GET'])
+def check_auth():
+    if 'user_id' in session and session.get('logged_in'):
+        return jsonify({
+            "authenticated": True,
+            "user": {
+                "id": session.get('user_id'),
+                "fullName": session.get('user_name'),
+                "role": session.get('user_role')
+            }
+        }), 200
+    else:
+        return jsonify({"authenticated": False}), 401

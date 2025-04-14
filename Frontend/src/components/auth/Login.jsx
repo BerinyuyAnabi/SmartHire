@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../../pages/AuthLayout';
 import { useAuth } from '../../context/AuthContext';
 import '../../css/Auth.css';
@@ -10,26 +10,8 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
-  const { login, isAuthenticated } = useAuth();
-  
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
-  
-  // Check for success message from navigation state (e.g., after signup)
-  useEffect(() => {
-    if (location.state && location.state.message) {
-      setSuccessMessage(location.state.message);
-      // Clear the message from location state
-      window.history.replaceState({}, document.title);
-    }
-  }, [location]);
+  const { login } = useAuth();
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,19 +20,10 @@ const Login = () => {
     
     try {
       // Use the login function from AuthContext
-      const data = await login(email, password, rememberMe);
+      await login(email, password, rememberMe);
       
-      // Login successful
-      console.log('Login successful:', data);
-      
-      // Redirect based on user role
-      if (data.user.role === 'professional') {
-        navigate('/dashboard');
-      } else if (data.user.role === 'student') {
-        navigate('/student-dashboard');
-      } else {
-        navigate('/dashboard'); // Default fallback
-      }
+      // Redirect on success
+      navigate('/admin');
     } catch (error) {
       console.error('Login failed:', error);
       setError(error.message || 'Invalid email or password. Please try again.');
@@ -69,7 +42,6 @@ const Login = () => {
         <p className="auth-subtitle">Welcome back! Please enter your details.</p>
       </div>
       
-      {successMessage && <div className="success-message">{successMessage}</div>}
       {error && <div className="error-message">{error}</div>}
       
       <div className="social-buttons">

@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Create the authentication context
 const AuthContext = createContext();
@@ -10,33 +11,40 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  // Check if user is already logged in on initial load
+  // Check if user is authenticated on initial load
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // You could add an API endpoint to check if the user is authenticated
-        // For now, we'll just check if there's a user in localStorage
-        const storedUser = localStorage.getItem('user');
+        const response = await fetch('/api/check-auth', {
+          credentials: 'include', // Important for cookies/session
+        });
         
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-          setIsAuthenticated(true);
+        const data = await response.json();
+        
+        if (response.ok && data.authenticated) {
+          setUser(data.user);
+        } else {
+          setUser(null);
         }
       } catch (error) {
-        console.error('Auth status check failed:', error);
+        console.error('Auth check failed:', error);
+        setError('Failed to check authentication status');
       } finally {
         setLoading(false);
       }
     };
-
+    
     checkAuthStatus();
   }, []);
 
   // Login function
-  const login = async (email, password, rememberMe = false) => {
+  const login = async (email, password, rememberMe) => {
+    setLoading(true);
+    setError(null);
+    
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
@@ -48,51 +56,30 @@ export const AuthProvider = ({ children }) => {
           password,
           rememberMe
         }),
+        credentials: 'include',
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      // Store user data
-      setUser(data.user);
-      setIsAuthenticated(true);
       
-      // Store in localStorage if remember me is checked
-      if (rememberMe) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
       }
-
+      
+      setUser(data.user);
       return data;
     } catch (error) {
-      console.error('Login error:', error);
+      setError(error.message || 'Login failed');
       throw error;
-    }
-  };
-
-  // Logout function
-  const logout = async () => {
-    try {
-      await fetch('/api/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
     } finally {
-      // Clear user data regardless of API response
-      setUser(null);
-      setIsAuthenticated(false);
-      localStorage.removeItem('user');
+      setLoading(false);
     }
   };
 
-  // Register function
-  const register = async (userData) => {
+  // Signup function
+  const signup = async (userData) => {
+    setLoading(true);
+    setError(null);
+    
     try {
       const response = await fetch('/api/signup', {
         method: 'POST',
@@ -100,18 +87,41 @@ export const AuthProvider = ({ children }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),
+        credentials: 'include',
       });
-
+      
       const data = await response.json();
-
+      
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.error || 'Signup failed');
       }
-
+      
+      setUser(data.user);
       return data;
     } catch (error) {
-      console.error('Registration error:', error);
+      setError(error.message || 'Signup failed');
       throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logout function
+  const logout = async () => {
+    setLoading(true);
+    
+    try {
+      await fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      setUser(null);
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,15 +129,16 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
-    isAuthenticated,
+    error,
     login,
+    signup,
     logout,
-    register
+    isAuthenticated: !!user
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

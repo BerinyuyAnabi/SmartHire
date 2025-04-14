@@ -16,14 +16,7 @@ const Signup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { register, isAuthenticated } = useAuth();
-  
-  // Redirect if already authenticated
-  React.useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
+  const { signup } = useAuth();
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -52,19 +45,11 @@ const Signup = () => {
     setError('');
     
     try {
-      // Use the register function from AuthContext
-      await register({
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role
-      });
+      // Use the signup function from AuthContext
+      await signup(formData);
       
-      // Registration successful
-      console.log('Registration successful');
-      
-      // Redirect to login page
-      navigate('/login', { state: { message: 'Account created successfully. Please login.' } });
+      // Redirect on success
+      navigate('/admin');
     } catch (error) {
       console.error('Registration failed:', error);
       setError(error.message || 'Registration failed. Please try again.');
@@ -194,6 +179,7 @@ const Signup = () => {
           ) : (
             <>
               Create Account
+      
             </>
           )}
         </button>
