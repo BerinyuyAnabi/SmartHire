@@ -2,7 +2,7 @@
 # IMPORTS AND CONFIGURATION
 # =============================================================================
 from flask import Flask, request, jsonify, send_from_directory, session, redirect, url_for, render_template
-from flask_cors import CORS
+# from flask_cors import CORS
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from dotenv import load_dotenv
@@ -16,7 +16,7 @@ from datetime import datetime
 
 app = Flask(__name__, static_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist/static', template_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist')
 app.secret_key = os.urandom(24)
-CORS(app, supports_credentials=True)  # Enable CORS for API calls with credentials
+# CORS(app, supports_credentials=True)  # Enable CORS for API calls with credentials
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
