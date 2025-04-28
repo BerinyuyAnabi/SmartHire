@@ -1,1 +1,35 @@
+# Flask and Extensions
 Flask==2.1.1
+flask-cors==3.0.10
+Flask-Limiter==2.8.1
+Werkzeug==2.0.3
+
+# Database
+mysql-connector-python==8.0.33
+SQLAlchemy==1.4.46
+alembic==1.9.4
+
+# Security
+cryptography==39.0.2
+PyJWT==2.6.0
+bcrypt==4.0.1
+
+# Environment & Config
+python-dotenv==1.0.0
+pyyaml==6.0
+
+# Utilities
+marshmallow==3.19.0
+email-validator==2.0.0
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Production Server
+gunicorn==20.1.0
+
+# Testing
+pytest==7.3.1
+pytest-cov==4.1.0
+
+# Logging
+structlog==23.1.0

@@ -8,23 +8,52 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
   
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     
     try {
-      // Your login logic here
-      // await loginUser(email, password);
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('password', password);
       
-      // Redirect on success
-      // history.push('/dashboard');
+      const response = await fetch('/faculty-login', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include' // Important for session cookies
+      });
+      
+      if (response.redirected) {
+        // Follow the redirect from the server
+        window.location.href = response.url;
+        return;
+      }
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        setError(data.error);
+      } else {
+        // Check for admin role and redirect accordingly
+        if (data.is_admin) {
+          navigate('/admin');
+        } else {
+          navigate('/login');
+        }
+      }
     } catch (error) {
+      setError('Login failed. Please try again.');
       console.error('Login failed:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+  
+
   
   return (
     <AuthLayout 
@@ -118,3 +147,6 @@ const Login = () => {
 };
 
 export default Login;
+
+
+

@@ -40,11 +40,24 @@ const Signup = () => {
     setIsSubmitting(true);
     
     try {
-      // Your registration logic here
-      // await registerUser(formData);
+      const formData = new FormData();
+      formData.append('username', formData.fullName);
+      formData.append('email', formData.email);
+      formData.append('password', formData.password);
+      formData.append('confirmPassword', formData.password);
+      formData.append('agreeTerms', formData.agreeToTerms ? 'on' : 'off');
       
-      // Redirect on success
-      // history.push('/login');
+      const response = await fetch('/faculty_signup', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.redirected) {
+        window.location.href = response.url;
+        return;
+      }
+      
+      navigate('/login');
     } catch (error) {
       console.error('Registration failed:', error);
     } finally {
