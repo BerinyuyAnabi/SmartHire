@@ -1,7 +1,9 @@
 // src/components/auth/ProtectedRoute.js
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
+  const location = useLocation();
+
   // Check if user is authenticated using session data
   const isAuthenticated = () => {
     // This could be a check against localStorage, sessionStorage, or a context
@@ -13,11 +15,13 @@ const ProtectedRoute = ({ children }) => {
   };
 
   if (!isAuthenticated()) {
-    return <Navigate to="/login" />;
+    // Redirect to login while preserving the intended destination
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!isAdmin() && window.location.pathname.includes('/admin')) {
-    return <Navigate to="/dashboard" />;
+  // Check if user is trying to access admin page without admin privileges
+  if (!isAdmin() && location.pathname.includes('/admin')) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Assuming you're using React Router
+import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate import
 import AuthLayout from '../../pages/AuthLayout';
 import '../../css/Auth.css';
 
@@ -53,8 +53,6 @@ const Login = () => {
     }
   };
   
-
-  
   return (
     <AuthLayout 
       illustrationTitle="Welcome Back"
@@ -81,6 +79,8 @@ const Login = () => {
       </div>
       
       <form className="auth-form" onSubmit={handleSubmit}>
+        {error && <div className="error-message">{error}</div>}
+        
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <div className="input-group">
@@ -147,6 +147,3 @@ const Login = () => {
 };
 
 export default Login;
-
-
-
