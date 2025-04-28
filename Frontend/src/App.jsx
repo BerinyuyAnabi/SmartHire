@@ -18,7 +18,14 @@ function App() {
     <NavBar/>
     <main className="main-content">
     <Routes>
+      {/* Public routes */}
       <Route path='/' element={<Home />}/>
+      <Route path='/features' element={<Features/>}/>
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      
+      {/* Protected routes */}
       <Route path='/job-posting' element={
         <ProtectedRoute>
           <JobPosting />
@@ -34,15 +41,13 @@ function App() {
           <Admin/>
         </ProtectedRoute>
       }/>
-      <Route path='/features' element={<Features/>}/>
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/applicant/:id" element={
         <ProtectedRoute>
           <ApplicantDetails />
         </ProtectedRoute>
       } />
+      
+      {/* Fallback route - redirect to login */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
     </main>

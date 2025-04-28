@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate import
+import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../../pages/AuthLayout';
 import '../../css/Auth.css';
 
 const Signup = () => {
-  const navigate = useNavigate(); // Added navigate hook
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  // Use state for controlling visibility instead of step numbers
+  const [showPersonalInfo, setShowPersonalInfo] = useState(true);
+  const [showRoleSelection, setShowRoleSelection] = useState(false);
+  const [userData, setUserData] = useState({
     fullName: '',
     email: '',
     password: '',
@@ -18,38 +20,39 @@ const Signup = () => {
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setUserData({
+      ...userData,
       [name]: type === 'checkbox' ? checked : value
     });
   };
   
   const selectRole = (role) => {
-    setFormData({
-      ...formData,
+    setUserData({
+      ...userData,
       role
     });
+  };
+  
+  const handleContinue = (e) => {
+    e.preventDefault();
+    // Instead of changing a step number, control component visibility
+    setShowPersonalInfo(false);
+    setShowRoleSelection(true);
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (step === 1) {
-      setStep(2);
-      return;
-    }
-    
     setIsSubmitting(true);
     setError(null);
     
     try {
-      // Create a new FormData object with a different name to avoid conflict
       const submitData = new FormData();
-      submitData.append('username', formData.fullName);
-      submitData.append('email', formData.email);
-      submitData.append('password', formData.password);
-      submitData.append('confirmPassword', formData.password);
-      submitData.append('agreeTerms', formData.agreeToTerms ? 'on' : 'off');
+      submitData.append('username', userData.fullName);
+      submitData.append('email', userData.email);
+      submitData.append('password', userData.password);
+      submitData.append('confirmPassword', userData.password);
+      submitData.append('agreeTerms', userData.agreeToTerms ? 'on' : 'off');
       
       const response = await fetch('/faculty_signup', {
         method: 'POST',
@@ -61,6 +64,8 @@ const Signup = () => {
         return;
       }
       
+      // Set session storage to indicate successful signup
+      sessionStorage.setItem('isLoggedIn', 'true');
       navigate('/login');
     } catch (error) {
       setError('Registration failed. Please try again.');
@@ -69,6 +74,9 @@ const Signup = () => {
       setIsSubmitting(false);
     }
   };
+  
+  // Calculate current step for the UI indicator
+  const currentStep = showPersonalInfo ? 1 : 2;
   
   return (
     <AuthLayout
@@ -81,120 +89,134 @@ const Signup = () => {
       </div>
       
       <div className="step-indicator">
-        <div className={`step ${step >= 1 ? 'active' : ''}`}>1</div>
-        <div className={`step-line ${step > 1 ? 'completed' : ''}`}></div>
-        <div className={`step ${step >= 2 ? 'active' : ''}`}>2</div>
+        <div className={`step ${currentStep >= 1 ? 'active' : ''}`}>1</div>
+        <div className={`step-line ${currentStep > 1 ? 'completed' : ''}`}></div>
+        <div className={`step ${currentStep >= 2 ? 'active' : ''}`}>2</div>
       </div>
       
-      <form className="auth-form" onSubmit={handleSubmit}>
-        {error && <div className="error-message">{error}</div>}
-        
-        {step === 1 ? (
-          <>
-            <div className="form-group">
-              <label htmlFor="fullName">Full Name</label>
-              <div className="input-group">
-                <i className="input-icon fas fa-user"></i>
-                <input 
-                  type="text" 
-                  id="fullName" 
-                  name="fullName"
-                  placeholder="Enter your full name" 
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <div className="input-group">
-                <i className="input-icon fas fa-envelope"></i>
-                <input 
-                  type="email" 
-                  id="email" 
-                  name="email"
-                  placeholder="Enter your email" 
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <div className="input-group">
-                <i className="input-icon fas fa-lock"></i>
-                <input 
-                  type="password" 
-                  id="password" 
-                  name="password"
-                  placeholder="Create a password" 
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="form-group">
-              <label>Select Your Role</label>
-              <div className="role-selector">
-                <div 
-                  className={`role-option ${formData.role === 'professional' ? 'selected' : ''}`}
-                  onClick={() => selectRole('professional')}
-                >
-                  <i className="fas fa-briefcase"></i>
-                  <span>Professional</span>
-                </div>
-                <div 
-                  className={`role-option ${formData.role === 'student' ? 'selected' : ''}`}
-                  onClick={() => selectRole('student')}
-                >
-                  <i className="fas fa-graduation-cap"></i>
-                  <span>Student</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="form-check terms-check">
+      {error && <div className="error-message">{error}</div>}
+      
+      {showPersonalInfo && (
+        <form className="auth-form" onSubmit={handleContinue}>
+          <div className="form-group">
+            <label htmlFor="fullName">Full Name</label>
+            <div className="input-group">
+              <i className="input-icon fas fa-user"></i>
               <input 
-                type="checkbox" 
-                id="terms" 
-                name="agreeToTerms"
-                checked={formData.agreeToTerms}
+                type="text" 
+                id="fullName" 
+                name="fullName"
+                placeholder="Enter your full name" 
+                value={userData.fullName}
                 onChange={handleChange}
                 required
               />
-              <label htmlFor="terms">
-                I agree to the <Link to="/terms" className="auth-link">Terms of Service</Link> and <Link to="/privacy" className="auth-link">Privacy Policy</Link>
-              </label>
             </div>
-          </>
-        )}
-        
-        <button 
-          type="submit" 
-          className={`auth-button ${isSubmitting ? 'submitting' : ''}`}
-          disabled={isSubmitting || (step === 2 && (!formData.role || !formData.agreeToTerms))}
-        >
-          {isSubmitting ? (
-            <span className="spinner"></span>
-          ) : step === 1 ? (
-            <>
-              Continue
-            </>
-          ) : (
-            <>
-              Create Account
-            </>
-          )}
-        </button>
-      </form>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <div className="input-group">
+              <i className="input-icon fas fa-envelope"></i>
+              <input 
+                type="email" 
+                id="email" 
+                name="email"
+                placeholder="Enter your email" 
+                value={userData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <div className="input-group">
+              <i className="input-icon fas fa-lock"></i>
+              <input 
+                type="password" 
+                id="password" 
+                name="password"
+                placeholder="Create a password" 
+                value={userData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          
+          <button 
+            type="submit" 
+            className="auth-button"
+          >
+            Continue
+          </button>
+        </form>
+      )}
+      
+      {showRoleSelection && (
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Select Your Role</label>
+            <div className="role-selector">
+              <div 
+                className={`role-option ${userData.role === 'professional' ? 'selected' : ''}`}
+                onClick={() => selectRole('professional')}
+              >
+                <i className="fas fa-briefcase"></i>
+                <span>Professional</span>
+              </div>
+              <div 
+                className={`role-option ${userData.role === 'student' ? 'selected' : ''}`}
+                onClick={() => selectRole('student')}
+              >
+                <i className="fas fa-graduation-cap"></i>
+                <span>Student</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="form-check terms-check">
+            <input 
+              type="checkbox" 
+              id="terms" 
+              name="agreeToTerms"
+              checked={userData.agreeToTerms}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="terms">
+              I agree to the <Link to="/terms" className="auth-link">Terms of Service</Link> and <Link to="/privacy" className="auth-link">Privacy Policy</Link>
+            </label>
+          </div>
+          
+          <button 
+            type="submit" 
+            className={`auth-button ${isSubmitting ? 'submitting' : ''}`}
+            disabled={isSubmitting || (!userData.role || !userData.agreeToTerms)}
+          >
+            {isSubmitting ? (
+              <span className="spinner"></span>
+            ) : (
+              <>
+                Create Account
+              </>
+            )}
+          </button>
+          
+          <button 
+            type="button" 
+            className="auth-button secondary"
+            onClick={() => {
+              setShowPersonalInfo(true);
+              setShowRoleSelection(false);
+            }}
+          >
+            Back
+          </button>
+        </form>
+      )}
       
       <div className="auth-footer">
         Already have an account? <Link to="/login" className="auth-link">Login</Link>
