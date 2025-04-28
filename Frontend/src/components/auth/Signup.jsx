@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Assuming you're using React Router
+import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate import
 import AuthLayout from '../../pages/AuthLayout';
 import '../../css/Auth.css';
 
 const Signup = () => {
+  const navigate = useNavigate(); // Added navigate hook
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -13,6 +14,7 @@ const Signup = () => {
     agreeToTerms: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -38,18 +40,20 @@ const Signup = () => {
     }
     
     setIsSubmitting(true);
+    setError(null);
     
     try {
-      const formData = new FormData();
-      formData.append('username', formData.fullName);
-      formData.append('email', formData.email);
-      formData.append('password', formData.password);
-      formData.append('confirmPassword', formData.password);
-      formData.append('agreeTerms', formData.agreeToTerms ? 'on' : 'off');
+      // Create a new FormData object with a different name to avoid conflict
+      const submitData = new FormData();
+      submitData.append('username', formData.fullName);
+      submitData.append('email', formData.email);
+      submitData.append('password', formData.password);
+      submitData.append('confirmPassword', formData.password);
+      submitData.append('agreeTerms', formData.agreeToTerms ? 'on' : 'off');
       
       const response = await fetch('/faculty_signup', {
         method: 'POST',
-        body: formData
+        body: submitData
       });
       
       if (response.redirected) {
@@ -59,6 +63,7 @@ const Signup = () => {
       
       navigate('/login');
     } catch (error) {
+      setError('Registration failed. Please try again.');
       console.error('Registration failed:', error);
     } finally {
       setIsSubmitting(false);
@@ -82,6 +87,8 @@ const Signup = () => {
       </div>
       
       <form className="auth-form" onSubmit={handleSubmit}>
+        {error && <div className="error-message">{error}</div>}
+        
         {step === 1 ? (
           <>
             <div className="form-group">
@@ -184,7 +191,6 @@ const Signup = () => {
           ) : (
             <>
               Create Account
-      
             </>
           )}
         </button>
