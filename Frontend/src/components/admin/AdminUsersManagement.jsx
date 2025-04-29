@@ -1,55 +1,45 @@
 // src/components/admin/AdminUsersManagement.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { AdminContext } from '../../pages/Admin'; // Import the context
 
 function AdminUsersManagement() {
   const navigate = useNavigate();
+  const { currentAdmin } = useContext(AdminContext); // Use the context
   const [adminUsers, setAdminUsers] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   
   useEffect(() => {
-    // Fetch admin users and current user info
-    const fetchData = async () => {
+    // Fetch admin users
+    const fetchAdminUsers = async () => {
       setLoading(true);
       try {
-        // Fetch all admin users
-        const usersResponse = await fetch('/api/admin-users', {
+        const response = await fetch('/api/admin-users', {
           credentials: 'include'
         });
         
-        // Fetch current user info
-        const currentUserResponse = await fetch('/api/me', {
-          credentials: 'include'
-        });
-        
-        if (!usersResponse.ok || !currentUserResponse.ok) {
-          throw new Error('Failed to fetch data');
+        if (!response.ok) {
+          throw new Error('Failed to fetch admin users');
         }
         
-        const [usersData, currentUserData] = await Promise.all([
-          usersResponse.json(),
-          currentUserResponse.json()
-        ]);
-        
-        setAdminUsers(usersData);
-        setCurrentUser(currentUserData);
+        const data = await response.json();
+        setAdminUsers(data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching admin users:', error);
         setError('Failed to load admin users. Please try again.');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchData();
+    fetchAdminUsers();
   }, [navigate]);
   
   const deleteAdminUser = async (userId) => {
     // Prevent deletion of own account
-    if (userId === currentUser.id) {
+    if (userId === currentAdmin.id) {
       alert("You cannot delete your own account.");
       return;
     }
@@ -93,7 +83,7 @@ function AdminUsersManagement() {
     );
   });
   
-  if (!currentUser) return <div className="loading">Checking permissions...</div>;
+  if (!currentAdmin) return <div className="loading">Checking permissions...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (loading) return <div className="loading">Loading admin users...</div>;
   
@@ -139,11 +129,11 @@ function AdminUsersManagement() {
               </thead>
               <tbody>
                 {filteredAdminUsers.map(user => (
-                  <tr key={user.id} className={user.id === currentUser.id ? 'current-user' : ''}>
+                  <tr key={user.id} className={user.id === currentAdmin.id ? 'current-user' : ''}>
                     <td>{user.id}</td>
                     <td>
                       {user.email}
-                      {user.id === currentUser.id && <span className="current-user-label">(You)</span>}
+                      {user.id === currentAdmin.id && <span className="current-user-label">(You)</span>}
                     </td>
                     <td>{new Date(user.created_at).toLocaleString()}</td>
                     <td className="actions-cell">
@@ -158,8 +148,8 @@ function AdminUsersManagement() {
                       <button 
                         onClick={() => deleteAdminUser(user.id)} 
                         className="delete-button"
-                        disabled={user.id === currentUser.id}
-                        title={user.id === currentUser.id ? "Cannot delete your own account" : "Delete Admin"}
+                        disabled={user.id === currentAdmin.id}
+                        title={user.id === currentAdmin.id ? "Cannot delete your own account" : "Delete Admin"}
                       >
                         <i className="fas fa-trash"></i>
                       </button>

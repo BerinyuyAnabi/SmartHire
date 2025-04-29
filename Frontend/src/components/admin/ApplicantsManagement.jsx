@@ -1,9 +1,11 @@
 // src/components/admin/ApplicantsManagement.js
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { AdminContext } from '../../pages/Admin'; // Import the context
 
 function ApplicantsManagement() {
   const navigate = useNavigate();
+  const { currentAdmin } = useContext(AdminContext); // Use the context
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -104,6 +106,7 @@ function ApplicantsManagement() {
     navigate(`/admin/applicants/${applicantId}`);
   };
   
+  if (!currentAdmin) return <div className="loading">Checking permissions...</div>;
   if (loading) return <div className="loading">Loading applicants...</div>;
   if (error) return <div className="error-message">{error}</div>;
   
@@ -274,6 +277,7 @@ function ApplicantsManagement() {
 function ApplicantDetail() {
   const { applicantId } = useParams();
   const navigate = useNavigate();
+  const { currentAdmin } = useContext(AdminContext); // Use the context
   const [applicant, setApplicant] = useState(null);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -313,6 +317,7 @@ function ApplicantDetail() {
     navigate('/admin/applicants');
   };
   
+  if (!currentAdmin) return <div className="loading">Checking permissions...</div>;
   if (loading) return <div className="loading">Loading applicant details...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!applicant) return <div className="not-found">Applicant not found</div>;

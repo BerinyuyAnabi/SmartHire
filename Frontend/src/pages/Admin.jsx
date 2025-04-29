@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext } from 'react';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import "../css/Admin.css";
 
@@ -9,6 +9,9 @@ import ApplicantsManagement from '../components/admin/ApplicantsManagement';
 import AssessmentsManagement from '../components/admin/AssessmentsManagement';
 import AdminUsersManagement from '../components/admin/AdminUsersManagement';
 
+// Create a context to share admin state with child components
+export const AdminContext = createContext(null);
+
 function Admin() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,10 +19,14 @@ function Admin() {
   const [error, setError] = useState(null);
   const [currentAdmin, setCurrentAdmin] = useState(null);
   
-  // Check authentication on component mount
+  // Check authentication on component mount and when pathname changes
   useEffect(() => {
     const checkAuth = async () => {
-      setLoading(true);
+      // Don't set loading to true during navigation to avoid flashing
+      const isInitialLoad = !currentAdmin;
+      if (isInitialLoad) {
+        setLoading(true);
+      }
       setError(null); // Clear any previous errors
       
       try {
@@ -45,6 +52,7 @@ function Admin() {
           sessionStorage.setItem('isLoggedIn', 'true');
           sessionStorage.setItem('isAdmin', 'true');
           sessionStorage.setItem('userId', data.id);
+          sessionStorage.setItem('adminEmail', data.email || '');
           
           setCurrentAdmin(data);
         }
@@ -53,7 +61,9 @@ function Admin() {
         setError('Authentication failed. Please log in again.');
         navigate('/login');
       } finally {
-        setLoading(false);
+        if (isInitialLoad) {
+          setLoading(false);
+        }
       }
     };
     
@@ -61,12 +71,14 @@ function Admin() {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
     const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
     const userId = sessionStorage.getItem('userId');
+    const email = sessionStorage.getItem('adminEmail');
     
     if (isLoggedIn && isAdmin && userId) {
       // If we have session storage data, use it first but verify with server
       setCurrentAdmin({
         id: userId,
-        is_admin: true
+        is_admin: true,
+        email: email || ''
       });
       setLoading(false);
       
@@ -100,7 +112,7 @@ function Admin() {
     return () => {
       // Any cleanup code here if needed
     };
-  }, [navigate]);
+  }, [navigate]); // Removed location.pathname dependency to prevent re-auth on every navigation
 
   const handleLogout = async () => {
     setLoading(true);
@@ -120,6 +132,7 @@ function Admin() {
       sessionStorage.removeItem('isLoggedIn');
       sessionStorage.removeItem('isAdmin');
       sessionStorage.removeItem('userId');
+      sessionStorage.removeItem('adminEmail');
       
       navigate('/login');
     } catch (error) {
@@ -167,49 +180,50 @@ function Admin() {
   }
 
   return (
-    <div className="admin-portal">
-      <div className="admin-sidebar">
-        <div className="admin-sidebar-header">
-          <h2>Recruitment Portal</h2>
-          <p>{currentAdmin?.email || 'Admin'}</p>
+    <AdminContext.Provider value={{ currentAdmin }}>
+      <div className="admin-portal">
+        <div className="admin-sidebar">
+          <div className="admin-sidebar-header">
+            <h2>Recruitment Portal</h2>
+            <p>{currentAdmin?.email || 'Admin'}</p>
+          </div>
+          
+          <nav className="admin-nav">
+            <Link to="/admin" className={`admin-nav-link ${isActive('/admin') ? 'active' : ''}`}>
+              <i className="fas fa-tachometer-alt"></i> Dashboard
+            </Link>
+            <Link to="/admin/jobs" className={`admin-nav-link ${location.pathname.includes('/admin/jobs') ? 'active' : ''}`}>
+              <i className="fas fa-briefcase"></i> Jobs
+            </Link>
+            <Link to="/admin/applicants" className={`admin-nav-link ${location.pathname.includes('/admin/applicants') ? 'active' : ''}`}>
+              <i className="fas fa-users"></i> Applicants
+            </Link>
+            <Link to="/admin/assessments" className={`admin-nav-link ${location.pathname.includes('/admin/assessments') ? 'active' : ''}`}>
+              <i className="fas fa-clipboard-check"></i> Assessments
+            </Link>
+            <Link to="/admin/users" className={`admin-nav-link ${location.pathname.includes('/admin/users') ? 'active' : ''}`}>
+              <i className="fas fa-user-shield"></i> Admin Users
+            </Link>
+          </nav>
+          
+          <div className="admin-sidebar-footer">
+            <button onClick={handleLogout} className="logout-button">
+              <i className="fas fa-sign-out-alt"></i> Logout
+            </button>
+          </div>
         </div>
         
-        <nav className="admin-nav">
-          <Link to="/admin" className={`admin-nav-link ${isActive('/admin') ? 'active' : ''}`}>
-            <i className="fas fa-tachometer-alt"></i> Dashboard
-          </Link>
-          <Link to="/admin/jobs" className={`admin-nav-link ${location.pathname.includes('/admin/jobs') ? 'active' : ''}`}>
-            <i className="fas fa-briefcase"></i> Jobs
-          </Link>
-          <Link to="/admin/applicants" className={`admin-nav-link ${location.pathname.includes('/admin/applicants') ? 'active' : ''}`}>
-            <i className="fas fa-users"></i> Applicants
-          </Link>
-          <Link to="/admin/assessments" className={`admin-nav-link ${location.pathname.includes('/admin/assessments') ? 'active' : ''}`}>
-            <i className="fas fa-clipboard-check"></i> Assessments
-          </Link>
-          {/* Removed redundant is_admin check since all users here are admins */}
-          <Link to="/admin/users" className={`admin-nav-link ${location.pathname.includes('/admin/users') ? 'active' : ''}`}>
-            <i className="fas fa-user-shield"></i> Admin Users
-          </Link>
-        </nav>
-        
-        <div className="admin-sidebar-footer">
-          <button onClick={handleLogout} className="logout-button">
-            <i className="fas fa-sign-out-alt"></i> Logout
-          </button>
+        <div className="admin-content">
+          <Routes>
+            <Route path="/" element={<AdminDashboard />} />
+            <Route path="/jobs/*" element={<JobsManagement />} />
+            <Route path="/applicants/*" element={<ApplicantsManagement />} />
+            <Route path="/assessments/*" element={<AssessmentsManagement />} />
+            <Route path="/users/*" element={<AdminUsersManagement />} />
+          </Routes>
         </div>
       </div>
-      
-      <div className="admin-content">
-        <Routes>
-          <Route path="/" element={<AdminDashboard />} />
-          <Route path="/jobs/*" element={<JobsManagement />} />
-          <Route path="/applicants/*" element={<ApplicantsManagement />} />
-          <Route path="/assessments/*" element={<AssessmentsManagement />} />
-          <Route path="/users/*" element={<AdminUsersManagement />} />
-        </Routes>
-      </div>
-    </div>
+    </AdminContext.Provider>
   );
 }
 
