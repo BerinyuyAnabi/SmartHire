@@ -27,6 +27,28 @@ function App() {
       
       {/* Protected routes */}
       <Route path='/job-posting' element={
+ 
+          <JobPosting />
+    
+      }/>
+      <Route path='/assessment' element={
+       
+          <Assessment />
+    
+      }/>
+      <Route path='/admin' element={
+  
+          <Admin/>
+ 
+      }/>
+      <Route path="/applicant/:id" element={
+      
+          <ApplicantDetails />
+    
+      } />
+      
+      {/* Protected routes
+      <Route path='/job-posting' element={
         <ProtectedRoute>
           <JobPosting />
         </ProtectedRoute>
@@ -45,7 +67,7 @@ function App() {
         <ProtectedRoute>
           <ApplicantDetails />
         </ProtectedRoute>
-      } />
+      } /> */}
       
       {/* Fallback route - redirect to login */}
       <Route path="*" element={<Navigate to="/login" replace />} />
