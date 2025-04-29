@@ -25,7 +25,8 @@ logging.basicConfig(level=logging.DEBUG)
 # DATABASE CONNECTION
 # =============================================================================
 # Load environment variables
-load_dotenv()
+project_folder = '/home/smarthiringorg/SmartHire/Flask_Backend/'
+load_dotenv(os.path.join(project_folder, '.env'))
 
 def get_db_connection():
     return mysql.connector.connect(
