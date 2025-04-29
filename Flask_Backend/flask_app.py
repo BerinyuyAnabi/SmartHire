@@ -23,7 +23,7 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-default-development-secret-key')
 # Session configuration
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SECURE=False,  # Set to True in production with HTTPS
+    SESSION_COOKIE_SECURE=False,
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=timedelta(hours=24)  # Session lasts for 24 hours
 )
@@ -224,7 +224,6 @@ def check_auth():
         })
     else:
         return jsonify({"authenticated": False}), 401
-
 
 
 # =============================================================================

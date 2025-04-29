@@ -1,4 +1,3 @@
-// src/components/auth/ProtectedRoute.js
 import { Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
@@ -9,65 +8,66 @@ const ProtectedRoute = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // First check session storage for quick client-side check
-    const checkLocalAuth = () => {
-      const loggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-      const admin = sessionStorage.getItem('isAdmin') === 'true';
-      
-      setIsAuthenticated(loggedIn);
-      setIsAdmin(admin);
-      
-      return loggedIn;
-    };
-    
-    // Then verify with server to ensure session is actually valid
+
     const verifyAuthWithServer = async () => {
       try {
         const response = await fetch('/api/check-auth', {
           credentials: 'include'
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           if (data.authenticated) {
+
             sessionStorage.setItem('isLoggedIn', 'true');
             sessionStorage.setItem('isAdmin', data.is_admin ? 'true' : 'false');
             sessionStorage.setItem('userId', data.id);
-            
+
             setIsAuthenticated(true);
             setIsAdmin(data.is_admin);
           } else {
             // Clear session storage if server says not authenticated
-            sessionStorage.removeItem('isLoggedIn');
-            sessionStorage.removeItem('isAdmin');
-            sessionStorage.removeItem('userId');
-            
+            clearSessionStorage();
             setIsAuthenticated(false);
             setIsAdmin(false);
           }
         } else {
           // Server returned error, consider user not authenticated
+          clearSessionStorage();
           setIsAuthenticated(false);
           setIsAdmin(false);
         }
       } catch (error) {
         console.error("Auth verification error:", error);
-        // On error, fall back to local check
-        checkLocalAuth();
+        // On network error, fall back to local storage as temporary measure
+        fallbackToLocalStorage();
       } finally {
         setIsChecking(false);
       }
     };
 
-    // First check local storage
-    const localCheck = checkLocalAuth();
-    
-    // If locally authenticated, verify with server
-    if (localCheck) {
-      verifyAuthWithServer();
-    } else {
-      setIsChecking(false);
-    }
+    // Only used as fallback when server is unreachable
+    const fallbackToLocalStorage = () => {
+      const loggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+      const admin = sessionStorage.getItem('isAdmin') === 'true';
+
+      setIsAuthenticated(loggedIn);
+      setIsAdmin(admin);
+    };
+
+    const clearSessionStorage = () => {
+      sessionStorage.removeItem('isLoggedIn');
+      sessionStorage.removeItem('isAdmin');
+      sessionStorage.removeItem('userId');
+    };
+
+    // Always verify with server first
+    verifyAuthWithServer();
+
+    // Set up periodic re-verification to handle session expiration
+    const intervalId = setInterval(verifyAuthWithServer, 15 * 60 * 1000); // Check every 15 minutes
+
+    return () => clearInterval(intervalId);
   }, [location.pathname]);
 
   // Show loading or placeholder while checking authentication

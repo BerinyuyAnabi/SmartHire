@@ -11,57 +11,41 @@ function AdminUsersManagement() {
   const [search, setSearch] = useState("");
   
   useEffect(() => {
-    // Check if current user has super admin privileges
-    const checkPermissions = async () => {
+    // Fetch admin users and current user info
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await fetch('/api/check-auth', {
+        // Fetch all admin users
+        const usersResponse = await fetch('/api/admin-users', {
           credentials: 'include'
         });
         
-        if (!response.ok) {
-          throw new Error('Authentication check failed');
+        // Fetch current user info
+        const currentUserResponse = await fetch('/api/me', {
+          credentials: 'include'
+        });
+        
+        if (!usersResponse.ok || !currentUserResponse.ok) {
+          throw new Error('Failed to fetch data');
         }
         
-        const userData = await response.json();
+        const [usersData, currentUserData] = await Promise.all([
+          usersResponse.json(),
+          currentUserResponse.json()
+        ]);
         
-        if (!userData.is_super_admin) {
-          // Redirect non-super admins
-          navigate('/admin');
-          return;
-        }
-        
-        setCurrentUser(userData);
-        fetchAdminUsers();
+        setAdminUsers(usersData);
+        setCurrentUser(currentUserData);
       } catch (error) {
-        console.error('Permission check failed:', error);
-        setError('You do not have permission to access this page.');
-        navigate('/admin');
+        console.error('Error fetching data:', error);
+        setError('Failed to load admin users. Please try again.');
+      } finally {
+        setLoading(false);
       }
     };
     
-    checkPermissions();
+    fetchData();
   }, [navigate]);
-  
-  const fetchAdminUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/admin-users', {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch admin users');
-      }
-      
-      const data = await response.json();
-      setAdminUsers(data);
-    } catch (error) {
-      console.error('Error fetching admin users:', error);
-      setError('Failed to load admin users. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
   
   const deleteAdminUser = async (userId) => {
     // Prevent deletion of own account
@@ -109,7 +93,7 @@ function AdminUsersManagement() {
     );
   });
   
-  if (loading && !currentUser) return <div className="loading">Checking permissions...</div>;
+  if (!currentUser) return <div className="loading">Checking permissions...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (loading) return <div className="loading">Loading admin users...</div>;
   
@@ -307,7 +291,7 @@ function AdminUserForm() {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Failed to ${userId ? 'update' : 'create'} admin user`);
+        throw new Error(errorData.error || `Failed to ${userId ? 'update' : 'create'} admin user`);
       }
       
       navigate('/admin/users');
