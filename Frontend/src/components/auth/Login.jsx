@@ -21,7 +21,7 @@ const Login = () => {
       formData.append('email', email);
       formData.append('password', password);
       
-      const response = await fetch('/faculty-login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         body: formData,
         credentials: 'include' // Important for session cookies
