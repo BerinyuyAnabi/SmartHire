@@ -36,17 +36,14 @@ function App() {
           <Assessment />
     
       }/>
-      <Route path='/admin' element={
-  
-          <Admin/>
- 
-      }/>
+      <Route path='/admin/*' element={<Admin />} />
+
       <Route path="/applicant/:id" element={
       
           <ApplicantDetails />
     
       } />
-      
+
       {/* Protected routes
       <Route path='/job-posting' element={
         <ProtectedRoute>
