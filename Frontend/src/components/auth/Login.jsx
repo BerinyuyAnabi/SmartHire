@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate import
+import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../../pages/AuthLayout';
 import '../../css/Auth.css';
 
@@ -17,13 +17,16 @@ const Login = () => {
     setError(null);
     
     try {
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('password', password);
-      
+      // Send JSON data instead of FormData
       const response = await fetch('/api/login', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password
+        }),
         credentials: 'include' // Important for session cookies
       });
       
@@ -38,11 +41,16 @@ const Login = () => {
       if (data.error) {
         setError(data.error);
       } else {
-        // Check for admin role and redirect accordingly
+        // Store authentication data in sessionStorage
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('isAdmin', data.is_admin ? 'true' : 'false');
+        sessionStorage.setItem('userId', data.id);
+        
+        // Redirect based on role
         if (data.is_admin) {
           navigate('/admin');
         } else {
-          navigate('/login');
+          navigate('/');
         }
       }
     } catch (error) {
@@ -59,16 +67,16 @@ const Login = () => {
       illustrationText="Access your account to manage your projects, track your progress, and connect with like-minded professionals."
     >
       <div className="auth-header">
-        <h1 className="auth-title">Login In</h1>
+        <h1 className="auth-title">Login</h1>
         <p className="auth-subtitle">Welcome back! Please enter your details.</p>
       </div>
       
       <div className="social-buttons">
-        <button className="social-button google">
+        <button className="social-button google" type="button">
           <i className="fab fa-google"></i>
           Google
         </button>
-        <button className="social-button linkedin">
+        <button className="social-button linkedin" type="button">
           <i className="fab fa-linkedin-in"></i>
           LinkedIn
         </button>
@@ -132,9 +140,7 @@ const Login = () => {
           {isSubmitting ? (
             <span className="spinner"></span>
           ) : (
-            <>
-              Login 
-            </>
+            "Login"
           )}
         </button>
       </form>

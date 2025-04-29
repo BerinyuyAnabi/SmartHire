@@ -5,7 +5,6 @@ import '../../css/Auth.css';
 
 const Signup = () => {
   const navigate = useNavigate();
-  // Use state for controlling visibility instead of step numbers
   const [showPersonalInfo, setShowPersonalInfo] = useState(true);
   const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [userData, setUserData] = useState({
@@ -35,7 +34,6 @@ const Signup = () => {
   
   const handleContinue = (e) => {
     e.preventDefault();
-    // Instead of changing a step number, control component visibility
     setShowPersonalInfo(false);
     setShowRoleSelection(true);
   };
@@ -47,28 +45,34 @@ const Signup = () => {
     setError(null);
     
     try {
-      const submitData = new FormData();
-      submitData.append('username', userData.fullName);
-      submitData.append('email', userData.email);
-      submitData.append('password', userData.password);
-      submitData.append('confirmPassword', userData.password);
-      submitData.append('agreeTerms', userData.agreeToTerms ? 'on' : 'off');
-      
+      // Send JSON data instead of FormData to match the backend
       const response = await fetch('/api/signup', {
         method: 'POST',
-        body: submitData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: userData.fullName,
+          email: userData.email,
+          password: userData.password
+        }),
+        credentials: 'include'
       });
       
-      if (response.redirected) {
-        window.location.href = response.url;
-        return;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Registration failed');
       }
       
-      // Set session storage to indicate successful signup
-      sessionStorage.setItem('isLoggedIn', 'true');
-      navigate('/login');
+      // Get response data to confirm success
+      const data = await response.json();
+      
+      if (data.message) {
+        // Successful registration, navigate to login
+        navigate('/login');
+      }
     } catch (error) {
-      setError('Registration failed. Please try again.');
+      setError(error.message || 'Registration failed. Please try again.');
       console.error('Registration failed:', error);
     } finally {
       setIsSubmitting(false);
@@ -199,9 +203,7 @@ const Signup = () => {
             {isSubmitting ? (
               <span className="spinner"></span>
             ) : (
-              <>
-                Create Account
-              </>
+              "Create Account"
             )}
           </button>
           
