@@ -90,7 +90,7 @@ def signup():
         username = data.get('username')
         email = data.get('email')
         password = data.get('password')
-        confirm_password = data.get('confirmPassword')
+        
         
         # Validate inputs
         error = None
@@ -100,8 +100,6 @@ def signup():
             error = "Please enter a valid email address."
         elif not password or len(password) < 8:
             error = "Password must be at least 8 characters."
-        elif password != confirm_password:
-            error = "Passwords do not match."
         
         if error:
             return jsonify({"error": error}), 400
