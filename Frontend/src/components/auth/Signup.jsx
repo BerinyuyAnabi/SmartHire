@@ -45,6 +45,12 @@ const Signup = () => {
     setError(null);
     
     try {
+      console.log("Sending signup request with data:", {
+        username: userData.fullName,
+        email: userData.email,
+        password: userData.password
+      });
+      
       // Send JSON data instead of FormData to match the backend
       const response = await fetch('/api/signup', {
         method: 'POST',
@@ -59,21 +65,30 @@ const Signup = () => {
         credentials: 'include'
       });
       
+      console.log('Signup response status:', response.status);
+      
+      // Parse the response body ONCE
+      let data;
+      try {
+        data = await response.json();
+        console.log('Signup response data:', data);
+      } catch (err) {
+        console.error('Error parsing response:', err);
+      }
+      
+      // Check if the response was successful
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Registration failed');
+        setError(data?.error || 'Registration failed. Please try again.');
+        return;
       }
       
-      // Get response data to confirm success
-      const data = await response.json();
+      // If we got here, signup was successful
+      alert('Account created successfully! Please log in.');
+      navigate('/login');
       
-      if (data.message) {
-        // Successful registration, navigate to login
-        navigate('/login');
-      }
     } catch (error) {
-      setError(error.message || 'Registration failed. Please try again.');
-      console.error('Registration failed:', error);
+      console.error('Signup error:', error);
+      setError('Registration failed. Please check your network connection and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -114,6 +129,8 @@ const Signup = () => {
                 value={userData.fullName}
                 onChange={handleChange}
                 required
+                minLength="3"
+                maxLength="30"
               />
             </div>
           </div>
@@ -146,8 +163,10 @@ const Signup = () => {
                 value={userData.password}
                 onChange={handleChange}
                 required
+                minLength="8"
               />
             </div>
+            <small className="form-text text-muted">Password must be at least 8 characters long.</small>
           </div>
           
           <button 
