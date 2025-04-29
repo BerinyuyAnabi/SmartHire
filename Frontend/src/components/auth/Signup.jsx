@@ -54,7 +54,7 @@ const Signup = () => {
       submitData.append('confirmPassword', userData.password);
       submitData.append('agreeTerms', userData.agreeToTerms ? 'on' : 'off');
       
-      const response = await fetch('/faculty_signup', {
+      const response = await fetch('/api/signup', {
         method: 'POST',
         body: submitData
       });
