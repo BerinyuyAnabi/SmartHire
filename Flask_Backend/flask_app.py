@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, send_from_directory, session, redirect, url_for, render_template
-# from flask_cors import CORS
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from dotenv import load_dotenv
@@ -9,23 +8,33 @@ import base64
 import os
 import re
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
-app = Flask(__name__, static_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist/static',
-            template_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist')
-app.secret_key = os.urandom(24)
-# CORS(app, supports_credentials=True)  # Enable CORS for API calls with credentials
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-
-# =============================================================================
-# DATABASE CONNECTION
-# =============================================================================
 # Load environment variables
 project_folder = '/home/smarthiringorg/SmartHire/Flask_Backend/'
 load_dotenv(os.path.join(project_folder, '.env'))
 
+app = Flask(__name__, static_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist/static',
+            template_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist')
+
+# Set a fixed secret key or use environment variable (important for session persistence)
+app.secret_key = os.getenv('SECRET_KEY', 'your-default-development-secret-key')
+
+# Session configuration
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=False,  # Set to True in production with HTTPS
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=24)  # Session lasts for 24 hours
+)
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+
+
+# =============================================================================
+# DATABASE CONNECTION
+# =============================================================================
 
 def get_db_connection():
     return mysql.connector.connect(
@@ -170,6 +179,9 @@ def login():
             return jsonify({"error": "Authentication error"}), 500
 
         if verify_password(user['password_hash'], password, salt):
+            # Make the session permanent
+            session.permanent = True
+
             # Set session data
             session['admin_id'] = user['id']
             session['email'] = user['email']
@@ -202,6 +214,7 @@ def logout():
 
 @app.route('/api/check-auth', methods=['GET'])
 def check_auth():
+    app.logger.debug(f"Session content: {dict(session)}")
     if 'admin_id' in session:
         return jsonify({
             "authenticated": True,
@@ -211,6 +224,7 @@ def check_auth():
         })
     else:
         return jsonify({"authenticated": False}), 401
+
 
 
 # =============================================================================
@@ -543,7 +557,6 @@ def delete_job(job_id):
         app.logger.error(f"Error deleting job: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-
 @app.route('/api/jobs/<int:job_id>/applicants', methods=['GET'])
 @admin_required
 def get_job_applicants(job_id):
@@ -551,14 +564,13 @@ def get_job_applicants(job_id):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Assuming there's a job_applicants table that links jobs and applicants
-        # Or modify this query according to your actual database schema
+        # Fixed query - added the missing job_id parameter
         cursor.execute("""
             SELECT a.* FROM applicants a
             JOIN job_applicants ja ON a.id = ja.applicant_id
             WHERE ja.job_id = %s
             ORDER BY a.created_at DESC
-        """)
+        """, (job_id,))  # Added the job_id parameter here
 
         applicants = cursor.fetchall()
 
