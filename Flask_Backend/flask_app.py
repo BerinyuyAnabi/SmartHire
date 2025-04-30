@@ -1122,5 +1122,243 @@ def catch_all(path):
     return send_from_directory('/home/smarthiringorg/SmartHire/Flask_Backend/dist', 'index.html')
 
 
+# =============================================================================
+# PUBLIC API ROUTES FOR JOBS
+# =============================================================================
+@app.route('/api/public/jobs', methods=['GET'])
+def get_public_jobs():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT * FROM jobs
+            ORDER BY created_at DESC
+        """)
+
+        jobs = cursor.fetchall()
+
+        # Format datetime objects to string
+        for job in jobs:
+            if 'created_at' in job and job['created_at']:
+                job['created_at'] = job['created_at'].isoformat()
+
+            # Get the applicants count
+            job['applicants_count'] = job.get('applicants_count', 0)
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(jobs)
+
+    except Exception as e:
+        app.logger.error(f"Error getting public jobs: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/public/jobs/<int:job_id>', methods=['GET'])
+def get_public_job(job_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Get job details
+        cursor.execute("SELECT * FROM jobs WHERE id = %s", (job_id,))
+        job = cursor.fetchone()
+
+        if not job:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Job not found"}), 404
+
+        # Format datetime
+        if 'created_at' in job and job['created_at']:
+            job['created_at'] = job['created_at'].isoformat()
+
+        # Get responsibilities
+        cursor.execute("SELECT * FROM responsibilities WHERE job_id = %s", (job_id,))
+        job['responsibilities'] = cursor.fetchall()
+
+        # Get qualifications
+        cursor.execute("SELECT * FROM qualifications WHERE job_id = %s", (job_id,))
+        job['qualifications'] = cursor.fetchall()
+
+        # Get offers
+        cursor.execute("SELECT * FROM offers WHERE job_id = %s", (job_id,))
+        job['offers'] = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(job)
+
+    except Exception as e:
+        app.logger.error(f"Error getting public job: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+# Route for applying to a job
+@app.route('/api/public/jobs/<int:job_id>/apply', methods=['POST'])
+def apply_for_job(job_id):
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        if not data.get('full_name'):
+            return jsonify({"error": "Full name is required"}), 400
+        if not data.get('email'):
+            return jsonify({"error": "Email is required"}), 400
+
+        # Check if job exists
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("SELECT id FROM jobs WHERE id = %s", (job_id,))
+        job = cursor.fetchone()
+
+        if not job:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Job not found"}), 404
+
+        # Create or get applicant
+        cursor.execute(
+            "SELECT id FROM applicants WHERE email = %s",
+            (data.get('email'),)
+        )
+        existing_applicant = cursor.fetchone()
+
+        if existing_applicant:
+            applicant_id = existing_applicant['id']
+
+            # Update applicant information
+            cursor.execute("""
+                UPDATE applicants SET
+                    full_name = %s,
+                    phone = %s,
+                    institution = %s,
+                    qualifications_summary = %s,
+                    experience = %s,
+                    about = %s,
+                    location = %s,
+                    keywords = %s,
+                    tools = %s,
+                    testimonials = %s
+                WHERE id = %s
+            """, (
+                data.get('full_name'),
+                data.get('phone', ''),
+                data.get('institution', ''),
+                data.get('qualifications_summary', ''),
+                data.get('experience', ''),
+                data.get('about', ''),
+                data.get('location', ''),
+                data.get('keywords', ''),
+                data.get('tools', ''),
+                data.get('testimonials', ''),
+                applicant_id
+            ))
+        else:
+            # Create new applicant
+            cursor.execute("""
+                INSERT INTO applicants (
+                    full_name, email, phone, institution, 
+                    qualifications_summary, experience, about, location,
+                    keywords, tools, testimonials, status, created_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data.get('full_name'),
+                data.get('email'),
+                data.get('phone', ''),
+                data.get('institution', ''),
+                data.get('qualifications_summary', ''),
+                data.get('experience', ''),
+                data.get('about', ''),
+                data.get('location', ''),
+                data.get('keywords', ''),
+                data.get('tools', ''),
+                data.get('testimonials', ''),
+                'Applied',  # Default status
+                datetime.now()
+            ))
+
+            applicant_id = cursor.lastrowid
+
+        # Check if already applied to this job
+        cursor.execute(
+            "SELECT id FROM job_applicants WHERE job_id = %s AND applicant_id = %s",
+            (job_id, applicant_id)
+        )
+
+        if cursor.fetchone():
+            # Already applied, just update the application date
+            cursor.execute(
+                "UPDATE job_applicants SET applied_at = %s WHERE job_id = %s AND applicant_id = %s",
+                (datetime.now(), job_id, applicant_id)
+            )
+        else:
+            # Create new application
+            cursor.execute(
+                "INSERT INTO job_applicants (job_id, applicant_id, applied_at) VALUES (%s, %s, %s)",
+                (job_id, applicant_id, datetime.now())
+            )
+
+            # Increment the applicants_count in jobs table
+            cursor.execute(
+                "UPDATE jobs SET applicants_count = applicants_count + 1 WHERE id = %s",
+                (job_id,)
+            )
+
+        # Save social links if provided
+        if data.get('social_links'):
+            # First clear existing links
+            cursor.execute("DELETE FROM social_links WHERE applicant_id = %s", (applicant_id,))
+
+            # Insert new links
+            for link in data.get('social_links'):
+                if link.get('platform') and link.get('url'):
+                    cursor.execute(
+                        "INSERT INTO social_links (applicant_id, platform, url) VALUES (%s, %s, %s)",
+                        (applicant_id, link['platform'], link['url'])
+                    )
+
+        # Process assessment answers if provided
+        if data.get('assessment_answers'):
+            for answer in data.get('assessment_answers'):
+                if answer.get('assessment_id') and answer.get('answer'):
+                    # Check if already answered
+                    cursor.execute(
+                        "SELECT id FROM assessment_answers WHERE assessment_id = %s AND applicant_id = %s",
+                        (answer['assessment_id'], applicant_id)
+                    )
+
+                    existing_answer = cursor.fetchone()
+
+                    if existing_answer:
+                        # Update existing answer
+                        cursor.execute(
+                            "UPDATE assessment_answers SET answer = %s, submitted_at = %s WHERE id = %s",
+                            (answer['answer'], datetime.now(), existing_answer['id'])
+                        )
+                    else:
+                        # Create new answer
+                        cursor.execute(
+                            "INSERT INTO assessment_answers (assessment_id, applicant_id, answer, submitted_at) VALUES (%s, %s, %s, %s)",
+                            (answer['assessment_id'], applicant_id, answer['answer'], datetime.now())
+                        )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "message": "Application submitted successfully",
+            "applicant_id": applicant_id
+        }), 201
+
+    except Exception as e:
+        app.logger.error(f"Error applying for job: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)

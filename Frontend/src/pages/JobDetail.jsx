@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "../css/JobDetail.css";
-import { jobData } from "../data/jobposting";
+// Remove static data import
+// import { jobData } from "../data/jobposting";
 
-function JobDetail({ job: initialJob, onBack, onApply }) {
+function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
   // Dynamically load Bootstrap and FontAwesome CSS from CDN if not already loaded
   useEffect(() => {
     if (!document.getElementById('bootstrap-cdn')) {
@@ -14,7 +15,7 @@ function JobDetail({ job: initialJob, onBack, onApply }) {
       link.crossOrigin = 'anonymous';
       document.head.appendChild(link);
     }
-    
+
     // Load Font Awesome
     if (!document.getElementById('fontawesome-cdn')) {
       const faLink = document.createElement('link');
@@ -25,30 +26,136 @@ function JobDetail({ job: initialJob, onBack, onApply }) {
     }
   }, []);
 
-  const initialIndex = jobData.findIndex(
-    (job) => job.jobName === initialJob?.jobName
-  );
+  // If allJobs is not provided, we'll handle the job directly
+  const initialIndex = allJobs ? allJobs.findIndex(
+    (job) => job.id === initialJob?.id
+  ) : 0;
+
   const [currentIndex, setCurrentIndex] = useState(
     initialIndex >= 0 ? initialIndex : 0
   );
   const [loading, setLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [job, setJob] = useState(initialJob);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simulate loading data
-    setLoading(true);
-    const timer = setTimeout(() => {
+    // If we have the job object passed in, use it
+    if (initialJob) {
+      // If we were given an array of jobs, we can navigate through them
+      if (allJobs && allJobs.length > 0) {
+        setJob(allJobs[currentIndex]);
+      } else {
+        setJob(initialJob);
+      }
+
+      // Simulate loading for UI
+      setLoading(true);
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      // If no job was passed, we need to fetch it
+      fetchJobDetails();
+    }
+  }, [currentIndex, initialJob, allJobs]);
+
+  // Function to fetch job details from API if needed
+  const fetchJobDetails = async () => {
+    if (!initialJob || !initialJob.id) {
+      setError("Job information is missing");
       setLoading(false);
-    }, 800);
-    
-    return () => clearTimeout(timer);
-  }, [currentIndex]);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/public/jobs/${initialJob.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch job details');
+      }
+
+      const data = await response.json();
+
+      // Transform the API data format to match what the component expects
+      const transformedJob = {
+        id: data.id,
+        jobName: data.job_name,
+        company: data.company_name,
+        salary: data.salary_range || "Competitive salary",
+        type: data.type || "Full-time",
+        remote: data.remote_type || "Onsite",
+        location: data.location || "Not specified",
+        description: data.description || "No description available",
+        applicants: data.applicants_count || 0,
+        // Extract lists from the API response
+        responsibilities: data.responsibilities ?
+          data.responsibilities.map(r => r.responsibility_text) : [],
+        qualifications: data.qualifications ?
+          data.qualifications.map(q => q.qualification_text) : [],
+        offers: data.offers ?
+          data.offers.map(o => o.offer_text) : [],
+        // Add company description
+        companyDescription: data.company_description || null,
+        // Add created date
+        created_at: data.created_at,
+        // Generate tags
+        tags: generateTags(data),
+      };
+
+      setJob(transformedJob);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching job details:', err);
+      setError('Failed to load job details. Please try again later.');
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
+  };
+
+  // Helper function to generate tags from job properties
+  const generateTags = (job) => {
+    const tags = [];
+    if (job.type) tags.push(job.type);
+    if (job.remote_type) tags.push(job.remote_type);
+
+    // Add some skill tags based on qualifications if they exist
+    if (job.qualifications && job.qualifications.length > 0) {
+      // Extract potential skills from qualifications
+      const skillWords = ['JavaScript', 'React', 'Python', 'Java', 'SQL', 'Node.js',
+                         'CSS', 'HTML', 'UI/UX', 'Design', 'Leadership',
+                         'Communication', 'Marketing', 'Sales'];
+
+      job.qualifications.forEach(qual => {
+        const qualText = typeof qual === 'string' ? qual : qual.qualification_text;
+        skillWords.forEach(skill => {
+          if (qualText && qualText.includes(skill) && !tags.includes(skill)) {
+            tags.push(skill);
+          }
+        });
+      });
+    }
+
+    // Limit to 5 tags
+    return tags.slice(0, 5);
+  };
 
   const navigateJobPosting = (direction) => {
+    if (!allJobs || allJobs.length <= 1) return; // No navigation if only one job
+
     let newIndex = currentIndex;
     if (direction === "prev" && currentIndex > 0) {
       newIndex--;
-    } else if (direction === "next" && currentIndex < jobData.length - 1) {
+    } else if (direction === "next" && currentIndex < allJobs.length - 1) {
       newIndex++;
     }
     setCurrentIndex(newIndex);
@@ -56,9 +163,33 @@ function JobDetail({ job: initialJob, onBack, onApply }) {
 
   const toggleBookmark = () => {
     setIsBookmarked(!isBookmarked);
+
+    // Optional: Save bookmark state to localStorage
+    const bookmarkedJobs = JSON.parse(localStorage.getItem('bookmarkedJobs') || '[]');
+
+    if (!isBookmarked) {
+      // Add to bookmarks
+      if (!bookmarkedJobs.includes(job.id)) {
+        bookmarkedJobs.push(job.id);
+      }
+    } else {
+      // Remove from bookmarks
+      const index = bookmarkedJobs.indexOf(job.id);
+      if (index !== -1) {
+        bookmarkedJobs.splice(index, 1);
+      }
+    }
+
+    localStorage.setItem('bookmarkedJobs', JSON.stringify(bookmarkedJobs));
   };
 
-  const job = jobData[currentIndex];
+  // Check if job is already bookmarked on component mount
+  useEffect(() => {
+    if (job && job.id) {
+      const bookmarkedJobs = JSON.parse(localStorage.getItem('bookmarkedJobs') || '[]');
+      setIsBookmarked(bookmarkedJobs.includes(job.id));
+    }
+  }, [job]);
 
   return (
     <div className="job-detail-page">
@@ -67,6 +198,16 @@ function JobDetail({ job: initialJob, onBack, onApply }) {
           <div className="col-lg-10">
             {loading ? (
               <JobDetailSkeleton />
+            ) : error ? (
+              <div className="error-message fade-in">
+                <div className="alert alert-danger">
+                  <i className="fas fa-exclamation-circle me-2"></i>
+                  {error}
+                  <button onClick={onBack} className="btn btn-sm btn-outline-danger ms-3">
+                    Go Back
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="job-detail-container fade-in">
                 {/* Header */}
@@ -74,16 +215,16 @@ function JobDetail({ job: initialJob, onBack, onApply }) {
                   <button onClick={onBack} className="back-button">
                     <i className="fas fa-arrow-left"></i>
                   </button>
-                  
+
                   <h1 className="job-detail-title">{job.jobName}</h1>
-                  
+
                   <div className="job-detail-company">
                     <div className="job-detail-company-logo">
                       <img src="static/images/qualifications.png" alt="" width="20" height="20" />
                     </div>
                     {job.company}
                   </div>
-                  
+
                   <div className="job-detail-info">
                     <div className="job-detail-info-item">
                       <i className="fas fa-users job-detail-info-icon"></i>
@@ -106,7 +247,7 @@ function JobDetail({ job: initialJob, onBack, onApply }) {
                       {job.location}
                     </div>
                   </div>
-                  
+
                   <div className="job-detail-actions">
                     <button onClick={onApply} className="job-detail-apply-button">
                       <i className="fas fa-paper-plane"></i> Apply Now
@@ -116,26 +257,28 @@ function JobDetail({ job: initialJob, onBack, onApply }) {
                       {isBookmarked ? ' Saved' : ' Save'}
                     </button>
                   </div>
-                  
-                  <div className="job-detail-navigation">
-                    <button 
-                      className={`nav-button ${currentIndex === 0 ? 'disabled' : ''}`}
-                      onClick={() => currentIndex > 0 && navigateJobPosting("prev")}
-                      disabled={currentIndex === 0}
-                    >
-                      <i className="fas fa-chevron-left"></i> Previous
-                    </button>
-                    <span className="job-position-indicator">{currentIndex + 1} / {jobData.length}</span>
-                    <button 
-                      className={`nav-button ${currentIndex === jobData.length - 1 ? 'disabled' : ''}`}
-                      onClick={() => currentIndex < jobData.length - 1 && navigateJobPosting("next")}
-                      disabled={currentIndex === jobData.length - 1}
-                    >
-                      Next <i className="fas fa-chevron-right"></i>
-                    </button>
-                  </div>
+
+                  {allJobs && allJobs.length > 1 && (
+                    <div className="job-detail-navigation">
+                      <button
+                        className={`nav-button ${currentIndex === 0 ? 'disabled' : ''}`}
+                        onClick={() => currentIndex > 0 && navigateJobPosting("prev")}
+                        disabled={currentIndex === 0}
+                      >
+                        <i className="fas fa-chevron-left"></i> Previous
+                      </button>
+                      <span className="job-position-indicator">{currentIndex + 1} / {allJobs.length}</span>
+                      <button
+                        className={`nav-button ${currentIndex === allJobs.length - 1 ? 'disabled' : ''}`}
+                        onClick={() => currentIndex < allJobs.length - 1 && navigateJobPosting("next")}
+                        disabled={currentIndex === allJobs.length - 1}
+                      >
+                        Next <i className="fas fa-chevron-right"></i>
+                      </button>
+                    </div>
+                  )}
                 </div>
-                
+
                 {/* Content */}
                 <div className="job-detail-content">
                   {/* Job Description */}
@@ -146,7 +289,7 @@ function JobDetail({ job: initialJob, onBack, onApply }) {
                     <div className="job-detail-description">
                       {job.description || "No description available."}
                     </div>
-                    
+
                     {/* Tags */}
                     {job.tags && job.tags.length > 0 && (
                       <div className="job-tags mt-4">
@@ -156,40 +299,43 @@ function JobDetail({ job: initialJob, onBack, onApply }) {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Responsibilities */}
                   <div className="job-detail-section">
                     <h2 className="job-detail-section-title">
                       <i className="fas fa-tasks job-detail-section-icon"></i> Responsibilities
                     </h2>
                     <ul className="job-detail-requirements-list">
-                      {job.responsibilities?.map((item, index) => (
-                        <li key={index} className="job-detail-list-item">{item}</li>
-                      )) || <li className="job-detail-list-item">No responsibilities listed.</li>}
+                      {job.responsibilities && job.responsibilities.length > 0 ?
+                        job.responsibilities.map((item, index) => (
+                          <li key={index} className="job-detail-list-item">{item}</li>
+                        )) : <li className="job-detail-list-item">No responsibilities listed.</li>}
                     </ul>
                   </div>
-                  
+
                   {/* Qualifications */}
                   <div className="job-detail-section">
                     <h2 className="job-detail-section-title">
                       <i className="fas fa-graduation-cap job-detail-section-icon"></i> Preferred Qualifications
                     </h2>
                     <ul className="job-detail-requirements-list">
-                      {job.qualifications?.map((item, index) => (
-                        <li key={index} className="job-detail-list-item">{item}</li>
-                      )) || <li className="job-detail-list-item">No qualifications listed.</li>}
+                      {job.qualifications && job.qualifications.length > 0 ?
+                        job.qualifications.map((item, index) => (
+                          <li key={index} className="job-detail-list-item">{item}</li>
+                        )) : <li className="job-detail-list-item">No qualifications listed.</li>}
                     </ul>
                   </div>
-                  
+
                   {/* Benefits */}
                   <div className="job-detail-section">
                     <h2 className="job-detail-section-title">
                       <i className="fas fa-gift job-detail-section-icon"></i> What We Offer
                     </h2>
                     <ul className="job-detail-benefits-list">
-                      {job.offers?.map((item, index) => (
-                        <li key={index} className="job-detail-list-item">{item}</li>
-                      )) || <li className="job-detail-list-item">No benefits listed.</li>}
+                      {job.offers && job.offers.length > 0 ?
+                        job.offers.map((item, index) => (
+                          <li key={index} className="job-detail-list-item">{item}</li>
+                        )) : <li className="job-detail-list-item">No benefits listed.</li>}
                     </ul>
                   </div>
                   

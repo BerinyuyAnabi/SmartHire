@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import "../css/JobPosting.css";
 import ApplyPage from "./ApplyPage";
 import JobDetail from "./JobDetail"; 
-import { jobData } from "../data/jobposting";
+// Remove the import for static jobData
+// import { jobData } from "../data/jobposting";
 
 function JobPosting() {
   const [view, setView] = useState("list");
@@ -11,8 +12,9 @@ function JobPosting() {
   const [sort, setSort] = useState("recent");
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [jobsData, setJobsData] = useState([]); // State to hold jobs from API
+  const [error, setError] = useState(null);
 
-  // Add useEffect to inject Bootstrap CDN link and Font Awesome
   useEffect(() => {
     // Check if the Bootstrap link is already in the document
     if (!document.getElementById('bootstrap-cdn')) {
@@ -24,7 +26,7 @@ function JobPosting() {
       link.crossOrigin = 'anonymous';
       document.head.appendChild(link);
     }
-    
+
     // Check if Font Awesome is already in the document
     if (!document.getElementById('fontawesome-cdn')) {
       const fontAwesome = document.createElement('link');
@@ -33,16 +35,88 @@ function JobPosting() {
       fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
       document.head.appendChild(fontAwesome);
     }
-    
-    // Simulate loading state
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1200);
-    
-    return () => {
-      clearTimeout(timer);
-    };
+
+    // Fetch jobs from API
+    fetchJobs();
   }, []);
+
+  // Function to fetch jobs from API
+  const fetchJobs = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/public/jobs', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch jobs');
+      }
+
+      const data = await response.json();
+
+      // Transform API data to match the structure expected by the component
+      const transformedData = data.map(job => ({
+        id: job.id,
+        jobName: job.job_name,
+        company: job.company_name,
+        salary: job.salary_range || "Competitive salary",
+        type: job.type || "Full-time",
+        remote: job.remote_type || "Onsite",
+        location: job.location || "Not specified",
+        description: job.description || "No description available",
+        applicants: job.applicants_count || 0,
+        // Extract responsibilities, qualifications, and offers from API response
+        responsibilities: job.responsibilities ? job.responsibilities.map(r => r.responsibility_text) : [],
+        qualifications: job.qualifications ? job.qualifications.map(q => q.qualification_text) : [],
+        offers: job.offers ? job.offers.map(o => o.offer_text) : [],
+        // Add created_at date for sorting by recency
+        created_at: job.created_at,
+        // Generate tags from job attributes
+        tags: generateTags(job)
+      }));
+
+      setJobsData(transformedData);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+      setError('Failed to load jobs. Please try again later.');
+    } finally {
+      // Add a slight delay to ensure the UI looks smooth
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 800);
+    }
+  };
+
+  // Helper function to generate tags from job properties
+  const generateTags = (job) => {
+    const tags = [];
+    if (job.type) tags.push(job.type);
+    if (job.remote_type) tags.push(job.remote_type);
+
+    // Add some skill tags based on qualifications if they exist
+    if (job.qualifications && job.qualifications.length > 0) {
+      // Extract potential skills from qualifications
+      const skillWords = ['JavaScript', 'React', 'Python', 'Java', 'SQL', 'Node.js',
+                         'CSS', 'HTML', 'UI/UX', 'Design', 'Leadership',
+                         'Communication', 'Marketing', 'Sales'];
+
+      job.qualifications.forEach(qual => {
+        const qualText = typeof qual === 'string' ? qual : qual.qualification_text;
+        skillWords.forEach(skill => {
+          if (qualText && qualText.includes(skill) && !tags.includes(skill)) {
+            tags.push(skill);
+          }
+        });
+      });
+    }
+
+    // Limit to 5 tags
+    return tags.slice(0, 5);
+  };
 
   const handleJobClick = (job) => {
     setSelectedJob(job);
@@ -62,12 +136,12 @@ function JobPosting() {
   };
 
   // Filter and sort jobs
-  const filteredJobs = jobData.filter((job) => {
+  const filteredJobs = jobsData.filter((job) => {
     // Apply search filter
     if (searchTerm && !job.jobName.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
-    
+
     // Apply category filter
     if (filter === "all") return true;
     if (filter === "remote") return job.remote.toLowerCase() === "remote";
@@ -76,11 +150,15 @@ function JobPosting() {
   });
 
   const sortedJobs = [...filteredJobs].sort((a, b) => {
-    if (sort === "recent") return b.id - a.id;
+    if (sort === "recent") {
+      // Sort by created_at date
+      return new Date(b.created_at) - new Date(a.created_at);
+    }
     if (sort === "applicants") return b.applicants - a.applicants;
     if (sort === "salary") {
-      const aSalary = parseInt(a.salary.replace(/[^0-9]/g, ""));
-      const bSalary = parseInt(b.salary.replace(/[^0-9]/g, ""));
+      // Extract numbers from salary strings for comparison
+      const aSalary = a.salary ? parseInt(a.salary.replace(/[^0-9]/g, "")) : 0;
+      const bSalary = b.salary ? parseInt(b.salary.replace(/[^0-9]/g, "")) : 0;
       return bSalary - aSalary;
     }
     return 0;
@@ -92,6 +170,7 @@ function JobPosting() {
         job={selectedJob}
         onBack={handleBackToList}
         onApply={handleApplyClick}
+        allJobs={jobsData}
       />
     );
   }
@@ -131,9 +210,9 @@ function JobPosting() {
                       <div className="search-icon-wrapper">
                         <i className="fas fa-search"></i>
                       </div>
-                      <input 
-                        type="text" 
-                        className="search-input" 
+                      <input
+                        type="text"
+                        className="search-input"
                         placeholder="Search for job titles or keywords..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -145,9 +224,9 @@ function JobPosting() {
                       <div className="select-icon-wrapper">
                         <i className="fas fa-filter"></i>
                       </div>
-                      <select 
-                        className="filter-select" 
-                        value={filter} 
+                      <select
+                        className="filter-select"
+                        value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                       >
                         <option value="all">All Jobs</option>
@@ -161,9 +240,9 @@ function JobPosting() {
                       <div className="select-icon-wrapper">
                         <i className="fas fa-sort-amount-down"></i>
                       </div>
-                      <select 
-                        className="filter-select" 
-                        value={sort} 
+                      <select
+                        className="filter-select"
+                        value={sort}
                         onChange={(e) => setSort(e.target.value)}
                       >
                         <option value="recent">Most Recent</option>
@@ -180,6 +259,16 @@ function JobPosting() {
             {!isLoading && (
               <div className="job-count-info fade-in">
                 <p>{sortedJobs.length} positions found</p>
+              </div>
+            )}
+
+            {/* Error message if API call failed */}
+            {error && !isLoading && (
+              <div className="error-message fade-in">
+                <div className="alert alert-danger">
+                  <i className="fas fa-exclamation-circle me-2"></i>
+                  {error}
+                </div>
               </div>
             )}
 
