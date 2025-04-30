@@ -61,66 +61,78 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
     }
   }, [currentIndex, initialJob, allJobs]);
 
-  // Function to fetch job details from API if needed
-  const fetchJobDetails = async () => {
-    if (!initialJob || !initialJob.id) {
-      setError("Job information is missing");
-      setLoading(false);
-      return;
-    }
+ 
+const fetchJobDetails = async () => {
+  if (!initialJob || !initialJob.id) {
+    setError("Job information is missing");
+    setLoading(false);
+    return;
+  }
 
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/public/jobs/${initialJob.id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch job details');
+  try {
+    setLoading(true);
+    const response = await fetch(`/api/public/jobs/${initialJob.id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
       }
+    });
 
-      const data = await response.json();
-
-      // Transform the API data format to match what the component expects
-      const transformedJob = {
-        id: data.id,
-        jobName: data.job_name,
-        company: data.company_name,
-        salary: data.salary_range || "Competitive salary",
-        type: data.type || "Full-time",
-        remote: data.remote_type || "Onsite",
-        location: data.location || "Not specified",
-        description: data.description || "No description available",
-        applicants: data.applicants_count || 0,
-        // Extract lists from the API response
-        responsibilities: data.responsibilities ?
-          data.responsibilities.map(r => r.responsibility_text) : [],
-        qualifications: data.qualifications ?
-          data.qualifications.map(q => q.qualification_text) : [],
-        offers: data.offers ?
-          data.offers.map(o => o.offer_text) : [],
-        // Add company description
-        companyDescription: data.company_description || null,
-        // Add created date
-        created_at: data.created_at,
-        // Generate tags
-        tags: generateTags(data),
-      };
-
-      setJob(transformedJob);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching job details:', err);
-      setError('Failed to load job details. Please try again later.');
-    } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
+    if (!response.ok) {
+      throw new Error('Failed to fetch job details');
     }
-  };
+
+    const data = await response.json();
+    
+    // For debugging
+    console.log('Raw API response:', data);
+    
+    // Transform the API data format to match what the component expects
+    const transformedJob = {
+      id: data.id,
+      jobName: data.job_name,
+      company: data.company_name,
+      salary: data.salary_range || "Competitive salary",
+      type: data.type || "Full-time",
+      remote: data.remote_type || "Onsite",
+      location: data.location || "Not specified",
+      description: data.description || "No description available",
+      applicants: data.applicants_count || 0,
+      
+      // Improved extraction with better error handling
+      responsibilities: Array.isArray(data.responsibilities) ? 
+        data.responsibilities.map(r => r && r.responsibility_text ? r.responsibility_text : '').filter(text => text !== '') : [],
+      qualifications: Array.isArray(data.qualifications) ?
+        data.qualifications.map(q => q && q.qualification_text ? q.qualification_text : '').filter(text => text !== '') : [],
+      offers: Array.isArray(data.offers) ?
+        data.offers.map(o => o && o.offer_text ? o.offer_text : '').filter(text => text !== '') : [],
+        
+      // Add company description
+      companyDescription: data.company_description || null,
+      // Add created date
+      created_at: data.created_at,
+      // Generate tags
+      tags: generateTags(data),
+    };
+    
+    // For debugging
+    console.log('Transformed job data:', {
+      responsibilities: transformedJob.responsibilities,
+      qualifications: transformedJob.qualifications,
+      offers: transformedJob.offers
+    });
+
+    setJob(transformedJob);
+    setError(null);
+  } catch (err) {
+    console.error('Error fetching job details:', err);
+    setError('Failed to load job details. Please try again later.');
+  } finally {
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
+  }
+};
 
   // Helper function to generate tags from job properties
   const generateTags = (job) => {
