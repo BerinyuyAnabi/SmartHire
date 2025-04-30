@@ -598,53 +598,97 @@ function JobDetail() {
   const [error, setError] = useState(null);
   
   useEffect(() => {
-    const fetchJobDetails = async () => {
+    // Reset states
+    setLoading(true);
+    setError(null);
+
+    // Fetch job data
+    const fetchData = async () => {
       try {
-        // Use the correct API endpoint path for job details
-        // Change from /api/jobs/${jobId} to /api/public/jobs/${jobId}
-        const [jobResponse, applicantsResponse] = await Promise.all([
-          fetch(`/api/public/jobs/${jobId}`, { credentials: 'include' }),
-          fetch(`/api/jobs/${jobId}/applicants`, { credentials: 'include' })
-        ]);
-        
-        if (!jobResponse.ok || !applicantsResponse.ok) {
-          throw new Error('Failed to fetch job data');
+        const jobResponse = await fetch(`/api/public/jobs/${jobId}`, {
+
+          headers: {
+            'Accept': 'application/json'
+          },
+          // Add cache busting parameter to avoid any caching issues
+          cache: 'no-store'
+        });
+
+        if (!jobResponse.ok) {
+          throw new Error(`Job request failed with status: ${jobResponse.status}`);
         }
-        
-        const [jobData, applicantsData] = await Promise.all([
-          jobResponse.json(),
-          applicantsResponse.json()
-        ]);
-        
+
+        const jobData = await jobResponse.json();
         setJob(jobData);
-        setApplicants(applicantsData);
+
+        // Then try to get the applicants
+        try {
+          const applicantsResponse = await fetch(`/api/jobs/${jobId}/applicants`, {
+            // Include credentials for admin-protected routes
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (applicantsResponse.ok) {
+            const applicantsData = await applicantsResponse.json();
+            setApplicants(applicantsData);
+          } else {
+            // Just set empty applicants array if there's a problem
+            console.warn(`Couldn't fetch applicants: ${applicantsResponse.status}`);
+            setApplicants([]);
+          }
+        } catch (appError) {
+          // Still continue if we can't get applicants
+          console.warn("Error fetching applicants:", appError);
+          setApplicants([]);
+        }
+
+        // Success! We at least got the job data
+        setLoading(false);
+
       } catch (error) {
-        console.error('Error fetching job details:', error);
-        setError('Failed to load job details');
-      } finally {
+        console.error("Error in job details fetch:", error);
+        setError(error.message || "Failed to load job details");
         setLoading(false);
       }
     };
-    
-    fetchJobDetails();
+
+    fetchData();
   }, [jobId]);
-  
+
   const handleBack = () => {
     navigate('/admin/jobs');
   };
-  
+
   const handleEdit = () => {
     navigate(`/admin/jobs/edit/${jobId}`);
   };
-  
+
   const handleViewApplicant = (applicantId) => {
     navigate(`/admin/applicants/${applicantId}`);
   };
-  
-  if (loading) return <div className="loading">Loading job details...</div>;
-  if (error) return <div className="error-message">{error}</div>;
-  if (!job) return <div className="not-found">Job not found</div>;
-  
+
+  if (loading) {
+    return <div className="loading">Loading job details...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="error-message">
+        <div>{error}</div>
+        <button onClick={handleBack} className="back-button">
+          <i className="fas fa-arrow-left"></i> Back to Jobs
+        </button>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return <div className="not-found">Job not found</div>;
+  }
+
   return (
     <div className="job-detail-modal">
       <div className="detail-header">
@@ -656,9 +700,8 @@ function JobDetail() {
           <i className="fas fa-edit"></i> Edit
         </button>
       </div>
-      
+
       <div className="detail-content">
-        {/* Rest of the component remains the same */}
         <div className="job-detail-card">
           <div className="job-detail-header">
             <h3>{job.job_name}</h3>
@@ -670,34 +713,34 @@ function JobDetail() {
               </div>
             </div>
           </div>
-          
+
           <div className="job-detail-info">
             <div className="info-item">
               <i className="fas fa-map-marker-alt"></i>
               <span>{job.location || "No location specified"}</span>
             </div>
-            
+
             <div className="info-item">
               <i className="fas fa-money-bill-wave"></i>
               <span>{job.salary_range || "Salary not specified"}</span>
             </div>
-            
+
             <div className="info-item">
               <i className="fas fa-calendar-alt"></i>
               <span>Posted on {new Date(job.created_at).toLocaleDateString()}</span>
             </div>
-            
+
             <div className="info-item">
               <i className="fas fa-users"></i>
               <span>{job.applicants_count} applicants</span>
             </div>
           </div>
-          
+
           <div className="job-detail-section">
             <h4>Description</h4>
             <p>{job.description || "No description provided"}</p>
           </div>
-          
+
           <div className="job-detail-section">
             <h4>Responsibilities</h4>
             {job.responsibilities && job.responsibilities.length > 0 ? (
@@ -710,7 +753,7 @@ function JobDetail() {
               <p>No responsibilities listed</p>
             )}
           </div>
-          
+
           <div className="job-detail-section">
             <h4>Qualifications</h4>
             {job.qualifications && job.qualifications.length > 0 ? (
@@ -723,7 +766,7 @@ function JobDetail() {
               <p>No qualifications listed</p>
             )}
           </div>
-          
+
           <div className="job-detail-section">
             <h4>Offers & Benefits</h4>
             {job.offers && job.offers.length > 0 ? (
@@ -737,10 +780,10 @@ function JobDetail() {
             )}
           </div>
         </div>
-        
+
         <div className="job-applicants-section">
           <h3>Applicants for this Job</h3>
-          
+
           {applicants.length > 0 ? (
             <div className="applicants-list">
               {applicants.map((applicant) => (
@@ -757,8 +800,8 @@ function JobDetail() {
                       </span>
                     </div>
                   </div>
-                  
-                  <button 
+
+                  <button
                     onClick={() => handleViewApplicant(applicant.id)}
                     className="view-applicant-button"
                   >
@@ -778,5 +821,4 @@ function JobDetail() {
     </div>
   );
 }
-
 export default JobsManagement;
