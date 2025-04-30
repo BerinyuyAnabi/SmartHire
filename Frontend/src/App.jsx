@@ -3,6 +3,7 @@ import NavBar from './components/NavBar'
 import Home from "./pages/Home"
 import Assessment from "./pages/Assessment"
 import Admin from "./pages/Admin"
+import BookmarkedJobsViewer from "./pages/BookmarkedJobsViewer"
 import JobPosting from "./pages/JobPosting"
 import Features from "./pages/Features"
 import Login from './components/auth/Login';
@@ -43,6 +44,8 @@ function App() {
           <ApplicantDetails />
     
       } />
+
+      <Route path="/debug/bookmarked-jobs" element={<BookmarkedJobsViewer/>} />
 
       {/* Protected routes
       <Route path='/job-posting' element={
