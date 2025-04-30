@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from "react";
 import "../css/JobDetail.css";
-// Remove static data import
-// import { jobData } from "../data/jobposting";
 
 function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
+  // Helper function to safely extract text from either string or object items
+  function extractText(item, textProperty) {
+    if (typeof item === 'string') {
+      return item;
+    } else if (item && typeof item === 'object' && textProperty in item) {
+      return item[textProperty];
+    } else {
+      return '';
+    }
+  }
+
   // Dynamically load Bootstrap and FontAwesome CSS from CDN if not already loaded
   useEffect(() => {
     if (!document.getElementById('bootstrap-cdn')) {
@@ -39,18 +48,46 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
   const [job, setJob] = useState(initialJob);
   const [error, setError] = useState(null);
 
+  // Modified useEffect to ensure consistent data structure for both directly provided jobs and fetched jobs
   useEffect(() => {
+    // Reset loading state
+    setLoading(true);
+    
     // If we have the job object passed in, use it
     if (initialJob) {
+      let processedJob;
+      
       // If we were given an array of jobs, we can navigate through them
       if (allJobs && allJobs.length > 0) {
-        setJob(allJobs[currentIndex]);
+        processedJob = allJobs[currentIndex];
       } else {
-        setJob(initialJob);
+        processedJob = initialJob;
       }
-
+      
+      // Always transform the job object to ensure consistent structure
+      const transformedJob = {
+        ...processedJob,
+        // Transform potential objects into strings
+        responsibilities: processedJob.responsibilities && Array.isArray(processedJob.responsibilities) 
+          ? processedJob.responsibilities.map(r => extractText(r, 'responsibility_text')).filter(Boolean)
+          : [],
+        qualifications: processedJob.qualifications && Array.isArray(processedJob.qualifications)
+          ? processedJob.qualifications.map(q => extractText(q, 'qualification_text')).filter(Boolean)
+          : [],
+        offers: processedJob.offers && Array.isArray(processedJob.offers)
+          ? processedJob.offers.map(o => extractText(o, 'offer_text')).filter(Boolean)
+          : []
+      };
+      
+      console.log('Transformed job data from direct input:', {
+        responsibilities: transformedJob.responsibilities,
+        qualifications: transformedJob.qualifications,
+        offers: transformedJob.offers
+      });
+      
+      setJob(transformedJob);
+      
       // Simulate loading for UI
-      setLoading(true);
       const timer = setTimeout(() => {
         setLoading(false);
       }, 500);
@@ -61,78 +98,79 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
     }
   }, [currentIndex, initialJob, allJobs]);
 
- 
-const fetchJobDetails = async () => {
-  if (!initialJob || !initialJob.id) {
-    setError("Job information is missing");
-    setLoading(false);
-    return;
-  }
-
-  try {
-    setLoading(true);
-    const response = await fetch(`/api/public/jobs/${initialJob.id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch job details');
+  // Function to fetch job details from API if needed
+  const fetchJobDetails = async () => {
+    if (!initialJob || !initialJob.id) {
+      setError("Job information is missing");
+      setLoading(false);
+      return;
     }
 
-    const data = await response.json();
-    
-    // For debugging
-    console.log('Raw API response:', data);
-    
-    // Transform the API data format to match what the component expects
-    const transformedJob = {
-      id: data.id,
-      jobName: data.job_name,
-      company: data.company_name,
-      salary: data.salary_range || "Competitive salary",
-      type: data.type || "Full-time",
-      remote: data.remote_type || "Onsite",
-      location: data.location || "Not specified",
-      description: data.description || "No description available",
-      applicants: data.applicants_count || 0,
-      
-      // Improved extraction with better error handling
-      responsibilities: Array.isArray(data.responsibilities) ? 
-        data.responsibilities.map(r => r && r.responsibility_text ? r.responsibility_text : '').filter(text => text !== '') : [],
-      qualifications: Array.isArray(data.qualifications) ?
-        data.qualifications.map(q => q && q.qualification_text ? q.qualification_text : '').filter(text => text !== '') : [],
-      offers: Array.isArray(data.offers) ?
-        data.offers.map(o => o && o.offer_text ? o.offer_text : '').filter(text => text !== '') : [],
-        
-      // Add company description
-      companyDescription: data.company_description || null,
-      // Add created date
-      created_at: data.created_at,
-      // Generate tags
-      tags: generateTags(data),
-    };
-    
-    // For debugging
-    console.log('Transformed job data:', {
-      responsibilities: transformedJob.responsibilities,
-      qualifications: transformedJob.qualifications,
-      offers: transformedJob.offers
-    });
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/public/jobs/${initialJob.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
-    setJob(transformedJob);
-    setError(null);
-  } catch (err) {
-    console.error('Error fetching job details:', err);
-    setError('Failed to load job details. Please try again later.');
-  } finally {
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }
-};
+      if (!response.ok) {
+        throw new Error('Failed to fetch job details');
+      }
+
+      const data = await response.json();
+      
+      // For debugging
+      console.log('Raw API response:', data);
+      console.log('API responsibilities:', data.responsibilities);
+      
+      // Transform the API data format to match what the component expects
+      const transformedJob = {
+        id: data.id,
+        jobName: data.job_name,
+        company: data.company_name,
+        salary: data.salary_range || "Competitive salary",
+        type: data.type || "Full-time",
+        remote: data.remote_type || "Onsite",
+        location: data.location || "Not specified",
+        description: data.description || "No description available",
+        applicants: data.applicants_count || 0,
+        
+        // Improved extraction with better error handling
+        responsibilities: Array.isArray(data.responsibilities) ? 
+          data.responsibilities.map(r => r && r.responsibility_text ? r.responsibility_text : '').filter(text => text !== '') : [],
+        qualifications: Array.isArray(data.qualifications) ?
+          data.qualifications.map(q => q && q.qualification_text ? q.qualification_text : '').filter(text => text !== '') : [],
+        offers: Array.isArray(data.offers) ?
+          data.offers.map(o => o && o.offer_text ? o.offer_text : '').filter(text => text !== '') : [],
+          
+        // Add company description
+        companyDescription: data.company_description || null,
+        // Add created date
+        created_at: data.created_at,
+        // Generate tags
+        tags: generateTags(data),
+      };
+      
+      // For debugging
+      console.log('Transformed job data from API:', {
+        responsibilities: transformedJob.responsibilities,
+        qualifications: transformedJob.qualifications,
+        offers: transformedJob.offers
+      });
+
+      setJob(transformedJob);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching job details:', err);
+      setError('Failed to load job details. Please try again later.');
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
+  };
 
   // Helper function to generate tags from job properties
   const generateTags = (job) => {
@@ -202,6 +240,12 @@ const fetchJobDetails = async () => {
       setIsBookmarked(bookmarkedJobs.includes(job.id));
     }
   }, [job]);
+
+  // Debug the job object before rendering
+  console.log('Job being rendered:', job);
+  console.log('Responsibilities:', job?.responsibilities);
+  console.log('Qualifications:', job?.qualifications);
+  console.log('Offers:', job?.offers);
 
   return (
     <div className="job-detail-page">
@@ -320,7 +364,9 @@ const fetchJobDetails = async () => {
                     <ul className="job-detail-requirements-list">
                       {job.responsibilities && job.responsibilities.length > 0 ?
                         job.responsibilities.map((item, index) => (
-                          <li key={index} className="job-detail-list-item">{item}</li>
+                          <li key={index} className="job-detail-list-item">
+                            {extractText(item, 'responsibility_text') || item}
+                          </li>
                         )) : <li className="job-detail-list-item">No responsibilities listed.</li>}
                     </ul>
                   </div>
@@ -333,7 +379,9 @@ const fetchJobDetails = async () => {
                     <ul className="job-detail-requirements-list">
                       {job.qualifications && job.qualifications.length > 0 ?
                         job.qualifications.map((item, index) => (
-                          <li key={index} className="job-detail-list-item">{item}</li>
+                          <li key={index} className="job-detail-list-item">
+                            {extractText(item, 'qualification_text') || item}
+                          </li>
                         )) : <li className="job-detail-list-item">No qualifications listed.</li>}
                     </ul>
                   </div>
@@ -346,7 +394,9 @@ const fetchJobDetails = async () => {
                     <ul className="job-detail-benefits-list">
                       {job.offers && job.offers.length > 0 ?
                         job.offers.map((item, index) => (
-                          <li key={index} className="job-detail-list-item">{item}</li>
+                          <li key={index} className="job-detail-list-item">
+                            {extractText(item, 'offer_text') || item}
+                          </li>
                         )) : <li className="job-detail-list-item">No benefits listed.</li>}
                     </ul>
                   </div>
