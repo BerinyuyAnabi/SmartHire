@@ -72,7 +72,7 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
     // Reset loading state
     setLoading(true);
     
-    // If we have the job object passed in, use it
+    // If we have the job object passed in, use it initially
     if (initialJob) {
       let processedJob;
       
@@ -94,11 +94,16 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
       
       setJob(processedJob);
       
-      // Simulate loading for UI
-      const timer = setTimeout(() => {
-        setLoading(false);
-      }, 500);
-      return () => clearTimeout(timer);
+      // Check if we need to fetch additional data
+      if (processedJob.id) {
+        fetchJobDetails(processedJob.id, processedJob);
+      } else {
+        // Simulate loading for UI if no fetch is needed
+        const timer = setTimeout(() => {
+          setLoading(false);
+        }, 500);
+        return () => clearTimeout(timer);
+      }
     } else {
       // If no job was passed, we need to fetch it
       fetchJobDetails();
@@ -106,16 +111,19 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
   }, [currentIndex, initialJob, allJobs]);
 
   // Function to fetch job details from API if needed
-  const fetchJobDetails = async () => {
-    if (!initialJob || !initialJob.id) {
+  const fetchJobDetails = async (jobId, existingJob = null) => {
+    // Use provided jobId or from initialJob if available
+    const id = jobId || (initialJob ? initialJob.id : null);
+    
+    if (!id) {
       setError("Job information is missing");
       setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
-      const response = await fetch(`/api/public/jobs/${initialJob.id}`, {
+      // Make API call to get detailed job information
+      const response = await fetch(`/api/public/jobs/${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -131,6 +139,25 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
       // For debugging
       console.log('Raw API response:', data);
       
+      // Check what data we have from the API response
+      const hasResponsibilities = Array.isArray(data.responsibilities) && data.responsibilities.length > 0;
+      const hasQualifications = Array.isArray(data.qualifications) && data.qualifications.length > 0;
+      const hasOffers = Array.isArray(data.offers) && data.offers.length > 0;
+      
+      // If we have an existing job and the API doesn't provide these arrays,
+      // we'll keep the existing ones
+      const responsibilities = hasResponsibilities ? 
+        data.responsibilities.map(r => extractText(r, 'responsibility_text')).filter(Boolean) : 
+        (existingJob && existingJob.responsibilities) || [];
+          
+      const qualifications = hasQualifications ?
+        data.qualifications.map(q => extractText(q, 'qualification_text')).filter(Boolean) :
+        (existingJob && existingJob.qualifications) || [];
+          
+      const offers = hasOffers ?
+        data.offers.map(o => extractText(o, 'offer_text')).filter(Boolean) :
+        (existingJob && existingJob.offers) || [];
+      
       // Transform the API data format to match what the component expects
       const transformedJob = {
         id: data.id,
@@ -143,13 +170,10 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
         description: data.description || "No description available",
         applicants: data.applicants_count || 0,
         
-        // Use the same transformation logic
-        responsibilities: Array.isArray(data.responsibilities) ? 
-          data.responsibilities.map(r => extractText(r, 'responsibility_text')).filter(Boolean) : [],
-        qualifications: Array.isArray(data.qualifications) ?
-          data.qualifications.map(q => extractText(q, 'qualification_text')).filter(Boolean) : [],
-        offers: Array.isArray(data.offers) ?
-          data.offers.map(o => extractText(o, 'offer_text')).filter(Boolean) : [],
+        // Use our determined values
+        responsibilities,
+        qualifications,
+        offers,
           
         // Add company description
         companyDescription: data.company_description || null,
@@ -170,7 +194,14 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
       setError(null);
     } catch (err) {
       console.error('Error fetching job details:', err);
-      setError('Failed to load job details. Please try again later.');
+      
+      // Don't set an error if we already have a job to display
+      if (!existingJob) {
+        setError('Failed to load job details. Please try again later.');
+      } else {
+        // Just use the existing job data
+        console.log('Using existing job data due to API fetch error');
+      }
     } finally {
       setTimeout(() => {
         setLoading(false);
@@ -246,6 +277,21 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
       setIsBookmarked(bookmarkedJobs.includes(job.id));
     }
   }, [job]);
+
+  // If job is null at this point, and we're not loading, return an error message
+  if (!loading && !job && !error) {
+    return (
+      <div className="error-message fade-in">
+        <div className="alert alert-danger">
+          <i className="fas fa-exclamation-circle me-2"></i>
+          No job information available.
+          <button onClick={onBack} className="btn btn-sm btn-outline-danger ms-3">
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="job-detail-page">
