@@ -356,16 +356,21 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
                     )}
                   </div>
 
-                  {/* Responsibilities */}
+                  {/* Responsibilities */}  
                   <div className="job-detail-section">
                     <h2 className="job-detail-section-title">
                       <i className="fas fa-tasks job-detail-section-icon"></i> Responsibilities
                     </h2>
                     <ul className="job-detail-requirements-list">
-                      {job.responsibilities && job.responsibilities.length > 0 ?
+                      {job.responsibilities && Array.isArray(job.responsibilities) && job.responsibilities.length > 0 ? (
                         job.responsibilities.map((item, index) => (
-                          <li key={index} className="job-detail-list-item">{item}</li>
-                        )) : <li className="job-detail-list-item">No responsibilities listed.</li>}
+                          <li key={index} className="job-detail-list-item">
+                            {typeof item === 'string' ? item : (item && item.responsibility_text ? item.responsibility_text : '')}
+                          </li>
+                        ))
+                      ) : (
+                        <li className="job-detail-list-item">No responsibilities listed.</li>
+                      )}
                     </ul>
                   </div>
 
@@ -375,10 +380,15 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
                       <i className="fas fa-graduation-cap job-detail-section-icon"></i> Preferred Qualifications
                     </h2>
                     <ul className="job-detail-requirements-list">
-                      {job.qualifications && job.qualifications.length > 0 ?
+                      {job.qualifications && Array.isArray(job.qualifications) && job.qualifications.length > 0 ? (
                         job.qualifications.map((item, index) => (
-                          <li key={index} className="job-detail-list-item">{item}</li>
-                        )) : <li className="job-detail-list-item">No qualifications listed.</li>}
+                          <li key={index} className="job-detail-list-item">
+                            {typeof item === 'string' ? item : (item && item.qualification_text ? item.qualification_text : '')}
+                          </li>
+                        ))
+                      ) : (
+                        <li className="job-detail-list-item">No qualifications listed.</li>
+                      )}
                     </ul>
                   </div>
 
@@ -388,10 +398,15 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
                       <i className="fas fa-gift job-detail-section-icon"></i> What We Offer
                     </h2>
                     <ul className="job-detail-benefits-list">
-                      {job.offers && job.offers.length > 0 ?
+                      {job.offers && Array.isArray(job.offers) && job.offers.length > 0 ? (
                         job.offers.map((item, index) => (
-                          <li key={index} className="job-detail-list-item">{item}</li>
-                        )) : <li className="job-detail-list-item">No benefits listed.</li>}
+                          <li key={index} className="job-detail-list-item">
+                            {typeof item === 'string' ? item : (item && item.offer_text ? item.offer_text : '')}
+                          </li>
+                        ))
+                      ) : (
+                        <li className="job-detail-list-item">No benefits listed.</li>
+                      )}
                     </ul>
                   </div>
                   
