@@ -13,6 +13,25 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
     }
   }
 
+  // Helper function to ensure consistent job structure
+  function transformJob(job) {
+    if (!job) return null;
+    
+    return {
+      ...job,
+      // Transform arrays to ensure they're strings, preserving already-transformed data
+      responsibilities: job.responsibilities && Array.isArray(job.responsibilities) 
+        ? job.responsibilities.map(r => extractText(r, 'responsibility_text')).filter(Boolean)
+        : [],
+      qualifications: job.qualifications && Array.isArray(job.qualifications)
+        ? job.qualifications.map(q => extractText(q, 'qualification_text')).filter(Boolean)
+        : [],
+      offers: job.offers && Array.isArray(job.offers)
+        ? job.offers.map(o => extractText(o, 'offer_text')).filter(Boolean)
+        : []
+    };
+  }
+
   // Dynamically load Bootstrap and FontAwesome CSS from CDN if not already loaded
   useEffect(() => {
     if (!document.getElementById('bootstrap-cdn')) {
@@ -45,10 +64,10 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
   );
   const [loading, setLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [job, setJob] = useState(initialJob);
+  const [job, setJob] = useState(null);
   const [error, setError] = useState(null);
 
-  // Modified useEffect to ensure consistent data structure for both directly provided jobs and fetched jobs
+  // Modified useEffect to ensure consistent data structure for both direct jobs and navigated jobs
   useEffect(() => {
     // Reset loading state
     setLoading(true);
@@ -59,33 +78,21 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
       
       // If we were given an array of jobs, we can navigate through them
       if (allJobs && allJobs.length > 0) {
-        processedJob = allJobs[currentIndex];
+        const rawJob = allJobs[currentIndex];
+        // Transform the job to ensure consistent structure
+        processedJob = transformJob(rawJob);
       } else {
-        processedJob = initialJob;
+        // Transform initialJob to ensure consistent structure
+        processedJob = transformJob(initialJob);
       }
       
-      // Always transform the job object to ensure consistent structure
-      const transformedJob = {
-        ...processedJob,
-        // Transform potential objects into strings
-        responsibilities: processedJob.responsibilities && Array.isArray(processedJob.responsibilities) 
-          ? processedJob.responsibilities.map(r => extractText(r, 'responsibility_text')).filter(Boolean)
-          : [],
-        qualifications: processedJob.qualifications && Array.isArray(processedJob.qualifications)
-          ? processedJob.qualifications.map(q => extractText(q, 'qualification_text')).filter(Boolean)
-          : [],
-        offers: processedJob.offers && Array.isArray(processedJob.offers)
-          ? processedJob.offers.map(o => extractText(o, 'offer_text')).filter(Boolean)
-          : []
-      };
-      
-      console.log('Transformed job data from direct input:', {
-        responsibilities: transformedJob.responsibilities,
-        qualifications: transformedJob.qualifications,
-        offers: transformedJob.offers
+      console.log('Transformed job data:', {
+        responsibilities: processedJob.responsibilities,
+        qualifications: processedJob.qualifications,
+        offers: processedJob.offers
       });
       
-      setJob(transformedJob);
+      setJob(processedJob);
       
       // Simulate loading for UI
       const timer = setTimeout(() => {
@@ -123,7 +130,6 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
       
       // For debugging
       console.log('Raw API response:', data);
-      console.log('API responsibilities:', data.responsibilities);
       
       // Transform the API data format to match what the component expects
       const transformedJob = {
@@ -137,13 +143,13 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
         description: data.description || "No description available",
         applicants: data.applicants_count || 0,
         
-        // Improved extraction with better error handling
+        // Use the same transformation logic
         responsibilities: Array.isArray(data.responsibilities) ? 
-          data.responsibilities.map(r => r && r.responsibility_text ? r.responsibility_text : '').filter(text => text !== '') : [],
+          data.responsibilities.map(r => extractText(r, 'responsibility_text')).filter(Boolean) : [],
         qualifications: Array.isArray(data.qualifications) ?
-          data.qualifications.map(q => q && q.qualification_text ? q.qualification_text : '').filter(text => text !== '') : [],
+          data.qualifications.map(q => extractText(q, 'qualification_text')).filter(Boolean) : [],
         offers: Array.isArray(data.offers) ?
-          data.offers.map(o => o && o.offer_text ? o.offer_text : '').filter(text => text !== '') : [],
+          data.offers.map(o => extractText(o, 'offer_text')).filter(Boolean) : [],
           
         // Add company description
         companyDescription: data.company_description || null,
@@ -154,7 +160,7 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
       };
       
       // For debugging
-      console.log('Transformed job data from API:', {
+      console.log('Transformed job data:', {
         responsibilities: transformedJob.responsibilities,
         qualifications: transformedJob.qualifications,
         offers: transformedJob.offers
@@ -240,12 +246,6 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
       setIsBookmarked(bookmarkedJobs.includes(job.id));
     }
   }, [job]);
-
-  // Debug the job object before rendering
-  console.log('Job being rendered:', job);
-  console.log('Responsibilities:', job?.responsibilities);
-  console.log('Qualifications:', job?.qualifications);
-  console.log('Offers:', job?.offers);
 
   return (
     <div className="job-detail-page">
@@ -364,9 +364,7 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
                     <ul className="job-detail-requirements-list">
                       {job.responsibilities && job.responsibilities.length > 0 ?
                         job.responsibilities.map((item, index) => (
-                          <li key={index} className="job-detail-list-item">
-                            {extractText(item, 'responsibility_text') || item}
-                          </li>
+                          <li key={index} className="job-detail-list-item">{item}</li>
                         )) : <li className="job-detail-list-item">No responsibilities listed.</li>}
                     </ul>
                   </div>
@@ -379,9 +377,7 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
                     <ul className="job-detail-requirements-list">
                       {job.qualifications && job.qualifications.length > 0 ?
                         job.qualifications.map((item, index) => (
-                          <li key={index} className="job-detail-list-item">
-                            {extractText(item, 'qualification_text') || item}
-                          </li>
+                          <li key={index} className="job-detail-list-item">{item}</li>
                         )) : <li className="job-detail-list-item">No qualifications listed.</li>}
                     </ul>
                   </div>
@@ -394,9 +390,7 @@ function JobDetail({ job: initialJob, onBack, onApply, allJobs }) {
                     <ul className="job-detail-benefits-list">
                       {job.offers && job.offers.length > 0 ?
                         job.offers.map((item, index) => (
-                          <li key={index} className="job-detail-list-item">
-                            {extractText(item, 'offer_text') || item}
-                          </li>
+                          <li key={index} className="job-detail-list-item">{item}</li>
                         )) : <li className="job-detail-list-item">No benefits listed.</li>}
                     </ul>
                   </div>

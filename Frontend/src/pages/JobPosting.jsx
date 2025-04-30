@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../css/JobPosting.css";
 import ApplyPage from "./ApplyPage";
 import JobDetail from "./JobDetail"; 
-// Remove the import for static jobData
-// import { jobData } from "../data/jobposting";
+
 
 function JobPosting() {
   const [view, setView] = useState("list");
