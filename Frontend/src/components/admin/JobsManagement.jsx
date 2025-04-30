@@ -600,8 +600,10 @@ function JobDetail() {
   useEffect(() => {
     const fetchJobDetails = async () => {
       try {
+        // Use the correct API endpoint path for job details
+        // Change from /api/jobs/${jobId} to /api/public/jobs/${jobId}
         const [jobResponse, applicantsResponse] = await Promise.all([
-          fetch(`/api/jobs/${jobId}`, { credentials: 'include' }),
+          fetch(`/api/public/jobs/${jobId}`, { credentials: 'include' }),
           fetch(`/api/jobs/${jobId}/applicants`, { credentials: 'include' })
         ]);
         
@@ -656,6 +658,7 @@ function JobDetail() {
       </div>
       
       <div className="detail-content">
+        {/* Rest of the component remains the same */}
         <div className="job-detail-card">
           <div className="job-detail-header">
             <h3>{job.job_name}</h3>
