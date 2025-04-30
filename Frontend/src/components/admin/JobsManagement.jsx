@@ -67,7 +67,7 @@ function JobsManagement() {
   };
   
   const handleViewJob = (jobId) => {
-    navigate(`/api/public/jobs/${jobId}`);
+    navigate(`/admin/jobs/${jobId}`);
   };
 
   // Filter jobs based on search and filter criteria
@@ -242,7 +242,7 @@ function JobForm() {
   
   const fetchJobData = async () => {
     try {
-      const response = await fetch(`/api/jobs/${jobId}`, {
+      const response = await fetch(`/api/public/jobs/${jobId}`, {
         credentials: 'include'
       });
       
@@ -323,7 +323,7 @@ function JobForm() {
       };
       
       const url = jobId && jobId !== 'new' 
-        ? `/api/jobs/${jobId}` 
+        ? `/api/public/jobs/${jobId}`
         : '/api/jobs';
         
       const method = jobId && jobId !== 'new' ? 'PUT' : 'POST';
