@@ -67,9 +67,9 @@ function JobsManagement() {
   };
   
   const handleViewJob = (jobId) => {
-    navigate(`/admin/jobs/${jobId}`);
+    navigate(`/api/public/jobs/${jobId}`);
   };
-  
+
   // Filter jobs based on search and filter criteria
   const filteredJobs = jobs.filter(job => {
     // Search filter
