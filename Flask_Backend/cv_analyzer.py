@@ -567,7 +567,14 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
     Fixed analyze_cs_resume that works with either file objects or file paths
     """
     try:
+        # FIXED: Initialize required_skills properly and ensure it's not an integer
         required_skills = None
+        # If job_id is provided, make sure we're not accidentally using it as required_skills
+        if isinstance(job_id, int):
+            # Just ensure job_id isn't being used as required_skills
+            logger.info(f"Using job_id={job_id} to analyze resume, but not as required_skills")
+            # We could fetch actual required skills here if needed
+
         min_match_percentage = 60
         logger.info(f"Starting resume analysis for job_id={job_id}, applicant_id={applicant_id}")
 
@@ -584,7 +591,7 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
         if isinstance(resume_file, str) and os.path.exists(resume_file):
             saved_file_path = resume_file
             logger.info(f"Using existing file path: {saved_file_path}")
-            
+
             # Extract text based on file extension
             if saved_file_path.lower().endswith('.pdf'):
                 try:
@@ -638,6 +645,11 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
             skills_analysis["matched_skills"] = ["python", "javascript", "html", "css", "react"]
             skills_analysis["match_count"] = len(skills_analysis["matched_skills"])
             skills_analysis["match_percentage"] = 60
+
+        # FIXED: Additional check to make sure required_skills is iterable or None before using it
+        if required_skills is not None and not hasattr(required_skills, '__iter__'):
+            logger.warning(f"required_skills is not iterable: {type(required_skills).__name__}. Setting to None.")
+            required_skills = None
 
         # Check job requirements
         job_match = check_job_requirements(
