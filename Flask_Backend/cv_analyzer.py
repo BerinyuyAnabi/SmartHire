@@ -12,6 +12,7 @@ from io import BytesIO
 from datetime import datetime
 from flask import Blueprint, request, jsonify, send_file
 from question_bank import get_assessment_questions
+from database import get_db_connection
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -49,19 +50,6 @@ except ImportError:
                 logger.info("Using pdftotext")
             except ImportError:
                 logger.warning("No PDF processing libraries available. PDF parsing will be limited.")
-
-
-# Import the database connection function - adjust import path as needed
-try:
-    from flask_app import get_db_connection
-except ImportError:
-    try:
-        from flask_backend import get_db_connection
-    except ImportError:
-        logger.warning("Could not import get_db_connection. Using dummy function instead.")
-        def get_db_connection():
-            logger.warning("Using dummy DB connection")
-            return None
 
 # CS Skills Dictionary with categories and keywords
 CS_SKILLS = {

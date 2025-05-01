@@ -10,6 +10,7 @@ import os
 import re
 import json
 from datetime import datetime, timedelta
+from database import get_db_connection
 
 # CV IMPORTS
 from question_bank import get_assessment_questions
@@ -17,10 +18,6 @@ import json
 from datetime import datetime
 from cv_analyzer import register_api_routes, analyze_cs_resume
 from pathlib import Path
-
-# Load environment variables
-project_folder = '/home/smarthiringorg/SmartHire/Flask_Backend/'
-load_dotenv(os.path.join(project_folder, '.env'))
 
 app = Flask(__name__, static_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist/static',
             template_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist')
@@ -99,19 +96,6 @@ def save_uploaded_file(file, directory, applicant_id, job_id, file_type):
     logging.getLogger('file_operations').info(f"Saved {file_type} to {file_path}")
     
     return file_path
-
-
-# =============================================================================
-# DATABASE CONNECTION
-# =============================================================================
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host=os.getenv('DB_HOST'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        database=os.getenv('DB_NAME')
-    )
 
 
 # =============================================================================
