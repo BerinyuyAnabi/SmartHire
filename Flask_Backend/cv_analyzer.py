@@ -751,8 +751,7 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
         # Check job requirements
         job_match = check_job_requirements(
             skills_analysis["matched_skills"],
-            ['figma', 'adobe xd', 'user research', 'wireframing', 'prototyping'],
-            min_match_percentage
+            ['figma', 'adobe xd', 'user research', 'wireframing', 'prototyping']
         )
 
         # Get experience level
