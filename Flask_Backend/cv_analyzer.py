@@ -681,6 +681,19 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
             required_skills,
             min_match_percentage
         )
+        
+        # Get experience level
+        experience_level = evaluate_experience_level(resume_text)
+
+        # Return successful analysis
+        return {
+            "success": True,
+            "skills_analysis": skills_analysis,
+            "job_match": job_match,
+            "experience_level": experience_level,
+            "proceed_to_assessment": True,  # Always allow proceeding
+            "resume_path": saved_file_path
+        }
 
     except Exception as e:
         logger.error(f"Error analyzing resume: {str(e)}")
@@ -708,7 +721,6 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
             },
             "experience_level": "mid"
         }
-
 
 def generate_applicant_id(applicant_data):
     import hashlib
