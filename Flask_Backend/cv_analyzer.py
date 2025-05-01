@@ -483,67 +483,66 @@ def analyze_cs_skills(resume_text):
 def get_required_skills_for_job(job_id):
     """
     Fetches required skills for a job from the database.
-    Returns a list of skill strings.
+    Returns a list of skill strings (empty list if no skills found).
     """
     try:
-   
         conn = get_db_connection()
+        if conn is None:
+            logger.error("Database connection failed")
+            return []  # Return empty list instead of None
+
         cursor = conn.cursor()
-        
-        # Query to fetch required skills
         query = "SELECT required_skills FROM jobs WHERE id = %s"
         cursor.execute(query, (job_id,))
         result = cursor.fetchone()
-        
+
         if not result or not result[0]:
             logger.warning(f"No required skills found for job_id={job_id}")
-            return None
-            
-        # Process the result based on how skills are stored
+            return []  # Return empty list instead of None
+
         skills_data = result[0]
-        
-        # If skills are stored as JSON
-        if isinstance(skills_data, dict) or (isinstance(skills_data, str) and skills_data.startswith('{')):
-            # If it's a string, parse it
+        logger.info(f"Parsing required skills for job_id={job_id} using format: {type(skills_data).__name__}")
+
+        # Handle JSON/dict format
+        if isinstance(skills_data, dict) or (isinstance(skills_data, str) and skills_data.strip().startswith('{')):
             if isinstance(skills_data, str):
                 import json
                 try:
                     skills_data = json.loads(skills_data)
                 except json.JSONDecodeError:
-                    # Not valid JSON, might be comma-separated
-                    return skills_data.split(',')
-            
-            # Extract skills from the dictionary
-            # Adjust according to your JSON structure
-            if 'skills' in skills_data:
-                return skills_data['skills']
+                    logger.warning("Failed to decode JSON. Treating as comma-separated string.")
+                    return [skill.strip() for skill in skills_data.split(',') if skill.strip()]
+
+            if isinstance(skills_data, dict):
+                if 'skills' in skills_data:
+                    return skills_data['skills'] or []  # Return empty list if skills is None
+                return list(skills_data.values()) or []  # Return empty list if values is None
+            elif isinstance(skills_data, list):
+                return skills_data or []  # Return empty list if skills_data is None
             else:
-                # Assume the entire object is the skills list
-                return list(skills_data.values()) if isinstance(skills_data, dict) else skills_data
-                
-        # If skills are stored as comma-separated text
-        elif isinstance(skills_data, str):
+                logger.warning(f"Parsed JSON is not a dict or list: {type(skills_data).__name__}")
+                return []
+
+        # Comma-separated string
+        if isinstance(skills_data, str):
             return [skill.strip() for skill in skills_data.split(',') if skill.strip()]
-            
-        # If skills are already a list
-        elif isinstance(skills_data, list):
-            return skills_data
-            
-        else:
-            logger.warning(f"Unexpected skills data format: {type(skills_data).__name__}")
-            return None
-            
+
+        # List
+        if isinstance(skills_data, list):
+            return skills_data or []  # Return empty list if skills_data is None
+
+        # Default case for any other type
+        logger.warning(f"Unexpected skills data format: {type(skills_data).__name__}")
+        return []
+
     except Exception as e:
         logger.error(f"Database error in get_required_skills_for_job: {str(e)}")
-        return None
+        return []  # Return empty list on error
     finally:
-        # Close database connections
         if 'cursor' in locals() and cursor:
             cursor.close()
         if 'conn' in locals() and conn:
             conn.close()
-
-
 
 def check_job_requirements(matched_skills, required_skills=None, min_match_percentage=60):
     """
@@ -663,15 +662,13 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
             try:
                 # Fetch required skills from database
                 required_skills = get_required_skills_for_job(job_id)
+
+                logger.debug(f"Raw result from DB for job_id={job_id}: {required_skills}")
+                logger.info(f"Raw result from DB for job_id={job_id}: {required_skills}")
                 logger.info(f"Retrieved required skills for job_id={job_id}: {required_skills}")
             except Exception as db_error:
                 logger.error(f"Error fetching required skills: {str(db_error)}")
 
-        # If job_id is provided, make sure we're not accidentally using it as required_skills
-        if isinstance(job_id, int):
-            # Just ensure job_id isn't being used as required_skills
-            logger.info(f"Using job_id={job_id} to analyze resume, but not as required_skills")
-            # We could fetch actual required skills here if needed
         
         min_match_percentage = 60
         logger.info(f"Starting resume analysis for job_id={job_id}, applicant_id={applicant_id}")
@@ -749,6 +746,7 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
             logger.warning(f"required_skills is not iterable: {type(required_skills).__name__}. Setting to None.")
             required_skills = None
 
+        logger.info(f"Raw result from DB for job_id={job_id}: {required_skills}")
         # Check job requirements
         job_match = check_job_requirements(
             skills_analysis["matched_skills"],
