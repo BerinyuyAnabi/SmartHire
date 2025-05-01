@@ -12,11 +12,10 @@ import json
 from datetime import datetime, timedelta
 
 # CV IMPORTS
-from cv_analyzer import analyze_cs_resume
 from question_bank import get_assessment_questions
 import json
 from datetime import datetime
-
+from cv_analyzer import register_api_routes, analyze_cs_resume
 
 
 # Load environment variables
@@ -25,6 +24,9 @@ load_dotenv(os.path.join(project_folder, '.env'))
 
 app = Flask(__name__, static_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist/static',
             template_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist')
+
+register_api_routes(app)
+
 
 # Set a fixed secret key or use environment variable (important for session persistence)
 app.secret_key = os.getenv('SECRET_KEY', 'your-default-development-secret-key')
@@ -1579,7 +1581,6 @@ def apply_with_screening(job_id):
     except Exception as e:
         app.logger.error(f"Error in application with screening: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == '__main__':
     app.run(debug=True)
