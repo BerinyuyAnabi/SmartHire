@@ -563,27 +563,7 @@ def check_job_requirements(matched_skills, required_skills=None, min_match_perce
         except:
             logger.error("matched_skills cannot be converted to a list")
             matched_skills = ["python", "javascript", "html", "css", "react"]
-    
-    # Handle required_skills
-    if required_skills is not None:
-        # If it's an integer (which is causing our error), convert to string and wrap in list
-        if isinstance(required_skills, int):
-            logger.warning(f"required_skills is an integer: {required_skills}, converting to string in list")
-            required_skills = [str(required_skills)]
-        # Otherwise check if it's iterable
-        else:
-            try:
-                iter(required_skills)
-                # It's iterable, but if it's a string, wrap it in a list
-                if isinstance(required_skills, str):
-                    required_skills = [required_skills]
-            except TypeError:
-                logger.warning(f"Non-iterable required_skills value ({type(required_skills).__name__}), converting to list")
-                try:
-                    required_skills = [str(required_skills)]
-                except:
-                    logger.error(f"Failed to convert {type(required_skills).__name__} to string, defaulting to None")
-                    required_skills = None
+
 
     # No specific requirements
     if not required_skills:
@@ -599,29 +579,44 @@ def check_job_requirements(matched_skills, required_skills=None, min_match_perce
     logger.info(f"BEFORE COMP - Type of required_skills: {type(required_skills)}")
     logger.info(f"BEFORE COMP - Value of required_skills: {required_skills}")
 
-    # Process the requirements
-    try:
-        matched_required = [skill for skill in required_skills if skill in matched_skills]
-        missing_required = [skill for skill in required_skills if skill not in matched_skills]
-        
-        match_percentage = 0
-        if required_skills and len(required_skills) > 0:
-            match_percentage = (len(matched_required) / len(required_skills)) * 100
-        
+    # No specific requirements
+    if not required_skills:
         return {
-            "passes": match_percentage >= min_match_percentage,
-            "match_percentage": round(match_percentage, 2),
-            "matched_required": matched_required,
-            "missing_required": missing_required
-        }
-    except Exception as e:
-        logger.error(f"Error in check_job_requirements: {str(e)}")
-        return {
-            "passes": True,
-            "match_percentage": 60,
-            "matched_required": matched_skills[:5] if matched_skills else [],
+            "passes": len(matched_skills) >= 5,
+            "match_percentage": 100 if len(matched_skills) >= 5 else (len(matched_skills) * 20),
+            "matched_required": matched_skills[:5] if len(matched_skills) >= 5 else matched_skills,
             "missing_required": []
         }
+    
+    logger.info(f"SIMPLE TEST - About to use required_skills: {required_skills}")
+    
+    # Try a simple test with a for loop
+    test_list = []
+    for skill in required_skills:  # This would fail if required_skills is an int
+        test_list.append(skill)
+    
+    logger.info(f"SIMPLE TEST - For loop completed successfully")
+    
+    # Now try the list comprehension
+    matched_required = [skill for skill in required_skills if skill in matched_skills]
+    
+    logger.info(f"matched_required: {matched_required}")
+    
+    missing_required = [skill for skill in required_skills if skill not in matched_skills]
+    
+    logger.info(f"missing_required: {missing_required}")
+    
+    match_percentage = 0
+    if len(required_skills) > 0:
+        match_percentage = (len(matched_required) / len(required_skills)) * 100
+    
+    return {
+        "passes": match_percentage >= min_match_percentage,
+        "match_percentage": round(match_percentage, 2),
+        "matched_required": matched_required,
+        "missing_required": missing_required
+    }
+
 
 
 def evaluate_experience_level(resume_text):
