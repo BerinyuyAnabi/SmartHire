@@ -747,10 +747,11 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
             required_skills = None
 
         logger.info(f"Raw result from DB for job_id={job_id}: {required_skills}")
+        logger.info(f"Raw matched skills from comparison for job_id={job_id}: {skills_analysis["matched_skills"]}")
         # Check job requirements
         job_match = check_job_requirements(
             skills_analysis["matched_skills"],
-            required_skills,
+            ['figma', 'adobe xd', 'user research', 'wireframing', 'prototyping'],
             min_match_percentage
         )
 
