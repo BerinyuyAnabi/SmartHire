@@ -4,6 +4,7 @@ import Home from "./pages/Home"
 import Assessment from "./pages/Assessment"
 import Admin from "./pages/Admin"
 import BookmarkedJobsViewer from "./pages/BookmarkedJobsViewer"
+import PDFDiagnosticTool from "./pages/PDFDiagnosticTool"
 import JobPosting from "./pages/JobPosting"
 import Features from "./pages/Features"
 import Login from './components/auth/Login';
@@ -48,6 +49,7 @@ function App() {
       } />
 
       <Route path="/debug/bookmarked-jobs" element={<BookmarkedJobsViewer/>} />
+      <Route path="/debug/pdf" element={<PDFDiagnosticTool/>} />
 
       <Route path="/assessment/:assessmentId" element={<CSAssessmentWithCustomStyle />} />
       {/* Protected routes

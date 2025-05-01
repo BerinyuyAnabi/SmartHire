@@ -2,13 +2,46 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/ApplyPage.css";
 
-// Screening Results Modal Component
-const ScreeningResultsModal = ({ result, onClose }) => {
+// Debugging Modal Component - Shows detailed info about the API response
+const DebugModal = ({ result, onClose }) => {
+  return (
+    <div className="screening-modal-overlay">
+      <div className="screening-modal fade-in-up-modal" style={{ width: '80%', maxWidth: '800px' }}>
+        <h3 className="result-title">API Response Debug</h3>
+        
+        <div style={{ 
+          textAlign: 'left', 
+          backgroundColor: '#f5f5f5', 
+          padding: '15px', 
+          borderRadius: '5px',
+          maxHeight: '400px',
+          overflow: 'auto'
+        }}>
+          <pre>{JSON.stringify(result, null, 2)}</pre>
+        </div>
+        
+        <div className="modal-actions">
+          <button 
+            className="modal-close-btn" 
+            onClick={onClose}
+          >
+            Close Debug View
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Screening Results Modal Component with improved logic
+const ScreeningResultsModal = ({ result, onClose, onProceedToAssessment }) => {
   const isPassing = result.success;
   
   // Get reference to the assessment_id if available
   const assessmentId = result.assessment_id;
-  const redirecting = isPassing && assessmentId;
+  
+  // Check if we should show a redirect message
+  const [showRedirectMessage, setShowRedirectMessage] = useState(false);
   
   // Animation delay for the progress circle
   useEffect(() => {
@@ -47,6 +80,20 @@ const ScreeningResultsModal = ({ result, onClose }) => {
   // Calculate match percentage for the progress circle                         
   const matchPercentage = hasSkillsAnalysis ? 
     Math.round(result.analysis.skills_analysis.match_percentage) : 0;
+
+  // Handle proceed button click
+  const handleProceedClick = () => {
+    if (assessmentId) {
+      // If there's an assessment ID, show redirecting message and then proceed
+      setShowRedirectMessage(true);
+      setTimeout(() => {
+        onProceedToAssessment(assessmentId, result.application_id);
+      }, 1500);
+    } else {
+      // Just close the modal
+      onClose();
+    }
+  };
   
   return (
     <div className="screening-modal-overlay">
@@ -106,7 +153,7 @@ const ScreeningResultsModal = ({ result, onClose }) => {
           </div>
         )}
         
-        {redirecting ? (
+        {showRedirectMessage ? (
           <div className="redirecting-message">
             <p>You will be redirected to the technical assessment shortly...</p>
             <div className="redirect-spinner"></div>
@@ -115,12 +162,28 @@ const ScreeningResultsModal = ({ result, onClose }) => {
           <div className="modal-actions">
             <button 
               className="modal-close-btn" 
-              onClick={onClose}
+              onClick={handleProceedClick}
             >
-              {isPassing ? 'Proceed to Assessment' : 'Back to Jobs'}
+              {assessmentId ? 'Proceed to Assessment' : 'Back to Jobs'}
             </button>
           </div>
         )}
+        
+        {/* Add a debug button that can reveal details about the API response */}
+        <div style={{ marginTop: '15px' }}>
+          <button 
+            onClick={() => console.log('Full API response:', result)} 
+            style={{ 
+              background: 'transparent', 
+              border: 'none', 
+              fontSize: '12px', 
+              color: '#999',
+              cursor: 'pointer'
+            }}
+          >
+            Debug Info
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -140,11 +203,13 @@ function ApplyPage({ job, onBack }) {
     coverLetter: null,
   });
   
-  // Add these to your existing state variables
+  // State variables
   const [submitting, setSubmitting] = useState(false);
   const [screeningResult, setScreeningResult] = useState(null);
   const [showScreeningResult, setShowScreeningResult] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
+  const [showDebugModal, setShowDebugModal] = useState(false);
+  const [requestLogs, setRequestLogs] = useState([]);
 
   // Add useEffect to inject Bootstrap CDN link
   useEffect(() => {
@@ -168,6 +233,12 @@ function ApplyPage({ job, onBack }) {
       clearTimeout(timer);
     };
   }, []);
+
+  // Add a log entry 
+  const addLog = (message) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setRequestLogs(prev => [...prev, { timestamp, message }]);
+  };
 
   // Country codes data
   const [countryCodes] = useState([
@@ -196,76 +267,139 @@ function ApplyPage({ job, onBack }) {
     alert("Application submitted!");
     onBack();
   };
-// Modified handleContinue function for the ApplyPage component
 
-const handleContinue = async (e) => {
-  e.preventDefault();
-
-  // Validate form data
-  if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-    setSubmissionError('Please fill in all required fields');
-    return;
-  }
-
-  if (!formData.cv) {
-    setSubmissionError('Please upload your CV/Resume');
-    return;
-  }
-
-  // Show loading state
-  setSubmitting(true);
-
-  try {
-    // Create a FormData object
-    const formDataToSubmit = new FormData();
-
-    // Add form fields
-    formDataToSubmit.append('firstName', formData.firstName);
-    formDataToSubmit.append('lastName', formData.lastName);
-    formDataToSubmit.append('full_name', `${formData.firstName} ${formData.lastName}`);
-    formDataToSubmit.append('gender', formData.gender);
-    formDataToSubmit.append('email', formData.email);
-    formDataToSubmit.append('phone', `${formData.countryCode}${formData.phone}`);
-
-    // Add CV file - this is the key for the screening
-    if (formData.cv) {
-      formDataToSubmit.append('resume', formData.cv);
+  // Function to handle assessment navigation
+  const handleProceedToAssessment = (assessmentId, applicantId) => {
+    console.log(`Navigating to assessment ${assessmentId} for applicant ${applicantId}`);
+    
+    // Store applicant ID in localStorage for reference
+    if (applicantId) {
+      localStorage.setItem('applicantId', applicantId);
     }
-
-    // Add cover letter if available
-    if (formData.coverLetter) {
-      formDataToSubmit.append('coverLetter', formData.coverLetter);
-    }
-
-    console.log('Submitting application...', formData.cv.name);
-
-    // Call the screening endpoint
-    const response = await fetch(`/api/public/jobs/${job.id}/apply-with-screening`, {
-      method: 'POST',
-      body: formDataToSubmit
+    
+    // Navigate to the assessment page
+    navigate(`/assessment/${assessmentId}`, { 
+      state: { 
+        jobDetails: job,
+        applicantId: applicantId
+      } 
     });
+  };
 
-    // Always parse the JSON regardless of status code
-    const result = await response.json();
+  // Modified handleContinue function with better error handling and diagnostic logging
+  const handleContinue = async (e) => {
+    e.preventDefault();
+    setRequestLogs([]); // Clear previous logs
 
-    // Log the full response for debugging
-    console.log('Application submission response:', result);
-
-    // Store application ID for future reference
-    if (result.application_id) {
-      localStorage.setItem('applicantId', result.application_id);
+    // Validate form data
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
+      setSubmissionError('Please fill in all required fields');
+      return;
     }
 
-    // Even if there's an error, show results to let user proceed
-    // This ensures users can continue their application process
-    if (!result.success) {
-      console.warn('Application had issues but will continue:', result.error || result.error_details);
+    if (!formData.cv) {
+      setSubmissionError('Please upload your CV/Resume');
+      return;
+    }
 
-      // Create a minimal successful result to show
+    // Show loading state
+    setSubmitting(true);
+    addLog("Starting application submission process");
+
+    try {
+      // Create a FormData object
+      const formDataToSubmit = new FormData();
+
+      // Add form fields
+      formDataToSubmit.append('firstName', formData.firstName);
+      formDataToSubmit.append('lastName', formData.lastName);
+      formDataToSubmit.append('full_name', `${formData.firstName} ${formData.lastName}`);
+      formDataToSubmit.append('gender', formData.gender);
+      formDataToSubmit.append('email', formData.email);
+      formDataToSubmit.append('phone', `${formData.countryCode}${formData.phone}`);
+
+      // Add CV file - this is the key for the screening
+      if (formData.cv) {
+        formDataToSubmit.append('resume', formData.cv);
+        addLog(`Added resume file: ${formData.cv.name} (${formData.cv.type}, ${(formData.cv.size / 1024 / 1024).toFixed(2)} MB)`);
+      }
+
+      // Add cover letter if available
+      if (formData.coverLetter) {
+        formDataToSubmit.append('coverLetter', formData.coverLetter);
+        addLog(`Added cover letter: ${formData.coverLetter.name}`);
+      }
+
+      addLog(`Submitting application for job ID: ${job.id}`);
+
+      // Call the screening endpoint
+      const response = await fetch(`/api/public/jobs/${job.id}/apply-with-screening`, {
+        method: 'POST',
+        body: formDataToSubmit
+      });
+
+      addLog(`Received server response with status: ${response.status} ${response.statusText}`);
+
+      // Always parse the JSON regardless of status code
+      const result = await response.json();
+
+      // Log the full response for debugging
+      console.log('Application submission response:', result);
+      addLog("Parsed server response data");
+
+      // Store application ID for future reference
+      if (result.application_id) {
+        localStorage.setItem('applicantId', result.application_id);
+        addLog(`Stored applicant ID: ${result.application_id}`);
+      }
+
+      // Check for assessment ID which is crucial for proper redirection
+      if (result.assessment_id) {
+        addLog(`Server provided assessment ID: ${result.assessment_id}`);
+      } else {
+        addLog("WARNING: No assessment ID was provided in the response");
+      }
+
+      // Even if there's an error, show results to let user proceed
+      if (!result.success) {
+        console.warn('Application had issues but will continue:', result.error || result.error_details);
+        addLog(`Warning: Application had issues: ${result.error || result.error_details}`);
+
+        // Create a minimal successful result to show
+        const fallbackResult = {
+          success: true,
+          message: "Your application has been received. You may proceed to the assessment.",
+          application_id: result.application_id,
+          assessment_id: result.assessment_id, // Pass this through if it exists
+          analysis: {
+            skills_analysis: {
+              matched_skills: [],
+              match_count: 0,
+              match_percentage: 60,
+              total_skills: 100
+            },
+            experience_level: "unknown"
+          }
+        };
+
+        setScreeningResult(fallbackResult);
+      } else {
+        // Normal success flow
+        addLog("Application processing was successful");
+        setScreeningResult(result);
+      }
+
+      setShowScreeningResult(true);
+
+    } catch (error) {
+      console.error('Error in application submission:', error);
+      addLog(`ERROR: ${error.message}`);
+
+      // Even on error, create a minimal result to allow users to proceed
       const fallbackResult = {
         success: true,
-        message: "Your application has been received. You may proceed to the assessment.",
-        application_id: result.application_id,
+        message: "We've received your application. There was an issue with the analysis, but you may proceed to the assessment.",
+        application_id: null,
         analysis: {
           skills_analysis: {
             matched_skills: [],
@@ -278,38 +412,11 @@ const handleContinue = async (e) => {
       };
 
       setScreeningResult(fallbackResult);
-    } else {
-      // Normal success flow
-      setScreeningResult(result);
+      setShowScreeningResult(true);
+    } finally {
+      setSubmitting(false);
     }
-
-    setShowScreeningResult(true);
-
-  } catch (error) {
-    console.error('Error in application submission:', error);
-
-    // Even on error, create a minimal result to allow users to proceed
-    const fallbackResult = {
-      success: true,
-      message: "We've received your application. There was an issue with the analysis, but you may proceed to the assessment.",
-      application_id: null,
-      analysis: {
-        skills_analysis: {
-          matched_skills: [],
-          match_count: 0,
-          match_percentage: 60,
-          total_skills: 100
-        },
-        experience_level: "unknown"
-      }
-    };
-
-    setScreeningResult(fallbackResult);
-    setShowScreeningResult(true);
-  } finally {
-    setSubmitting(false);
-  }
-};
+  };
 
   // SVG icons
   const UploadIcon = () => (
@@ -407,6 +514,45 @@ const handleContinue = async (e) => {
         <div className="d-flex justify-content-between mt-5 pt-4" style={{borderTop: '1px solid var(--gray-200)'}}>
           <div className="skeleton-button skeleton"></div>
           <div className="skeleton-button skeleton"></div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Add a diagnostic logs modal
+  const RequestLogsModal = ({ logs, onClose }) => (
+    <div className="screening-modal-overlay">
+      <div className="screening-modal fade-in-up-modal" style={{ width: '80%', maxWidth: '800px' }}>
+        <h3 className="result-title">Request Logs</h3>
+        
+        <div style={{ 
+          textAlign: 'left', 
+          backgroundColor: '#f5f5f5', 
+          padding: '15px', 
+          borderRadius: '5px',
+          maxHeight: '400px',
+          overflow: 'auto',
+          fontFamily: 'monospace',
+          fontSize: '14px'
+        }}>
+          {logs.length === 0 ? (
+            <p>No logs recorded yet.</p>
+          ) : (
+            logs.map((log, index) => (
+              <div key={index} style={{ borderBottom: '1px solid #e0e0e0', padding: '5px 0' }}>
+                <span style={{ color: '#666' }}>[{log.timestamp}]</span> {log.message}
+              </div>
+            ))
+          )}
+        </div>
+        
+        <div className="modal-actions">
+          <button 
+            className="modal-close-btn" 
+            onClick={onClose}
+          >
+            Close Logs
+          </button>
         </div>
       </div>
     </div>
@@ -636,6 +782,23 @@ const handleContinue = async (e) => {
                   {submitting ? 'Processing...' : 'Continue to Assessment'} {!submitting && <ContinueIcon />}
                 </button>
               </div>
+              
+              {/* Add a small button to view request logs - helps with debugging */}
+              <div style={{ textAlign: 'center', marginTop: '15px' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowDebugModal(true)}
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    fontSize: '12px', 
+                    color: '#999',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Debug Mode
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -647,20 +810,25 @@ const handleContinue = async (e) => {
           result={screeningResult} 
           onClose={() => {
             setShowScreeningResult(false);
-            
-            // If successful and has assessment, navigate to it
-            if (screeningResult.success && screeningResult.assessment_id) {
-              navigate('/assessment/' + screeningResult.assessment_id, { 
-                state: { 
-                  jobDetails: job,
-                  applicantId: screeningResult.application_id
-                } 
-              });
-            } else {
-              // Otherwise go back to jobs
-              onBack();
-            }
-          }} 
+            onBack(); // Go back to jobs
+          }}
+          onProceedToAssessment={handleProceedToAssessment}
+        />
+      )}
+      
+      {/* Debug Modal */}
+      {showDebugModal && (
+        <DebugModal 
+          result={screeningResult} 
+          onClose={() => setShowDebugModal(false)} 
+        />
+      )}
+      
+      {/* Request Logs Modal */}
+      {showDebugModal && (
+        <RequestLogsModal 
+          logs={requestLogs} 
+          onClose={() => setShowDebugModal(false)} 
         />
       )}
 
