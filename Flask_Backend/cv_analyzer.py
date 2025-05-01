@@ -574,7 +574,7 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
             # Just ensure job_id isn't being used as required_skills
             logger.info(f"Using job_id={job_id} to analyze resume, but not as required_skills")
             # We could fetch actual required skills here if needed
-
+        
         min_match_percentage = 60
         logger.info(f"Starting resume analysis for job_id={job_id}, applicant_id={applicant_id}")
 
@@ -591,7 +591,7 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
         if isinstance(resume_file, str) and os.path.exists(resume_file):
             saved_file_path = resume_file
             logger.info(f"Using existing file path: {saved_file_path}")
-
+            
             # Extract text based on file extension
             if saved_file_path.lower().endswith('.pdf'):
                 try:
