@@ -550,7 +550,7 @@ def check_job_requirements(matched_skills, required_skills=None, min_match_perce
     logger.info(f"INSIDE FUNCTION - Value of matched_skills: {matched_skills}")
     logger.info(f"INSIDE FUNCTION - Type of required_skills: {type(required_skills)}")
     logger.info(f"INSIDE FUNCTION - Value of required_skills: {required_skills}")
-    
+
     """
     Fixed check_job_requirements that safely handles all edge cases.
     """
@@ -593,6 +593,11 @@ def check_job_requirements(matched_skills, required_skills=None, min_match_perce
             "matched_required": matched_skills[:5] if len(matched_skills) >= 5 else matched_skills,
             "missing_required": []
         }
+
+    logger.info(f"BEFORE COMP - Type of matched_skills: {type(matched_skills)}")
+    logger.info(f"BEFORE COMP - Value of matched_skills: {matched_skills}")
+    logger.info(f"BEFORE COMP - Type of required_skills: {type(required_skills)}")
+    logger.info(f"BEFORE COMP - Value of required_skills: {required_skills}")
 
     # Process the requirements
     try:
