@@ -13,7 +13,6 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify, send_file
 from question_bank import get_assessment_questions
 
-
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -52,11 +51,9 @@ except ImportError:
                 logger.warning("No PDF processing libraries available. PDF parsing will be limited.")
 
 
-
-
 # Import the database connection function - adjust import path as needed
 try:
-    from app import get_db_connection
+    from flask_app import get_db_connection
 except ImportError:
     try:
         from flask_backend import get_db_connection
@@ -501,8 +498,7 @@ def get_required_skills_for_job(job_id):
     Returns a list of skill strings.
     """
     try:
-        # Establish database connection
-        # Replace with your actual database connection logic
+   
         conn = get_db_connection()
         cursor = conn.cursor()
         
