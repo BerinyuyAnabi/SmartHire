@@ -1,8 +1,14 @@
 import re
-import PyPDF2
 import textract
 from io import BytesIO
 import logging
+
+try:
+    # For PyPDF2 version 3.0.0 and newer
+    from PyPDF2 import PdfReader
+except ImportError:
+    # For older PyPDF2 versions
+    from PyPDF2 import PdfFileReader as PdfReader
 
 logger = logging.getLogger(__name__)
 
