@@ -1,16 +1,31 @@
 import re
-import textract
-from io import BytesIO
 import logging
+from io import BytesIO
 
+# Setup logging
+logger = logging.getLogger(__name__)
+
+# PyPDF2 fallback handling
 try:
     # For PyPDF2 version 3.0.0 and newer
     from PyPDF2 import PdfReader
+    HAS_PYPDF2 = True
 except ImportError:
-    # For older PyPDF2 versions
-    from PyPDF2 import PdfFileReader as PdfReader
+    try:
+        # For older PyPDF2 versions
+        from PyPDF2 import PdfFileReader as PdfReader
+        HAS_PYPDF2 = True
+    except ImportError:
+        HAS_PYPDF2 = False
+        logger.warning("PyPDF2 not installed. PDF parsing will be limited.")
 
-logger = logging.getLogger(__name__)
+# Textract fallback handling
+try:
+    import textract
+    HAS_TEXTRACT = True
+except ImportError:
+    HAS_TEXTRACT = False
+    logger.warning("Textract not installed. DOCX parsing will be limited.")
 
 # CS Skills Dictionary with categories and keywords
 CS_SKILLS = {
@@ -70,27 +85,67 @@ def extract_text_from_resume(file_object):
     """
     Extract text from uploaded resume file (PDF, DOCX, TXT)
     """
-    filename = file_object.filename.lower()
-    file_content = file_object.read()
-    file_content_io = BytesIO(file_content)
-
+    if not file_object:
+        raise ValueError("No file provided")
+        
+    filename = file_object.filename.lower() if hasattr(file_object, 'filename') else str(file_object)
+    file_content = file_object.read() if hasattr(file_object, 'read') else file_object
+    
     try:
+        # Create BytesIO object if we have binary content
+        if isinstance(file_content, bytes):
+            file_content_io = BytesIO(file_content)
+        else:
+            # If it's already a file-like object, use it directly
+            file_content_io = file_content
+
+        # Extract text based on file extension
         if filename.endswith('.pdf'):
-            # Extract text from PDF
-            pdf_reader = PyPDF2.PdfReader(file_content_io)
-            text = ""
-            for page in pdf_reader.pages:
-                text += page.extract_text() + "\n"
-            return text
+            # PDF extraction
+            if not HAS_PYPDF2:
+                raise ImportError("PyPDF2 is not installed. Cannot process PDF files.")
+            
+            try:
+                pdf_reader = PdfReader(file_content_io)
+                text = ""
+                for page in pdf_reader.pages:
+                    text += page.extract_text() + "\n"
+                return text
+            except Exception as e:
+                logger.error(f"PDF extraction error: {str(e)}")
+                # Try a basic text extraction fallback
+                try:
+                    # This is a very basic fallback and may not work well
+                    decoded = file_content.decode('utf-8', errors='ignore')
+                    return decoded
+                except:
+                    raise ValueError("Could not extract text from PDF.")
 
         elif filename.endswith('.docx'):
-            # Extract text from DOCX
-            text = textract.process(file_content_io).decode('utf-8')
-            return text
-
+            # DOCX extraction
+            if HAS_TEXTRACT:
+                try:
+                    text = textract.process(file_content_io).decode('utf-8')
+                    return text
+                except Exception as e:
+                    logger.error(f"DOCX extraction error with textract: {str(e)}")
+            
+            # We don't have textract, try with python-docx if available
+            try:
+                import docx
+                doc = docx.Document(file_content_io)
+                return "\n".join([para.text for para in doc.paragraphs])
+            except ImportError:
+                raise ImportError("Neither textract nor python-docx is installed. Cannot process DOCX files.")
+            except Exception as e:
+                logger.error(f"DOCX extraction error: {str(e)}")
+                raise ValueError(f"Could not extract text from DOCX: {str(e)}")
+                
         elif filename.endswith('.txt'):
-            # Extract text from TXT
-            return file_content.decode('utf-8')
+            # Plain text extraction
+            if isinstance(file_content, bytes):
+                return file_content.decode('utf-8', errors='ignore')
+            return file_content
 
         else:
             logger.error(f"Unsupported file format: {filename}")
@@ -138,7 +193,7 @@ def analyze_cs_skills(resume_text):
     }
 
 
-def check_job_requirements(matched_skills, required_skills, min_match_percentage=60):
+def check_job_requirements(matched_skills, required_skills=None, min_match_percentage=60):
     """
     Check if a candidate's skills match the job requirements
     
@@ -217,21 +272,51 @@ def evaluate_experience_level(resume_text):
     return max(counts, key=counts.get)
 
 
-def analyze_cs_resume(resume_file, required_skills=None, min_match_percentage=60):
+def analyze_cs_resume(resume_file, job_id=None):
     """
     Main function to analyze a CS resume
     
     Parameters:
         resume_file: Uploaded resume file object
-        required_skills: List of skills required for the job (optional)
-        min_match_percentage: Minimum percentage of required skills to match
+        job_id: ID of the job being applied for (optional)
         
     Returns:
         Dictionary with analysis results
     """
     try:
+        # Get required skills based on job_id if provided
+        required_skills = None
+        min_match_percentage = 60
+        
+        if job_id:
+            try:
+                # Try to get job requirements from database
+                # This is just a placeholder - implement as needed
+                # required_skills = get_job_requirements(job_id)
+                pass
+            except Exception as e:
+                logger.error(f"Error getting job requirements: {str(e)}")
+        
         # Extract text from resume
-        resume_text = extract_text_from_resume(resume_file)
+        try:
+            resume_text = extract_text_from_resume(resume_file)
+        except ImportError as e:
+            # Return limited functionality if dependencies are missing
+            logger.error(f"Dependency error: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "limited_mode": True,
+                "experience_level": "unknown",
+                "proceed_to_assessment": True  # Default to allowing assessment
+            }
+        
+        if not resume_text or len(resume_text.strip()) < 100:
+            return {
+                "success": False,
+                "error": "Could not extract sufficient text from the resume",
+                "proceed_to_assessment": True  # Let them proceed anyway
+            }
         
         # Analyze skills
         skills_analysis = analyze_cs_skills(resume_text)
@@ -259,5 +344,6 @@ def analyze_cs_resume(resume_file, required_skills=None, min_match_percentage=60
         logger.error(f"Error analyzing resume: {str(e)}")
         return {
             "success": False,
-            "error": str(e)
+            "error": str(e),
+            "proceed_to_assessment": True  # Default to allowing assessment if analysis fails
         }
