@@ -1,7 +1,3 @@
-"""
-cv_analyzer.py - Enhanced PDF processing capabilities
-"""
-
 import os
 import re
 import uuid
@@ -14,37 +10,17 @@ from flask import Blueprint, request, jsonify, send_file
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# PDF processing libraries - multiple fallbacks
-PDF_PROCESSOR = None
+# PDF processing library
 PDF_PROCESSOR_NAME = None
 
-# Try PyPDF2 first (newer versions)
 try:
-    from PyPDF2 import PdfReader
-    PDF_PROCESSOR = PdfReader
-    PDF_PROCESSOR_NAME = "PyPDF2"
-    logger.info("Using PyPDF2 with PdfReader")
+    import pdfplumber
+
+    PDF_PROCESSOR_NAME = "pdfplumber"
+    logger.info("Using pdfplumber for PDF processing")
 except ImportError:
-    # Try older PyPDF2 versions
-    try:
-        from PyPDF2 import PdfFileReader
-        PDF_PROCESSOR = PdfFileReader
-        PDF_PROCESSOR_NAME = "PyPDF2-Legacy"
-        logger.info("Using PyPDF2 with PdfFileReader")
-    except ImportError:
-        # Try pdfplumber as alternative
-        try:
-            import pdfplumber
-            PDF_PROCESSOR_NAME = "pdfplumber"
-            logger.info("Using pdfplumber")
-        except ImportError:
-            # Try pdf2text as last resort
-            try:
-                import pdftotext
-                PDF_PROCESSOR_NAME = "pdftotext"
-                logger.info("Using pdftotext")
-            except ImportError:
-                logger.warning("No PDF processing libraries available. PDF parsing will be limited.")
+    logger.error("pdfplumber is not installed. PDF processing will not be available.")
+    PDF_PROCESSOR_NAME = None
 
 # CS Skills Dictionary with categories and keywords
 CS_SKILLS = {
@@ -145,105 +121,31 @@ def save_uploaded_file(file_object, upload_folder, applicant_id=None, file_type=
 
 
 def extract_text_from_pdf_file(filepath):
-    """Enhanced PDF text extraction with multiple fallbacks for PythonAnywhere"""
-    logger.info(f"Extracting text from PDF: {filepath} using {PDF_PROCESSOR_NAME}")
-    extraction_errors = []
+    """PDF text extraction using pdfplumber only"""
+    if PDF_PROCESSOR_NAME != "pdfplumber":
+        logger.error("pdfplumber is not available for PDF processing")
+        return "PDF text extraction failed - pdfplumber not available"
 
-    # 1. Try pdfplumber first (most reliable on PythonAnywhere)
+    logger.info(f"Extracting text from PDF: {filepath} using pdfplumber")
+
     try:
-        import pdfplumber
-        logger.info("Attempting extraction with pdfplumber")
-        
         with pdfplumber.open(filepath) as pdf:
             text = ""
             for page in pdf.pages:
                 page_text = page.extract_text()
                 if page_text:
                     text += page_text + "\n"
-            
+
             if text and len(text.strip()) > 10:
                 logger.info(f"Successfully extracted {len(text)} chars with pdfplumber")
                 return text
             else:
                 logger.warning("pdfplumber extracted empty or very short text")
-                extraction_errors.append("pdfplumber: Empty result")
-    except ImportError:
-        logger.warning("pdfplumber not installed")
-        extraction_errors.append("pdfplumber: Not installed")
+                return "PDF text extraction failed - empty or invalid content"
     except Exception as e:
         error_msg = f"pdfplumber extraction failed: {str(e)}"
-        logger.warning(error_msg)
-        extraction_errors.append(error_msg)
-    
-    # 2. Try pdftotext if available
-    try:
-        import pdftotext
-        logger.info("Attempting extraction with pdftotext")
-        
-        with open(filepath, "rb") as f:
-            pdf = pdftotext.PDF(f)
-            if len(pdf) > 0:
-                text = "\n".join(pdf)
-                if text and len(text.strip()) > 10:
-                    logger.info(f"Successfully extracted {len(text)} chars with pdftotext")
-                    return text
-                else:
-                    logger.warning("pdftotext extracted empty or very short text")
-                    extraction_errors.append("pdftotext: Empty result")
-            else:
-                logger.warning("pdftotext found no pages")
-                extraction_errors.append("pdftotext: No pages")
-    except ImportError:
-        logger.warning("pdftotext not installed")
-        extraction_errors.append("pdftotext: Not installed")
-    except Exception as e:
-        error_msg = f"pdftotext extraction failed: {str(e)}"
-        logger.warning(error_msg)
-        extraction_errors.append(error_msg)
-
-    # 3. Try PyPDF2 (newer or older versions)
-    if PDF_PROCESSOR_NAME in ["PyPDF2", "PyPDF2-Legacy"]:
-        try:
-            with open(filepath, 'rb') as file:
-                reader = PDF_PROCESSOR(file)
-                text = ""
-                for page in reader.pages:
-                    text += page.extract_text() + "\n"
-                
-                if text and len(text.strip()) > 10:
-                    logger.info(f"Successfully extracted {len(text)} chars with {PDF_PROCESSOR_NAME}")
-                    return text
-                else:
-                    logger.warning(f"{PDF_PROCESSOR_NAME} extracted empty or very short text")
-                    extraction_errors.append(f"{PDF_PROCESSOR_NAME}: Empty result")
-        except Exception as e:
-            error_msg = f"{PDF_PROCESSOR_NAME} extraction failed: {str(e)}"
-            logger.warning(error_msg)
-            extraction_errors.append(error_msg)
-
-    # 4. Last resort - try to read as binary and decode
-    try:
-        logger.info("Attempting binary read as last resort")
-        with open(filepath, 'rb') as file:
-            data = file.read()
-            text = data.decode('utf-8', errors='ignore')
-            
-            # Check if we got anything useful
-            if text and len(text.strip()) > 100:
-                logger.info(f"Successfully extracted {len(text)} chars with binary fallback")
-                return text
-            else:
-                logger.warning("Binary fallback produced too little text")
-                extraction_errors.append("Binary: Too little text")
-    except Exception as e:
-        error_msg = f"Binary read/decode failed: {str(e)}"
         logger.error(error_msg)
-        extraction_errors.append(error_msg)
-
-    # 5. If we get here, we've tried everything and failed
-    # Instead of raising an error, return a placeholder text
-    logger.error(f"All PDF extraction methods failed: {', '.join(extraction_errors)}")
-    return "PDF text extraction failed, but processing will continue. This is placeholder text."
+        return "PDF text extraction failed - processing error"
 
 
 def extract_text_from_docx_file(filepath):
@@ -334,24 +236,14 @@ def extract_text_from_resume(file_object, save_to_disk=True, upload_folder=None,
 
         try:
             if filename.endswith('.pdf'):
-                # In-memory PDF processing
-                if PDF_PROCESSOR_NAME in ["PyPDF2", "PyPDF2-Legacy"]:
-                    reader = PDF_PROCESSOR(file_content_io)
-                    text = ""
-                    for page in reader.pages:
-                        text += page.extract_text() + "\n"
-                elif PDF_PROCESSOR_NAME == "pdfplumber":
-                    import pdfplumber
+                # In-memory PDF processing with pdfplumber
+                if PDF_PROCESSOR_NAME == "pdfplumber":
                     with pdfplumber.open(file_content_io) as pdf:
                         text = ""
                         for page in pdf.pages:
                             text += page.extract_text() + "\n"
-                elif PDF_PROCESSOR_NAME == "pdftotext":
-                    import pdftotext
-                    pdf = pdftotext.PDF(file_content_io)
-                    text = "\n".join(pdf)
                 else:
-                    # Last resort - try to decode binary
+                    # Fallback to binary decoding if pdfplumber not available
                     text = file_content.decode('utf-8', errors='ignore')
             elif filename.endswith('.docx'):
                 try:
@@ -742,7 +634,8 @@ def apply_with_screening(job_id):
 
         # Customize the response message based on the result
         if result.get('success', False):
-            result['message'] = f"We've successfully analyzed your resume and found {result.get('analysis', {}).get('skills_analysis', {}).get('match_count', 0)} matching skills."
+            result[
+                'message'] = f"We've successfully analyzed your resume and found {result.get('analysis', {}).get('skills_analysis', {}).get('match_count', 0)} matching skills."
         else:
             # Set success to True even if there was an issue
             result['success'] = True
