@@ -496,6 +496,11 @@ def analyze_cs_skills(resume_text):
 
 
 def check_job_requirements(matched_skills, required_skills=None, min_match_percentage=60):
+    # FIXED: Handle case where required_skills is not iterable
+    if required_skills is not None and not hasattr(required_skills, '__iter__'):
+        logger.warning(f"Non-iterable required_skills value ({type(required_skills).__name__}), defaulting to None")
+        required_skills = None
+
     if not required_skills:
         # No specific requirements, so match at least 5 skills
         return {
