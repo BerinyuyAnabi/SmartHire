@@ -14,60 +14,6 @@ from flask import Blueprint, request, jsonify, send_file
 from question_bank import get_assessment_questions
 
 
-
-
-def create_required_tables():
-    """Create tables if they don't exist"""
-    try:
-        conn = get_db_connection()
-        if not conn:
-            logger.warning("No database connection available. Cannot create tables.")
-            return
-            
-        cursor = conn.cursor()
-        
-        # Check if job_applicants table exists
-        try:
-            cursor.execute("SHOW TABLES LIKE 'job_applicants'")
-            if not cursor.fetchone():
-                logger.info("Creating job_applicants table")
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS job_applicants (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        job_id INT NOT NULL,
-                        applicant_id INT NOT NULL,
-                        applied_at DATETIME,
-                        status VARCHAR(50) DEFAULT 'Applied'
-                    )
-                """)
-                conn.commit()
-        except Exception as e:
-            logger.error(f"Error checking/creating job_applicants table: {str(e)}")
-            
-        # Check if assessment_sessions table exists
-        try:
-            cursor.execute("SHOW TABLES LIKE 'assessment_sessions'")
-            if not cursor.fetchone():
-                logger.info("Creating assessment_sessions table")
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS assessment_sessions (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        applicant_id INT NOT NULL,
-                        job_id INT NOT NULL,
-                        created_at DATETIME,
-                        status VARCHAR(50) DEFAULT 'pending'
-                    )
-                """)
-                conn.commit()
-        except Exception as e:
-            logger.error(f"Error checking/creating assessment_sessions table: {str(e)}")
-            
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        logger.error(f"Error creating required tables: {str(e)}")
-
-
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -76,10 +22,6 @@ logger = logging.getLogger(__name__)
 PDF_PROCESSOR = None
 PDF_PROCESSOR_NAME = None
 
-try:
-    create_required_tables()
-except Exception as e:
-    logger.error(f"Error creating tables on startup: {str(e)}")
 
 # Try PyPDF2 first (newer versions)
 try:
@@ -917,8 +859,6 @@ def submit_application(applicant_data, resume_file, cover_letter_file=None, job_
         # Try to save to database if possible, but handle errors
         db_applicant_id = None
         try:
-            # Try to create the required tables first
-            create_required_tables()
             
             # Get database connection
             conn = get_db_connection()
