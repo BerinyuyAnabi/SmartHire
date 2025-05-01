@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify, send_from_directory, session, redirect, url_for, render_template
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
@@ -9,6 +10,14 @@ import os
 import re
 import json
 from datetime import datetime, timedelta
+
+# CV IMPORTS
+from cv_analyzer import analyze_cs_resume
+from question_bank import get_assessment_questions
+import json
+from datetime import datetime
+
+
 
 # Load environment variables
 project_folder = '/home/smarthiringorg/SmartHire/Flask_Backend/'
@@ -1359,6 +1368,218 @@ def apply_for_job(job_id):
     except Exception as e:
         app.logger.error(f"Error applying for job: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+
+"""
+This code adds the missing route for CV screening functionality.
+Add this to your Flask application to handle the resume screening requests 
+from the React frontend.
+"""
+
+# Add this route to your Flask application
+@app.route('/api/public/jobs/<int:job_id>/apply-with-screening', methods=['POST'])
+def apply_with_screening(job_id):
+    try:
+        # Get form data
+        full_name = request.form.get('full_name')
+        first_name = request.form.get('firstName')
+        last_name = request.form.get('lastName')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        gender = request.form.get('gender', '')
+        
+        # If full_name wasn't provided but first and last name were
+        if not full_name and first_name and last_name:
+            full_name = f"{first_name} {last_name}"
+        
+        # Validate required fields
+        if not full_name:
+            return jsonify({"error": "Full name is required"}), 400
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
+        
+        # Check if job exists
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("SELECT * FROM jobs WHERE id = %s", (job_id,))
+        job = cursor.fetchone()
+        
+        if not job:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Job not found"}), 404
+        
+        # Handle CV/resume file upload
+        resume_file = request.files.get('resume')
+        cover_letter_file = request.files.get('coverLetter')
+        
+        if not resume_file:
+            return jsonify({"error": "Resume/CV is required"}), 400
+        
+        # Save uploaded resume temporarily
+        resume_path = os.path.join('/tmp', f"{email}_{datetime.now().strftime('%Y%m%d%H%M%S')}_resume{os.path.splitext(resume_file.filename)[1]}")
+        resume_file.save(resume_path)
+        
+        # Process CV/resume for skill matching using the cv_analyzer module
+        try:
+            # Analyze the resume using the imported function
+            analysis_result = analyze_cs_resume(resume_path, job_id)
+            
+            # Determine if the applicant meets the requirements
+            skills_match = analysis_result.get('skills_analysis', {})
+            match_percentage = skills_match.get('match_percentage', 0)
+            
+            # Decide if applicant passes the screening (adjust threshold as needed)
+            success = match_percentage >= 60  # 60% match required to pass
+            
+            # Create applicant record in database
+            # Create or get applicant
+            cursor.execute(
+                "SELECT id FROM applicants WHERE email = %s",
+                (email,)
+            )
+            existing_applicant = cursor.fetchone()
+            
+            if existing_applicant:
+                applicant_id = existing_applicant['id']
+                
+                # Update applicant information
+                cursor.execute("""
+                    UPDATE applicants SET
+                        full_name = %s,
+                        phone = %s,
+                        gender = %s,
+                        status = %s,
+                        updated_at = %s
+                    WHERE id = %s
+                """, (
+                    full_name,
+                    phone,
+                    gender,
+                    'Shortlisted' if success else 'Applied',
+                    datetime.now(),
+                    applicant_id
+                ))
+            else:
+                # Create new applicant
+                cursor.execute("""
+                    INSERT INTO applicants (
+                        full_name, email, phone, gender, status, created_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                """, (
+                    full_name,
+                    email,
+                    phone,
+                    gender,
+                    'Shortlisted' if success else 'Applied',
+                    datetime.now()
+                ))
+                
+                applicant_id = cursor.lastrowid
+            
+            # Associate applicant with job
+            cursor.execute(
+                "SELECT id FROM job_applicants WHERE job_id = %s AND applicant_id = %s",
+                (job_id, applicant_id)
+            )
+            
+            if cursor.fetchone():
+                # Already applied, just update the application date
+                cursor.execute(
+                    "UPDATE job_applicants SET applied_at = %s WHERE job_id = %s AND applicant_id = %s",
+                    (datetime.now(), job_id, applicant_id)
+                )
+            else:
+                # Create new application
+                cursor.execute(
+                    "INSERT INTO job_applicants (job_id, applicant_id, applied_at) VALUES (%s, %s, %s)",
+                    (job_id, applicant_id, datetime.now())
+                )
+                
+                # Increment the applicants_count in jobs table
+                cursor.execute(
+                    "UPDATE jobs SET applicants_count = applicants_count + 1 WHERE id = %s",
+                    (job_id,)
+                )
+            
+            # If successful, create an assessment
+            assessment_id = None
+            if success:
+                # Get questions based on the matched skills
+                matched_skills = skills_match.get('matched_skills', [])
+                assessment_questions = get_assessment_questions(matched_skills, job_id)
+                
+                # Create an assessment session
+                cursor.execute("""
+                    INSERT INTO assessment_sessions (
+                        applicant_id, job_id, created_at, status
+                    ) VALUES (%s, %s, %s, %s)
+                """, (
+                    applicant_id,
+                    job_id,
+                    datetime.now(),
+                    'pending'
+                ))
+                
+                assessment_id = cursor.lastrowid
+                
+                # Store the questions for this assessment
+                for question in assessment_questions:
+                    cursor.execute("""
+                        INSERT INTO assessment_questions (
+                            session_id, question_text, question_type, options, correct_answer
+                        ) VALUES (%s, %s, %s, %s, %s)
+                    """, (
+                        assessment_id,
+                        question.get('question_text'),
+                        question.get('question_type', 'multiple-choice'),
+                        json.dumps(question.get('options', [])),
+                        question.get('correct_answer', '')
+                    ))
+            
+            conn.commit()
+            
+            # Prepare response with screening results
+            response_data = {
+                "success": success,
+                "message": "Your skills match our requirements! Proceed to the technical assessment." if success else "Your skills don't seem to match our requirements. Please check other positions.",
+                "application_id": applicant_id,
+                "assessment_id": assessment_id,
+                "analysis": analysis_result
+            }
+            
+            cursor.close()
+            conn.close()
+            
+            # Clean up the temporary file
+            try:
+                os.remove(resume_path)
+            except Exception as e:
+                app.logger.error(f"Error removing temporary file: {str(e)}")
+            
+            return jsonify(response_data)
+            
+        except Exception as e:
+            app.logger.error(f"Error analyzing resume: {str(e)}")
+            
+            # Clean up the temporary file
+            try:
+                os.remove(resume_path)
+            except:
+                pass
+            
+            # Return a friendly error message
+            return jsonify({
+                "success": False,
+                "error": "We couldn't process your resume. Please make sure it's in a valid format (PDF or Word)."
+            }), 500
+    
+    except Exception as e:
+        app.logger.error(f"Error in application with screening: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
