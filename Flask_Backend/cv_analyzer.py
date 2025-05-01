@@ -14,10 +14,6 @@ from flask import Blueprint, request, jsonify, send_file
 from question_bank import get_assessment_questions
 
 
-try:
-    create_required_tables()
-except Exception as e:
-    logger.error(f"Error creating tables on startup: {str(e)}")
 
 
 def create_required_tables():
@@ -80,6 +76,11 @@ logger = logging.getLogger(__name__)
 PDF_PROCESSOR = None
 PDF_PROCESSOR_NAME = None
 
+try:
+    create_required_tables()
+except Exception as e:
+    logger.error(f"Error creating tables on startup: {str(e)}")
+
 # Try PyPDF2 first (newer versions)
 try:
     from PyPDF2 import PdfReader
@@ -107,6 +108,9 @@ except ImportError:
                 logger.info("Using pdftotext")
             except ImportError:
                 logger.warning("No PDF processing libraries available. PDF parsing will be limited.")
+
+
+
 
 # Import the database connection function - adjust import path as needed
 try:
