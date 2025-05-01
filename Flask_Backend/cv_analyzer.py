@@ -545,6 +545,12 @@ def get_required_skills_for_job(job_id):
             conn.close()
 
 def check_job_requirements(matched_skills, required_skills=None, min_match_percentage=60):
+
+    logger.info(f"INSIDE FUNCTION - Type of matched_skills: {type(matched_skills)}")
+    logger.info(f"INSIDE FUNCTION - Value of matched_skills: {matched_skills}")
+    logger.info(f"INSIDE FUNCTION - Type of required_skills: {type(required_skills)}")
+    logger.info(f"INSIDE FUNCTION - Value of required_skills: {required_skills}")
+    
     """
     Fixed check_job_requirements that safely handles all edge cases.
     """
@@ -751,7 +757,8 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
         # Check job requirements
         job_match = check_job_requirements(
             skills_analysis["matched_skills"],
-            ['figma', 'adobe xd', 'user research', 'wireframing', 'prototyping']
+            ['figma', 'adobe xd', 'user research', 'wireframing', 'prototyping'],
+            min_match_percentage
         )
 
         # Get experience level
