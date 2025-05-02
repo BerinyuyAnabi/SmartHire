@@ -1,4 +1,4 @@
-/* Assessment.css - Premium Design */
+/* Assessment.css - Premium Design with Relaxed Card Layout */
 :root {
   --primary: #006d6d;
   --primary-light: #01a0a0;
@@ -22,9 +22,9 @@
   --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
   --transition: all 0.3s ease;
-  --border-radius: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px;
+  --border-radius: 12px; /* Increased from 8px */
+  --border-radius-lg: 16px; /* Increased from 12px */
+  --border-radius-xl: 20px; /* Increased from 16px */
 }
 
 /* Assessment Page Container */
@@ -33,7 +33,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  max-width: 900px;
+  max-width: 1000px; /* Increased from 900px */
   margin: 2rem auto;
   padding: 0;
   font-family: 'Inter', sans-serif;
@@ -42,14 +42,14 @@
 /* Assessment Header */
 .header-section {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-  padding: 2.5rem;
+  padding: 3rem; /* Increased from 2.5rem */
   color: var(--white);
   border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
   position: relative;
 }
 
 .header-section h1 {
-  font-size: 2rem;
+  font-size: 2.2rem; /* Increased from 2rem */
   font-weight: 700;
   margin-bottom: 1.2rem;
   letter-spacing: -0.02em;
@@ -58,13 +58,13 @@
 .progress-container-assessment {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: 1.5rem; /* Increased from 1rem */
+  margin-top: 2rem; /* Increased from 1.5rem */
 }
 
 .progress-bar-assessment {
   flex-grow: 1;
-  height: 8px;
+  height: 10px; /* Increased from 8px */
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   overflow: hidden;
@@ -80,7 +80,7 @@
 .progress-percentage {
   color: var(--white);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem; /* Increased from 0.9rem */
   min-width: 40px;
 }
 
@@ -89,14 +89,14 @@
   color: var(--white);
   border: none;
   border-radius: 30px;
-  padding: 0.5rem 1.2rem;
-  font-size: 0.9rem;
+  padding: 0.6rem 1.4rem; /* Increased from 0.5rem 1.2rem */
+  font-size: 1rem; /* Increased from 0.9rem */
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem; /* Increased from 0.5rem */
 }
 
 .preview-btn:hover {
@@ -105,8 +105,8 @@
 }
 
 .preview-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 18px; /* Increased from 16px */
+  height: 18px; /* Increased from 16px */
 }
 
 /* Question Information Bar */
@@ -114,10 +114,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2.5rem;
+  padding: 1.2rem 3rem; /* Increased from 1rem 2.5rem */
   background-color: var(--white);
   border-bottom: 1px solid var(--gray-200);
-  font-size: 0.95rem;
+  font-size: 1rem; /* Increased from 0.95rem */
 }
 
 .question-number {
@@ -128,11 +128,11 @@
 .timer {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem; /* Increased from 0.5rem */
   color: var(--gray-700);
   font-weight: 600;
   background-color: var(--gray-100);
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem; /* Increased from 0.5rem 1rem */
   border-radius: 30px;
 }
 
@@ -153,61 +153,64 @@
 }
 
 .question {
-  padding: 2.5rem 2.5rem 1.5rem;
+  padding: 3rem 3rem 2rem; /* Increased from 2.5rem 2.5rem 1.5rem */
   color: var(--gray-900);
-  font-size: 1.2rem;
+  font-size: 1.3rem; /* Increased from 1.2rem */
   font-weight: 500;
-  line-height: 1.6;
+  line-height: 1.7; /* Increased from 1.6 */
 }
 
 .answer-section {
-  padding: 0 2.5rem 2rem;
+  padding: 0 3rem 2.5rem; /* Increased from 0 2.5rem 2rem */
 }
 
-/* Multiple Choice Options */
+/* Multiple Choice Options - MAIN CHANGES HERE */
 .options-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem; /* Increased from 1rem for more spacing between options */
 }
 
 .option {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.2rem 1.5rem;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--border-radius);
+  gap: 1.5rem; /* Increased from 1rem */
+  padding: 1.5rem 2rem; /* Increased from 1.2rem 1.5rem for more padding */
+  border: 2px solid var(--gray-300); /* Increased border width from 1px */
+  border-radius: var(--border-radius-lg); /* Using larger border radius */
   cursor: pointer;
   transition: var(--transition);
   background-color: var(--white);
+  /* Added box shadow for depth */
+  box-shadow: var(--shadow-sm);
 }
 
 .option:hover {
   border-color: var(--primary-light);
   background-color: var(--off-white);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-3px); /* Increased from -2px */
+  box-shadow: var(--shadow-md); /* Increased shadow on hover */
 }
 
 .option.selected {
-  background-color: rgba(0, 109, 109, 0.05);
+  background-color: rgba(0, 109, 109, 0.08); /* Slightly darker background */
   border-color: var(--primary);
-  box-shadow: 0 0 0 1px var(--primary);
+  box-shadow: 0 0 0 2px var(--primary); /* Thicker focus ring */
 }
 
 .option-letter {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 45px; /* Increased from 36px */
+  height: 45px; /* Increased from 36px */
   background-color: var(--gray-100);
   color: var(--primary);
   font-weight: 600;
   border-radius: 50%;
   flex-shrink: 0;
   transition: var(--transition);
+  font-size: 1.1rem; /* Added font size */
 }
 
 .option.selected .option-letter {
@@ -217,28 +220,28 @@
 
 .option-text {
   color: var(--gray-800);
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 1.1rem; /* Increased from 1rem */
+  line-height: 1.6; /* Increased from 1.5 */
 }
 
 /* Text Input */
 .input-container {
-  margin-top: 1rem;
+  margin-top: 1.5rem; /* Increased from 1rem */
 }
 
 .input-container textarea {
   width: 100%;
-  padding: 1.2rem;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--border-radius);
+  padding: 1.5rem; /* Increased from 1.2rem */
+  border: 2px solid var(--gray-300); /* Increased from 1px */
+  border-radius: var(--border-radius-lg); /* Using larger border radius */
   resize: vertical;
-  min-height: 180px;
+  min-height: 200px; /* Increased from 180px */
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 1.1rem; /* Increased from 1rem */
   color: var(--gray-800);
   background-color: var(--white);
   transition: var(--transition);
-  line-height: 1.6;
+  line-height: 1.7; /* Increased from 1.6 */
 }
 
 .input-container textarea:focus {
@@ -255,7 +258,7 @@
 .navigation-buttons {
   display: flex;
   justify-content: space-between;
-  padding: 1.5rem 2.5rem 2.5rem;
+  padding: 2rem 3rem 3rem; /* Increased from 1.5rem 2.5rem 2.5rem */
   background-color: var(--white);
   border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
   border-top: 1px solid var(--gray-200);
@@ -266,20 +269,20 @@
   color: var(--white);
   border: 1px solid var(--gray-300);
   border-radius: 30px;
-  padding: 0.8rem 1.8rem;
-  font-size: 0.95rem;
+  padding: 1rem 2rem; /* Increased from 0.8rem 1.8rem */
+  font-size: 1.05rem; /* Increased from 0.95rem */
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem; /* Increased from 0.5rem */
 }
 
 .nav-button-assessment:hover:not(:disabled) {
   background-color: var(--primary-dark);
   color: var(--white);
-  transform: translateY(-2px);
+  transform: translateY(-3px); /* Increased from -2px */
 }
 
 .nav-button-assessment:disabled {
@@ -298,6 +301,51 @@
   color: var(--white);
 }
 
+/* Added for question navigation dots - more spacious */
+.question-navigation-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem; /* Increased from 0.5rem if you had this before */
+  padding: 0 0 2rem 0; /* More bottom padding */
+}
+
+.question-dot {
+  width: 14px; /* Increased from 10px if you had this before */
+  height: 14px; /* Increased from 10px if you had this before */
+  border-radius: 50%;
+  background-color: var(--gray-300);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.question-dot.active {
+  background-color: var(--primary);
+  transform: scale(1.2); /* Slight increase in size for active dot */
+}
+
+.question-dot.answered {
+  background-color: var(--gray-500);
+}
+
+/* Additional animation classes */
+.fade-in {
+  animation: fadeIn 0.4s ease-in;
+}
+
+.fade-out {
+  animation: fadeOut 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
 /* Media Queries for Responsiveness */
 @media (max-width: 992px) {
   .portal {
@@ -306,30 +354,30 @@
   }
   
   .header-section {
-    padding: 2rem;
+    padding: 2.5rem; /* Adjusted from 2rem */
   }
 }
 
 @media (max-width: 768px) {
   .header-section {
-    padding: 1.5rem;
+    padding: 2rem; /* Adjusted from 1.5rem */
   }
   
   .question-info {
-    padding: 1rem 1.5rem;
+    padding: 1.2rem 2rem; /* Adjusted from 1rem 1.5rem */
   }
   
   .question {
-    padding: 1.5rem 1.5rem 1rem;
-    font-size: 1.1rem;
+    padding: 2rem 2rem 1.5rem; /* Adjusted from 1.5rem 1.5rem 1rem */
+    font-size: 1.2rem; /* Adjusted from 1.1rem */
   }
   
   .answer-section, .navigation-buttons {
-    padding: 0 1.5rem 1.5rem;
+    padding: 0 2rem 2rem; /* Adjusted from 0 1.5rem 1.5rem */
   }
   
   .option {
-    padding: 1rem;
+    padding: 1.2rem 1.5rem; /* Adjusted from 1rem */
   }
 }
 
@@ -342,21 +390,30 @@
   
   .header-section {
     border-radius: 0;
-    padding: 1.2rem;
+    padding: 1.5rem; /* Adjusted from 1.2rem */
   }
   
   .question-info {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.8rem;
+    gap: 1rem; /* Adjusted from 0.8rem */
+  }
+  
+  .question {
+    padding: 1.5rem 1.5rem 1rem; /* Added more padding */
+    font-size: 1.1rem;
+  }
+  
+  .option {
+    padding: 1.2rem 1.5rem; /* Increased padding */
   }
   
   .navigation-buttons {
-    padding: 1rem 1.2rem 1.5rem;
+    padding: 1.5rem 1.5rem 2rem; /* Adjusted from 1rem 1.2rem 1.5rem */
   }
   
-  .nav-button {
-    padding: 0.7rem 1.2rem;
-    font-size: 0.9rem;
+  .nav-button-assessment {
+    padding: 0.8rem 1.5rem; /* Adjusted from 0.7rem 1.2rem */
+    font-size: 1rem; /* Adjusted from 0.9rem */
   }
 }

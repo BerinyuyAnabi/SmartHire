@@ -43,6 +43,7 @@ function Assessment() {
         }
         
         const data = await response.json();
+        console.log("Raw data received:", data);
         
         // Check for questions array in different possible structures
         const questionsArray = data.questions || data || [];
@@ -51,15 +52,17 @@ function Assessment() {
           throw new Error("No questions found for this assessment");
         }
         
+        console.log("Questions array before normalization:", questionsArray);
+        
         // Normalize the question structure to match what the component expects
         const normalizedQuestions = questionsArray.map(q => ({
           id: q.id || `q_${Math.random().toString(36).substr(2, 9)}`,
-          question: q.question || q.question_text || '',
+          questionText: q.question_text || q.question || '', // Store original property
           options: q.options || [],
-          type: q.type || q.question_type || 'multiple-choice'
+          type: q.question_type || q.type || 'multiple-choice'
         }));
         
-        console.log(`Loaded ${normalizedQuestions.length} questions`);
+        console.log(`Loaded ${normalizedQuestions.length} questions after normalization:`, normalizedQuestions);
         setQuestions(normalizedQuestions);
         
         // Check if we have saved answers
@@ -83,19 +86,19 @@ function Assessment() {
         const sampleQuestions = [
           {
             id: "prog_1",
-            question: "What is the time complexity of binary search on a sorted array?",
+            questionText: "What is the time complexity of binary search on a sorted array?",
             options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
             type: "multiple-choice"
           },
           {
             id: "fe_1",
-            question: "Which of the following is NOT a JavaScript framework or library?",
+            questionText: "Which of the following is NOT a JavaScript framework or library?",
             options: ["React", "Angular", "Vue", "Servlet"],
             type: "multiple-choice"
           },
           {
             id: "be_1",
-            question: "What does REST stand for in the context of API design?",
+            questionText: "What does REST stand for in the context of API design?",
             options: [
               "Reactive State Transfer",
               "Representational State Transfer",
@@ -106,13 +109,13 @@ function Assessment() {
           },
           {
             id: "db_1",
-            question: "Which of the following is a NoSQL database?",
+            questionText: "Which of the following is a NoSQL database?",
             options: ["MySQL", "PostgreSQL", "Oracle", "MongoDB"],
             type: "multiple-choice"
           },
           {
             id: "devops_1",
-            question: "What is the main purpose of container technology like Docker?",
+            questionText: "What is the main purpose of container technology like Docker?",
             options: [
               "To virtualize entire operating systems",
               "To package applications with their dependencies for consistent deployment",
@@ -123,7 +126,7 @@ function Assessment() {
           },
           {
             id: "code_1",
-            question: "Review the following code snippet and explain what it does:\n\n```javascript\nfunction mystery(arr) {\n  return arr.reduce((a, b) => a + b, 0) / arr.length;\n}\n```",
+            questionText: "Review the following code snippet and explain what it does:\n\n```javascript\nfunction mystery(arr) {\n  return arr.reduce((a, b) => a + b, 0) / arr.length;\n}\n```",
             type: "text",
             placeholder: "Write your explanation here..."
           }
@@ -136,6 +139,13 @@ function Assessment() {
 
     fetchAssessment();
   }, [assessmentId]);
+
+  // For debugging - log current question whenever it changes
+  useEffect(() => {
+    if (questions.length > 0 && currentQuestionIndex < questions.length) {
+      console.log("Current question being displayed:", questions[currentQuestionIndex]);
+    }
+  }, [questions, currentQuestionIndex]);
 
   // Save answers to localStorage whenever they change
   useEffect(() => {
@@ -393,9 +403,9 @@ function Assessment() {
           </div>
         </div>
 
-        {/* Question Text */}
+        {/* Question Text - FIXED HERE */}
         <div className={`question ${isAnimating ? 'fade-out' : 'fade-in'}`}>
-          <p dangerouslySetInnerHTML={{ __html: currentQuestion.question.replace(/\n/g, '<br/>') }}></p>
+          <p dangerouslySetInnerHTML={{ __html: currentQuestion.questionText.replace(/\n/g, '<br/>') }}></p>
         </div>
 
         {/* Answer Section */}

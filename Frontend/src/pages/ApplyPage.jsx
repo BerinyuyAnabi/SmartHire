@@ -752,7 +752,7 @@ function ApplyPage({ job, onBack }) {
                 </button>
                 <button 
                   type="button" 
-                  className="btn btn-continue" 
+                  className="btn btn-continue"
                   onClick={handleContinue}
                   disabled={submitting}
                 >
