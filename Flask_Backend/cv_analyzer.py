@@ -1044,6 +1044,13 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
         # Log that we're returning
         logger.info("Returning result without reference issues")
         
+        # Add this before returning safe_result
+        for key in safe_result.keys():
+            logger.info(f"Key: {key}, Type: {type(safe_result[key])}")
+            if isinstance(safe_result[key], dict):
+                for subkey in safe_result[key].keys():
+                    logger.info(f"  Subkey: {subkey}, Type: {type(safe_result[key][subkey])}")
+        
         return safe_result
 
     except Exception as e:

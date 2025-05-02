@@ -17,6 +17,11 @@ from datetime import datetime
 from cv_analyzer import register_api_routes, analyze_cs_resume
 from pathlib import Path
 
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__, static_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist/static',
             template_folder='/home/smarthiringorg/SmartHire/Flask_Backend/dist')
 
@@ -1568,6 +1573,9 @@ def apply_with_screening(job_id):
                 upload_folder=RESUME_DIR  # Use the same folder for consistency
             )
             
+            logger.info(f"Analysis result type: {type(analysis_result)}")
+            logger.info(f"Analysis result keys: {analysis_result.keys() if isinstance(analysis_result, dict) else 'Not a dict'}")
+
             # Determine if the applicant meets the requirements
             skills_match = analysis_result.get('skills_analysis', {})
             match_percentage = skills_match.get('match_percentage', 0)
