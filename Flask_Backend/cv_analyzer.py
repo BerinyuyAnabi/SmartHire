@@ -437,6 +437,84 @@ def extract_text_from_resume(file_object, save_to_disk=True, upload_folder=None,
             return "", saved_file_path
         raise Exception(f"Error extracting text from resume: {str(e)}")
 
+def ensure_result_types(result):
+    """
+    Ensures all values in the analysis result are of the expected types.
+    """
+    if not isinstance(result, dict):
+        logger.error(f"Result is not a dictionary: {type(result)}")
+        return {
+            "success": False, 
+            "skills_analysis": {
+                "matched_skills": [],
+                "total_skills": 0,
+                "match_count": 0,
+                "match_percentage": 0,
+                "categories": {}
+            },
+            "job_match": {
+                "passes": False,
+                "match_percentage": 0,
+                "matched_required": [],
+                "missing_required": []
+            },
+            "experience_level": "unknown",
+            "proceed_to_assessment": True
+        }
+    
+    # Ensure skills_analysis is a dictionary
+    if not isinstance(result.get("skills_analysis"), dict):
+        logger.error(f"skills_analysis is not a dictionary: {type(result.get('skills_analysis'))}")
+        result["skills_analysis"] = {
+            "matched_skills": [],
+            "total_skills": 0,
+            "match_count": 0,
+            "match_percentage": 0,
+            "categories": {}
+        }
+    
+    # Ensure job_match is a dictionary
+    if not isinstance(result.get("job_match"), dict):
+        logger.error(f"job_match is not a dictionary: {type(result.get('job_match'))}")
+        result["job_match"] = {
+            "passes": False,
+            "match_percentage": 0,
+            "matched_required": [],
+            "missing_required": []
+        }
+    
+    # Ensure matched_skills is a list
+    skills_analysis = result.get("skills_analysis", {})
+    if not isinstance(skills_analysis.get("matched_skills"), list):
+        logger.error(f"matched_skills is not a list: {type(skills_analysis.get('matched_skills'))}")
+        skills_analysis["matched_skills"] = []
+    
+    # Ensure categories is a dictionary
+    if not isinstance(skills_analysis.get("categories"), dict):
+        logger.error(f"categories is not a dictionary: {type(skills_analysis.get('categories'))}")
+        skills_analysis["categories"] = {}
+    
+    # Ensure match_count and match_percentage are numbers
+    if not isinstance(skills_analysis.get("match_count"), (int, float)):
+        logger.error(f"match_count is not a number: {type(skills_analysis.get('match_count'))}")
+        skills_analysis["match_count"] = 0
+    
+    if not isinstance(skills_analysis.get("match_percentage"), (int, float)):
+        logger.error(f"match_percentage is not a number: {type(skills_analysis.get('match_percentage'))}")
+        skills_analysis["match_percentage"] = 0
+    
+    # Ensure job_match values are correct types
+    job_match = result.get("job_match", {})
+    if not isinstance(job_match.get("matched_required"), list):
+        logger.error(f"matched_required is not a list: {type(job_match.get('matched_required'))}")
+        job_match["matched_required"] = []
+    
+    if not isinstance(job_match.get("missing_required"), list):
+        logger.error(f"missing_required is not a list: {type(job_match.get('missing_required'))}")
+        job_match["missing_required"] = []
+    
+    return result
+
 
 def analyze_cs_skills(resume_text):
     resume_text = resume_text.lower()
@@ -789,41 +867,61 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
         # Get experience level
         experience_level = evaluate_experience_level(resume_text)
 
-        # Return successful analysis
-        return {
+        # Return successful analysis with type checking
+        result = {
             "success": True,
             "skills_analysis": skills_analysis,
             "job_match": job_match,
             "experience_level": experience_level,
-            "proceed_to_assessment": True,  # Always allow proceeding
+            "proceed_to_assessment": True,
             "resume_path": saved_file_path
         }
+        
+        # Make sure skills_analysis is a dictionary
+        if not isinstance(skills_analysis, dict):
+            logger.error(f"skills_analysis is not a dictionary: {type(skills_analysis)}")
+            result["skills_analysis"] = {
+                "matched_skills": [],
+                "total_skills": len(ALL_CS_SKILLS),
+                "match_count": 0,
+                "match_percentage": 0,
+                "categories": {}
+            }
+        
+        # Make sure job_match is a dictionary
+        if not isinstance(job_match, dict):
+            logger.error(f"job_match is not a dictionary: {type(job_match)}")
+            result["job_match"] = {
+                "passes": False,
+                "match_percentage": 0,
+                "matched_required": [],
+                "missing_required": []
+            }
+            
+        return result
 
     except Exception as e:
         logger.error(f"Error analyzing resume: {str(e)}")
         # Return a valid response with default values
         return {
-            "success": True,
+            "success": False,
             "error_details": str(e),
             "proceed_to_assessment": True,
             "resume_path": None,
             "skills_analysis": {
-                "matched_skills": ["python", "javascript", "html", "css", "react"],
+                "matched_skills": [],
                 "total_skills": len(ALL_CS_SKILLS),
-                "match_count": 5,
-                "match_percentage": 60,
-                "categories": {
-                    "programming_languages": ["python", "javascript"],
-                    "web_frontend": ["html", "css", "react"]
-                }
+                "match_count": 0,
+                "match_percentage": 0,
+                "categories": {}
             },
             "job_match": {
-                "passes": True,
-                "match_percentage": 60,
-                "matched_required": ["python", "javascript", "html", "css", "react"],
+                "passes": False,
+                "match_percentage": 0,
+                "matched_required": [],
                 "missing_required": []
             },
-            "experience_level": "mid"
+            "experience_level": "junior"
         }
 
 def generate_applicant_id(applicant_data):
@@ -958,6 +1056,8 @@ def submit_application(applicant_data, resume_file, cover_letter_file=None, job_
                     applicant_id=applicant_id
                 )
                 
+                analysis_result = ensure_result_types(analysis_result)
+
                 # Extract the analysis results
                 skills_analysis = analysis_result.get("skills_analysis")
                 job_match = analysis_result.get("job_match")
