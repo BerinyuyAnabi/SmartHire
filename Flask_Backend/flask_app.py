@@ -1619,7 +1619,11 @@ def apply_with_screening(job_id):
             if success or True:  # Always create assessment regardless of success
                 # Get questions based on the matched skills
                 matched_skills = skills_match.get('matched_skills', [])
-                assessment_questions = get_assessment_questions(matched_skills, job_id)
+                assessment_questions = get_assessment_questions(
+                    experience_level=analysis_result.get('experience_level', 'junior'),
+                    matched_skills=matched_skills,
+                    question_count=10
+                )
                 
                 # Create an assessment session
                 cursor.execute("""
