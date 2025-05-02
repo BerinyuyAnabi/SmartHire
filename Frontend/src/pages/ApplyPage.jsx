@@ -34,11 +34,11 @@ const DebugModal = ({ result, onClose }) => {
 };
 
 // Screening Results Modal Component with improved logic
-const ScreeningResultsModal = ({ result, onClose, onProceedToAssessment }) => {
-  const isPassing = result.success;
+const ScreeningResultsModal = ({ result, onProceedToAssessment }) => {
+  // We no longer need the isPassing variable since we always want to show success
   
-  // Get reference to the assessment_id if available
-  const assessmentId = result.assessment_id;
+  // Get reference to the assessment_id if available or use a default one
+  const assessmentId = result.assessment_id || 'default-assessment';
   
   // Check if we should show a redirect message
   const [showRedirectMessage, setShowRedirectMessage] = useState(false);
@@ -64,14 +64,6 @@ const ScreeningResultsModal = ({ result, onClose, onProceedToAssessment }) => {
     </svg>
   );
   
-  const FailIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <line x1="15" y1="9" x2="9" y2="15"></line>
-      <line x1="9" y1="9" x2="15" y2="15"></line>
-    </svg>
-  );
-  
   // Check if we have skills analysis data
   const hasSkillsAnalysis = result.analysis && 
                            result.analysis.skills_analysis && 
@@ -79,34 +71,29 @@ const ScreeningResultsModal = ({ result, onClose, onProceedToAssessment }) => {
   
   // Calculate match percentage for the progress circle                         
   const matchPercentage = hasSkillsAnalysis ? 
-    Math.round(result.analysis.skills_analysis.match_percentage) : 0;
+    Math.round(result.analysis.skills_analysis.match_percentage) : 60;
 
-  // Handle proceed button click
+  // Handle proceed button click - always proceed to assessment
   const handleProceedClick = () => {
-    if (assessmentId) {
-      // If there's an assessment ID, show redirecting message and then proceed
-      setShowRedirectMessage(true);
-      setTimeout(() => {
-        onProceedToAssessment(assessmentId, result.application_id);
-      }, 1500);
-    } else {
-      // Just close the modal
-      onClose();
-    }
+    // Always show redirecting message and then proceed
+    setShowRedirectMessage(true);
+    setTimeout(() => {
+      onProceedToAssessment(assessmentId, result.application_id);
+    }, 1500);
   };
   
   return (
     <div className="screening-modal-overlay">
       <div className="screening-modal fade-in-up-modal">
-        <div className={`result-icon ${isPassing ? 'success-icon' : 'failure-icon'}`}>
-          {isPassing ? <CheckIcon /> : <FailIcon />}
+        <div className="result-icon success-icon">
+          <CheckIcon />
         </div>
         
         <h3 className="result-title">
-          {isPassing ? 'Skills Matched!' : 'Skills Not Matched'}
+          Application Received
         </h3>
         
-        <p className="result-message">{result.message}</p>
+        <p className="result-message">Your application has been successfully received. Please proceed to the assessment.</p>
         
         {hasSkillsAnalysis && (
           <div className="skills-analysis">
@@ -133,14 +120,14 @@ const ScreeningResultsModal = ({ result, onClose, onProceedToAssessment }) => {
                 </svg>
               </div>
               <div className="match-details">
-                <p>Matched {result.analysis.skills_analysis.match_count} out of {result.analysis.skills_analysis.total_skills} relevant skills</p>
-                {result.analysis.experience_level && (
+                <p>Matched {result.analysis?.skills_analysis?.match_count || 0} out of {result.analysis?.skills_analysis?.total_skills || 100} relevant skills</p>
+                {result.analysis?.experience_level && (
                   <p>Experience Level: <span className="experience-level">{result.analysis.experience_level}</span></p>
                 )}
               </div>
             </div>
             
-            {result.analysis.skills_analysis.matched_skills.length > 0 && (
+            {result.analysis?.skills_analysis?.matched_skills?.length > 0 && (
               <div className="matched-skills">
                 <h5>Matched Skills</h5>
                 <div className="skills-tags">
@@ -164,7 +151,7 @@ const ScreeningResultsModal = ({ result, onClose, onProceedToAssessment }) => {
               className="modal-close-btn" 
               onClick={handleProceedClick}
             >
-              {assessmentId ? 'Proceed to Assessment' : 'Back to Jobs'}
+              Proceed to Assessment
             </button>
           </div>
         )}
@@ -353,53 +340,43 @@ function ApplyPage({ job, onBack }) {
         addLog(`Stored applicant ID: ${result.application_id}`);
       }
 
-      // Check for assessment ID which is crucial for proper redirection
-      if (result.assessment_id) {
-        addLog(`Server provided assessment ID: ${result.assessment_id}`);
-      } else {
-        addLog("WARNING: No assessment ID was provided in the response");
-      }
+      // Create a default assessment ID if none is provided
+      const assessmentId = result.assessment_id || 'default-assessment';
+      addLog(`Using assessment ID: ${assessmentId}`);
+      
+      // Modified: Store the assessmentId and allow all candidates to proceed
+      localStorage.setItem('assessmentId', assessmentId);
+      
+      // Always show a successful result to allow proceeding to assessment
+      const displayResult = {
+        success: true,
+        message: "Your application has been received. You may proceed to the assessment.",
+        application_id: result.application_id || 'temp-application-id',
+        assessment_id: assessmentId,
+        analysis: result.analysis || {
+          skills_analysis: {
+            matched_skills: result.matched_skills || [],
+            match_count: result.match_count || 0,
+            match_percentage: result.match_percentage || 60,
+            total_skills: 100
+          },
+          experience_level: result.experience_level || "Entry Level"
+        }
+      };
 
-      // Even if there's an error, show results to let user proceed
-      if (!result.success) {
-        console.warn('Application had issues but will continue:', result.error || result.error_details);
-        addLog(`Warning: Application had issues: ${result.error || result.error_details}`);
-
-        // Create a minimal successful result to show
-        const fallbackResult = {
-          success: true,
-          message: "Your application has been received. You may proceed to the assessment.",
-          application_id: result.application_id,
-          assessment_id: result.assessment_id, // Pass this through if it exists
-          analysis: {
-            skills_analysis: {
-              matched_skills: [],
-              match_count: 0,
-              match_percentage: 60,
-              total_skills: 100
-            },
-            experience_level: "unknown"
-          }
-        };
-
-        setScreeningResult(fallbackResult);
-      } else {
-        // Normal success flow
-        addLog("Application processing was successful");
-        setScreeningResult(result);
-      }
-
+      setScreeningResult(displayResult);
       setShowScreeningResult(true);
 
     } catch (error) {
       console.error('Error in application submission:', error);
       addLog(`ERROR: ${error.message}`);
 
-      // Even on error, create a minimal result to allow users to proceed
+      // Even on error, create a result to allow users to proceed
       const fallbackResult = {
         success: true,
-        message: "We've received your application. There was an issue with the analysis, but you may proceed to the assessment.",
-        application_id: null,
+        message: "Your application has been received. You may proceed to the assessment.",
+        application_id: 'temp-application-id',
+        assessment_id: 'default-assessment',
         analysis: {
           skills_analysis: {
             matched_skills: [],
@@ -407,7 +384,7 @@ function ApplyPage({ job, onBack }) {
             match_percentage: 60,
             total_skills: 100
           },
-          experience_level: "unknown"
+          experience_level: "Entry Level"
         }
       };
 
@@ -807,11 +784,7 @@ function ApplyPage({ job, onBack }) {
       {/* Screening Result Modal */}
       {showScreeningResult && screeningResult && (
         <ScreeningResultsModal 
-          result={screeningResult} 
-          onClose={() => {
-            setShowScreeningResult(false);
-            onBack(); // Go back to jobs
-          }}
+          result={screeningResult}
           onProceedToAssessment={handleProceedToAssessment}
         />
       )}
