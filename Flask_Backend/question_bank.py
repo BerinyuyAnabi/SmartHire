@@ -47,6 +47,88 @@ CS_QUESTIONS = {
         }
     ],
     
+    # Data Structures
+    "data_structures": [
+        {
+            "id": "ds_1",
+            "difficulty": "junior",
+            "question": "Which data structure operates on a First-In-First-Out (FIFO) principle?",
+            "options": ["Stack", "Queue", "Binary Tree", "Hash Table"],
+            "correct_answer": "Queue",
+            "explanation": "A queue follows the FIFO principle where the first element added is the first one to be removed."
+        },
+        {
+            "id": "ds_2",
+            "difficulty": "junior",
+            "question": "What is the time complexity of searching for an element in a balanced binary search tree?",
+            "options": ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+            "correct_answer": "O(log n)",
+            "explanation": "A balanced binary search tree divides the search space in half at each step, resulting in logarithmic time complexity."
+        },
+        {
+            "id": "ds_3",
+            "difficulty": "mid",
+            "question": "Which of the following data structures would be most efficient for implementing a dictionary with frequent lookups?",
+            "options": ["Array", "Linked List", "Hash Table", "Stack"],
+            "correct_answer": "Hash Table",
+            "explanation": "Hash tables provide O(1) average-case time complexity for lookups, making them ideal for dictionary implementations."
+        },
+        {
+            "id": "ds_4",
+            "difficulty": "senior",
+            "question": "Which data structure would be most appropriate for efficiently finding the k-th smallest element in a large dataset?",
+            "options": ["Sorted Array", "Min Heap", "Hash Table", "Linked List"],
+            "correct_answer": "Min Heap",
+            "explanation": "A min heap can efficiently track the k smallest elements seen so far, making it optimal for this problem."
+        }
+    ],
+    
+    # Algorithms
+    "algorithms": [
+        {
+            "id": "algo_1",
+            "difficulty": "junior",
+            "question": "What is the primary advantage of a binary search over a linear search?",
+            "options": [
+                "It works on unsorted data",
+                "It has O(log n) time complexity instead of O(n)",
+                "It requires less memory",
+                "It is easier to implement"
+            ],
+            "correct_answer": "It has O(log n) time complexity instead of O(n)",
+            "explanation": "Binary search is more efficient with O(log n) time complexity, but requires sorted data."
+        },
+        {
+            "id": "algo_2",
+            "difficulty": "junior",
+            "question": "Which sorting algorithm has the best average-case time complexity?",
+            "options": ["Bubble Sort", "Insertion Sort", "Merge Sort", "Selection Sort"],
+            "correct_answer": "Merge Sort",
+            "explanation": "Merge Sort has an average-case time complexity of O(n log n), which is optimal for comparison-based sorting algorithms."
+        },
+        {
+            "id": "algo_3",
+            "difficulty": "mid",
+            "question": "What is the purpose of dynamic programming?",
+            "options": [
+                "To parallelize algorithms across multiple processors",
+                "To solve problems by breaking them down into simpler overlapping subproblems",
+                "To dynamically allocate memory during program execution",
+                "To create self-modifying code"
+            ],
+            "correct_answer": "To solve problems by breaking them down into simpler overlapping subproblems",
+            "explanation": "Dynamic programming optimizes recursive solutions by storing results of subproblems to avoid redundant calculations."
+        },
+        {
+            "id": "algo_4",
+            "difficulty": "senior",
+            "question": "Which algorithm would be most appropriate for finding the shortest path in a graph with negative edge weights?",
+            "options": ["Dijkstra's Algorithm", "Bellman-Ford Algorithm", "A* Search", "Breadth-First Search"],
+            "correct_answer": "Bellman-Ford Algorithm",
+            "explanation": "Unlike Dijkstra's algorithm, Bellman-Ford can handle graphs with negative edge weights and can detect negative cycles."
+        }
+    ],
+    
     # Web Development - Frontend
     "frontend": [
         {
@@ -144,6 +226,57 @@ CS_QUESTIONS = {
         }
     ],
     
+    # Web Development - Full Stack
+    "fullstack": [
+        {
+            "id": "fs_1",
+            "difficulty": "junior",
+            "question": "What does CORS stand for in web development?",
+            "options": [
+                "Cross-Origin Resource Sharing",
+                "Content Origin Resource Server",
+                "Cross-Object Response System",
+                "Content-Oriented Response Service"
+            ],
+            "correct_answer": "Cross-Origin Resource Sharing",
+            "explanation": "CORS is a security feature that allows or restricts web applications running at one origin to request resources from a different origin."
+        },
+        {
+            "id": "fs_2",
+            "difficulty": "junior",
+            "question": "Which of the following is NOT a common HTTP request method?",
+            "options": ["GET", "POST", "SEND", "DELETE"],
+            "correct_answer": "SEND",
+            "explanation": "SEND is not a standard HTTP method. The common methods include GET, POST, PUT, DELETE, PATCH, and OPTIONS."
+        },
+        {
+            "id": "fs_3",
+            "difficulty": "mid",
+            "question": "What is the purpose of a web API gateway?",
+            "options": [
+                "To block unauthorized web traffic",
+                "To serve as a single entry point for multiple microservices",
+                "To increase database query performance",
+                "To compress web content for faster loading"
+            ],
+            "correct_answer": "To serve as a single entry point for multiple microservices",
+            "explanation": "An API gateway acts as a reverse proxy, routing requests to appropriate services and handling cross-cutting concerns like authentication."
+        },
+        {
+            "id": "fs_4",
+            "difficulty": "senior",
+            "question": "Which pattern would be most appropriate for handling real-time updates in a web application?",
+            "options": [
+                "Request-Response Pattern",
+                "Publish-Subscribe Pattern",
+                "Batch Processing Pattern",
+                "Circuit Breaker Pattern"
+            ],
+            "correct_answer": "Publish-Subscribe Pattern",
+            "explanation": "The Publish-Subscribe pattern allows for real-time updates by having clients subscribe to events and receiving notifications when events occur."
+        }
+    ],
+    
     # Database
     "database": [
         {
@@ -187,6 +320,93 @@ CS_QUESTIONS = {
             ],
             "correct_answer": "A partitioning strategy that splits a database across multiple servers",
             "explanation": "Sharding is a horizontal partitioning method that splits a large database across multiple servers to improve performance and scalability."
+        }
+    ],
+    
+    # Mobile Development
+    "mobile": [
+        {
+            "id": "mob_1",
+            "difficulty": "junior",
+            "question": "Which programming language is primarily used for native iOS app development?",
+            "options": ["Java", "Kotlin", "Swift", "C#"],
+            "correct_answer": "Swift",
+            "explanation": "Swift is Apple's preferred language for iOS development, replacing Objective-C as the primary language."
+        },
+        {
+            "id": "mob_2",
+            "difficulty": "junior",
+            "question": "What is the purpose of responsive design in mobile development?",
+            "options": [
+                "To make apps respond faster to user input",
+                "To adapt the layout to different screen sizes and orientations",
+                "To reduce the app's memory footprint",
+                "To enable push notifications"
+            ],
+            "correct_answer": "To adapt the layout to different screen sizes and orientations",
+            "explanation": "Responsive design ensures that applications look and function well across a variety of devices and screen sizes."
+        },
+        {
+            "id": "mob_3",
+            "difficulty": "mid",
+            "question": "What is the main advantage of using React Native for mobile development?",
+            "options": [
+                "It compiles to completely native code for maximum performance",
+                "It allows sharing code between iOS and Android platforms",
+                "It provides deeper access to hardware features than native development",
+                "It requires less memory than native applications"
+            ],
+            "correct_answer": "It allows sharing code between iOS and Android platforms",
+            "explanation": "React Native enables developers to write once and deploy to multiple platforms, significantly reducing development time."
+        },
+        {
+            "id": "mob_4",
+            "difficulty": "senior",
+            "question": "Which mobile app architecture pattern separates the app into three components: Model, View, and Intent?",
+            "options": ["MVC", "MVP", "MVVM", "MVI"],
+            "correct_answer": "MVI",
+            "explanation": "Model-View-Intent is a unidirectional architecture pattern that emphasizes a single source of truth and immutable state."
+        }
+    ],
+    
+    # Machine Learning
+    "machine_learning": [
+        {
+            "id": "ml_1",
+            "difficulty": "junior",
+            "question": "Which of the following is NOT a type of machine learning?",
+            "options": ["Supervised Learning", "Unsupervised Learning", "Deterministic Learning", "Reinforcement Learning"],
+            "correct_answer": "Deterministic Learning",
+            "explanation": "Deterministic Learning is not a standard type of machine learning. The main types are supervised, unsupervised, and reinforcement learning."
+        },
+        {
+            "id": "ml_2",
+            "difficulty": "junior",
+            "question": "What is the primary purpose of the training dataset in supervised learning?",
+            "options": [
+                "To test the model's performance",
+                "To provide examples for the model to learn from",
+                "To validate hyperparameter choices",
+                "To determine the learning rate"
+            ],
+            "correct_answer": "To provide examples for the model to learn from",
+            "explanation": "The training dataset contains labeled examples that the model uses to learn the relationships between features and target variables."
+        },
+        {
+            "id": "ml_3",
+            "difficulty": "mid",
+            "question": "Which technique is used to prevent overfitting in machine learning models?",
+            "options": ["Data augmentation", "Gradient descent", "Feature engineering", "Regularization"],
+            "correct_answer": "Regularization",
+            "explanation": "Regularization adds a penalty term to the loss function to discourage complex models, helping prevent overfitting to the training data."
+        },
+        {
+            "id": "ml_4",
+            "difficulty": "senior",
+            "question": "Which algorithm would be most appropriate for a recommender system with millions of users and items?",
+            "options": ["Decision Trees", "Naive Bayes", "Matrix Factorization", "K-means Clustering"],
+            "correct_answer": "Matrix Factorization",
+            "explanation": "Matrix factorization techniques like SVD can efficiently handle large-scale recommender systems by decomposing the user-item interaction matrix."
         }
     ],
     
@@ -243,6 +463,103 @@ CS_QUESTIONS = {
             ],
             "correct_answer": "Blue-Green deployment",
             "explanation": "Blue-Green deployment maintains two identical environments, allowing for zero-downtime switching between them during updates."
+        }
+    ],
+    
+    # Cloud Computing
+    "cloud": [
+        {
+            "id": "cloud_1",
+            "difficulty": "junior",
+            "question": "What is the primary benefit of auto-scaling in cloud environments?",
+            "options": [
+                "It automatically updates software versions",
+                "It adjusts resources based on demand",
+                "It reduces security vulnerabilities",
+                "It optimizes database queries"
+            ],
+            "correct_answer": "It adjusts resources based on demand",
+            "explanation": "Auto-scaling dynamically adjusts the number of resources (such as instances) to match the current demand, optimizing performance and cost."
+        },
+        {
+            "id": "cloud_2",
+            "difficulty": "junior",
+            "question": "Which of the following is NOT a major cloud service provider?",
+            "options": ["Amazon Web Services (AWS)", "Microsoft Azure", "Google Cloud Platform (GCP)", "Oracle Database (ODB)"],
+            "correct_answer": "Oracle Database (ODB)",
+            "explanation": "Oracle Database is a database product, not a cloud service provider. Oracle Cloud is their cloud platform."
+        },
+        {
+            "id": "cloud_3",
+            "difficulty": "mid",
+            "question": "What is the difference between IaaS and PaaS?",
+            "options": [
+                "IaaS provides infrastructure while PaaS provides a development platform",
+                "IaaS is internet-based while PaaS is private",
+                "IaaS is for internal users while PaaS is for public access",
+                "IaaS focuses on storage while PaaS focuses on compute"
+            ],
+            "correct_answer": "IaaS provides infrastructure while PaaS provides a development platform",
+            "explanation": "IaaS (Infrastructure as a Service) provides virtualized computing resources, while PaaS (Platform as a Service) provides a platform for developing, running, and managing applications."
+        },
+        {
+            "id": "cloud_4",
+            "difficulty": "senior",
+            "question": "Which cloud deployment pattern is best for applications that need to continue functioning during cloud provider outages?",
+            "options": [
+                "Multi-AZ deployment",
+                "Blue-green deployment",
+                "Multi-region deployment",
+                "Multi-cloud deployment"
+            ],
+            "correct_answer": "Multi-cloud deployment",
+            "explanation": "Multi-cloud deployment distributes applications across multiple cloud providers, ensuring resilience against a single provider's outage."
+        }
+    ],
+    
+    # Security
+    "security": [
+        {
+            "id": "sec_1",
+            "difficulty": "junior",
+            "question": "What is the purpose of HTTPS?",
+            "options": [
+                "To speed up web browsing",
+                "To encrypt data transmitted between client and server",
+                "To compress web content",
+                "To block malicious websites"
+            ],
+            "correct_answer": "To encrypt data transmitted between client and server",
+            "explanation": "HTTPS (HTTP Secure) uses TLS/SSL encryption to secure the communication between web browsers and servers."
+        },
+        {
+            "id": "sec_2",
+            "difficulty": "junior",
+            "question": "Which of the following is NOT a common type of web security vulnerability?",
+            "options": ["SQL Injection", "Cross-Site Scripting (XSS)", "Random Access Manipulation (RAM)", "Cross-Site Request Forgery (CSRF)"],
+            "correct_answer": "Random Access Manipulation (RAM)",
+            "explanation": "Random Access Manipulation is not a standard security vulnerability term. The others are well-known web security vulnerabilities."
+        },
+        {
+            "id": "sec_3",
+            "difficulty": "mid",
+            "question": "What is the principle of least privilege in security?",
+            "options": [
+                "Users should have minimal documentation about security features",
+                "Security measures should be as unobtrusive as possible",
+                "Users should be granted only the permissions they need to perform their tasks",
+                "Security should focus on the least critical systems first"
+            ],
+            "correct_answer": "Users should be granted only the permissions they need to perform their tasks",
+            "explanation": "The principle of least privilege states that users or processes should have only the minimum levels of access necessary to complete their job functions."
+        },
+        {
+            "id": "sec_4",
+            "difficulty": "senior",
+            "question": "Which cryptographic attack attempts to find a message that produces the same hash value as another message?",
+            "options": ["Brute Force Attack", "Dictionary Attack", "Collision Attack", "Man-in-the-Middle Attack"],
+            "correct_answer": "Collision Attack",
+            "explanation": "A collision attack focuses on finding two different inputs that produce the same hash output, which can compromise cryptographic hash functions."
         }
     ]
 }
@@ -312,7 +629,7 @@ def get_assessment_questions(experience_level='junior', matched_skills=None, que
         "javascript": "programming",
         "c++": "programming",
         "algorithms": "programming",
-        "data structures": "programming",
+        "data structures": "data_structures",
         
         "node.js": "backend",
         "express": "backend",
@@ -327,9 +644,29 @@ def get_assessment_questions(experience_level='junior', matched_skills=None, que
         
         "docker": "devops",
         "kubernetes": "devops",
-        "aws": "devops",
+        "aws": "cloud",
+        "azure": "cloud",
+        "gcp": "cloud",
         "ci/cd": "devops",
-        "git": "devops"
+        "git": "devops",
+        
+        "machine learning": "machine_learning",
+        "ai": "machine_learning",
+        "deep learning": "machine_learning",
+        
+        "ios": "mobile",
+        "android": "mobile",
+        "swift": "mobile",
+        "kotlin": "mobile",
+        "react native": "mobile",
+        "flutter": "mobile",
+        
+        "security": "security",
+        "encryption": "security",
+        "authentication": "security",
+        
+        "fullstack": "fullstack",
+        "full stack": "fullstack"
     }
     
     # Get some questions based on experience level
@@ -341,8 +678,8 @@ def get_assessment_questions(experience_level='junior', matched_skills=None, que
         # Convert skills to categories
         categories = set()
         for skill in matched_skills:
-            if skill in category_map:
-                categories.add(category_map[skill])
+            if skill.lower() in category_map:
+                categories.add(category_map[skill.lower()])
         
         # Get questions from each category
         for category in categories:
