@@ -723,40 +723,70 @@ def check_job_requirements(matched_skills, required_skills=None, min_match_perce
 
 
 def evaluate_experience_level(resume_text):
-    if not resume_text or len(resume_text.strip()) < 100:
-        return "unknown"
+    """
+    Fixed evaluate_experience_level function with better error handling
+    """
+    try:
+        if not resume_text or len(resume_text.strip()) < 100:
+            logger.info("Resume text too short for experience evaluation, defaulting to 'junior'")
+            return "junior"
 
-    resume_text = resume_text.lower()
+        resume_text = resume_text.lower()
+        logger.info(f"Evaluating experience level on text of length: {len(resume_text)}")
 
-    senior_keywords = [
-        "senior", "lead", "principal", "architect", "manager", "head of", "director",
-        "7+ years", "7 years", "8 years", "9 years", "10 years", "10+ years"
-    ]
+        senior_keywords = [
+            "senior", "lead", "principal", "architect", "manager", "head of", "director",
+            "7+ years", "7 years", "8 years", "9 years", "10 years", "10+ years"
+        ]
 
-    mid_keywords = [
-        "mid-level", "intermediate", "3 years", "4 years", "5 years", "6 years",
-        "3+ years", "4+ years", "5+ years"
-    ]
+        mid_keywords = [
+            "mid-level", "intermediate", "3 years", "4 years", "5 years", "6 years",
+            "3+ years", "4+ years", "5+ years"
+        ]
 
-    junior_keywords = [
-        "junior", "entry level", "entry-level", "intern", "internship", "graduate",
-        "1 year", "2 years", "1-2 years", "<3 years", "bootcamp"
-    ]
+        junior_keywords = [
+            "junior", "entry level", "entry-level", "intern", "internship", "graduate",
+            "1 year", "2 years", "1-2 years", "<3 years", "bootcamp"
+        ]
 
-    senior_count = sum(1 for keyword in senior_keywords if keyword in resume_text)
-    mid_count = sum(1 for keyword in mid_keywords if keyword in resume_text)
-    junior_count = sum(1 for keyword in junior_keywords if keyword in resume_text)
+        # Use safer keyword matching
+        senior_count = 0
+        mid_count = 0
+        junior_count = 0
+        
+        for keyword in senior_keywords:
+            if keyword in resume_text:
+                senior_count += 1
+                
+        for keyword in mid_keywords:
+            if keyword in resume_text:
+                mid_count += 1
+                
+        for keyword in junior_keywords:
+            if keyword in resume_text:
+                junior_count += 1
 
-    counts = {
-        "senior": senior_count,
-        "mid": mid_count,
-        "junior": junior_count
-    }
+        logger.info(f"Keyword counts - Senior: {senior_count}, Mid: {mid_count}, Junior: {junior_count}")
 
-    if senior_count == 0 and mid_count == 0 and junior_count == 0:
-        return "junior"
+        counts = {
+            "senior": senior_count,
+            "mid": mid_count,
+            "junior": junior_count
+        }
 
-    return max(counts, key=counts.get)
+        # Check if all counts are zero
+        if senior_count == 0 and mid_count == 0 and junior_count == 0:
+            logger.info("No experience keywords found, defaulting to 'junior'")
+            return "junior"
+
+        # Find the level with highest count
+        max_level = max(counts, key=counts.get)
+        logger.info(f"Determined experience level: {max_level}")
+        return max_level
+        
+    except Exception as e:
+        logger.error(f"Error in evaluate_experience_level: {str(e)}")
+        return "junior"  # Default to junior on error
 
 
 def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder="static/uploads"):
