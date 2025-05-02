@@ -471,6 +471,12 @@ def analyze_cs_skills(resume_text):
         if category_matches:
             results_by_category[category] = category_matches
 
+    # Log found skills
+    if matched_skills:
+        logger.info(f"Found {len(matched_skills)} skills: {list(matched_skills.keys())}")
+    else:
+        logger.warning("No skills found in the resume text")
+
     return {
         "matched_skills": list(matched_skills.keys()),
         "total_skills": len(ALL_CS_SKILLS),
@@ -551,19 +557,35 @@ def check_job_requirements(matched_skills, required_skills=None, min_match_perce
     logger.info(f"INSIDE FUNCTION - Type of required_skills: {type(required_skills)}")
     logger.info(f"INSIDE FUNCTION - Value of required_skills: {required_skills}")
 
-    """
-    Fixed check_job_requirements that safely handles all edge cases.
-    """
-    # Ensure matched_skills is a list
+     # Ensure matched_skills is a list
     if matched_skills is None:
-        matched_skills = ["python", "javascript", "html", "css", "react"]
+        matched_skills = []
     elif not isinstance(matched_skills, list):
         try:
-            matched_skills = list(matched_skills)
-        except:
-            logger.error("matched_skills cannot be converted to a list")
-            matched_skills = ["python", "javascript", "html", "css", "react"]
+            if isinstance(matched_skills, str):
+                matched_skills = [s.strip() for s in matched_skills.split(',')]
+            else:
+                matched_skills = list(matched_skills)
+        except Exception as e:
+            logger.error(f"Failed to convert matched_skills to list: {str(e)}")
+            matched_skills = []
     
+    # Ensure required_skills is a list
+    if required_skills is None:
+        required_skills = []
+    elif not isinstance(required_skills, list):
+        try:
+            if isinstance(required_skills, str):
+                required_skills = [s.strip() for s in required_skills.split(',')]
+            else:
+                required_skills = list(required_skills)
+        except Exception as e:
+            logger.error(f"Failed to convert required_skills to list: {str(e)}")
+            required_skills = []
+
+     # Log converted values
+    logger.info(f"Converted matched_skills: {matched_skills}")
+    logger.info(f"Converted required_skills: {required_skills}")
 
     # No specific requirements
     if not required_skills:
@@ -590,26 +612,30 @@ def check_job_requirements(matched_skills, required_skills=None, min_match_perce
     
     logger.info(f"SIMPLE TEST - About to use required_skills: {required_skills}")
     
-    # Try a simple test with a for loop
-    test_list = []
-    for skill in required_skills:  # This would fail if required_skills is an int
-        test_list.append(skill)
+    # Initialize result arrays
+    matched_required = []
+    missing_required = []
     
-    logger.info(f"SIMPLE TEST - For loop completed successfully")
+    # Safely match skills
+    for skill in required_skills:
+        if skill in matched_skills:
+            matched_required.append(skill)
+        else:
+            missing_required.append(skill)
     
-    # Now try the list comprehension
-    matched_required = [skill for skill in required_skills if skill in matched_skills]
     
     logger.info(f"matched_required: {matched_required}")
     
-    missing_required = [skill for skill in required_skills if skill not in matched_skills]
-    
     logger.info(f"missing_required: {missing_required}")
     
+    # Calculate match percentage
     match_percentage = 0
-    if len(required_skills) > 0:
+    if required_skills and len(required_skills) > 0:
         match_percentage = (len(matched_required) / len(required_skills)) * 100
     
+    logger.info(f"Match results: {len(matched_required)} matches out of {len(required_skills)} required")
+    logger.info(f"Match percentage: {match_percentage}%")
+
     return {
         "passes": match_percentage >= min_match_percentage,
         "match_percentage": round(match_percentage, 2),
@@ -756,7 +782,7 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
         # Check job requirements
         job_match = check_job_requirements(
             skills_analysis["matched_skills"],
-            ['figma', 'adobe xd', 'user research', 'wireframing', 'prototyping'],
+            required_skills,
             min_match_percentage
         )
 
