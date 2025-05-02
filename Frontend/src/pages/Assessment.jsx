@@ -44,12 +44,23 @@ function Assessment() {
         
         const data = await response.json();
         
-        if (!data.questions || !Array.isArray(data.questions) || data.questions.length === 0) {
+        // Check for questions array in different possible structures
+        const questionsArray = data.questions || data || [];
+        
+        if (!questionsArray || !Array.isArray(questionsArray) || questionsArray.length === 0) {
           throw new Error("No questions found for this assessment");
         }
         
-        console.log(`Loaded ${data.questions.length} questions`);
-        setQuestions(data.questions);
+        // Normalize the question structure to match what the component expects
+        const normalizedQuestions = questionsArray.map(q => ({
+          id: q.id || `q_${Math.random().toString(36).substr(2, 9)}`,
+          question: q.question || q.question_text || '',
+          options: q.options || [],
+          type: q.type || q.question_type || 'multiple-choice'
+        }));
+        
+        console.log(`Loaded ${normalizedQuestions.length} questions`);
+        setQuestions(normalizedQuestions);
         
         // Check if we have saved answers
         const savedAnswerKey = `assessment_${assessmentId}_answers`;
@@ -337,7 +348,6 @@ function Assessment() {
 
   const currentQuestion = questions[currentQuestionIndex];
   const progressPercentage = calculateProgress();
-  const hasAnsweredCurrent = answers[currentQuestionIndex] !== undefined;
 
   return (
     <div className="portal">
