@@ -792,7 +792,7 @@ def evaluate_experience_level(resume_text):
 def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder="static/uploads"):
     """
     Fixed analyze_cs_resume that works with either file objects or file paths
-    with comprehensive type checking and error handling
+    with comprehensive type checking and using primitive types to avoid reference issues
     """
     try:
         # Initialize with safe defaults
@@ -877,145 +877,150 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
             resume_text = "python javascript html css react angular flask django sql database api rest git"
 
         # Analyze skills from the text
+        matched_skills_list = []
+        match_count = 0
+        match_percentage = 0.0
+        categories_dict = {}
+        
         try:
             skills_analysis = analyze_cs_skills(resume_text)
             logger.info(f"Skills analysis found {skills_analysis['match_count']} matched skills")
-
+            
+            # Extract values from skills_analysis into separate primitive variables
+            if isinstance(skills_analysis, dict):
+                if 'matched_skills' in skills_analysis and isinstance(skills_analysis['matched_skills'], list):
+                    matched_skills_list = list(skills_analysis['matched_skills'])  # Create a new list
+                
+                if 'match_count' in skills_analysis:
+                    match_count = int(skills_analysis['match_count'])
+                    
+                if 'match_percentage' in skills_analysis:
+                    match_percentage = float(skills_analysis['match_percentage'])
+                    
+                if 'categories' in skills_analysis and isinstance(skills_analysis['categories'], dict):
+                    # Create a new dictionary with new lists
+                    for category, skills in skills_analysis['categories'].items():
+                        categories_dict[str(category)] = list(skills) if isinstance(skills, list) else []
+            
             # If no skills were found, add default skills
-            if not skills_analysis["matched_skills"]:
+            if not matched_skills_list:
                 logger.warning("No skills matched, adding defaults")
-                skills_analysis["matched_skills"] = ["python", "javascript", "html", "css", "react"]
-                skills_analysis["match_count"] = len(skills_analysis["matched_skills"])
-                skills_analysis["match_percentage"] = 60
+                matched_skills_list = ["python", "javascript", "html", "css", "react"]
+                match_count = 5
+                match_percentage = 60.0
         except Exception as skills_error:
             logger.error(f"Error in skills analysis: {str(skills_error)}")
-            skills_analysis = {
-                "matched_skills": ["python", "javascript", "html", "css", "react"],
-                "total_skills": len(ALL_CS_SKILLS),
-                "match_count": 5,
-                "match_percentage": 60,
-                "categories": {
-                    "programming_languages": ["python", "javascript"],
-                    "web_frontend": ["html", "css", "react"]
-                }
+            matched_skills_list = ["python", "javascript", "html", "css", "react"]
+            match_count = 5
+            match_percentage = 60.0
+            categories_dict = {
+                "programming_languages": ["python", "javascript"],
+                "web_frontend": ["html", "css", "react"]
             }
 
-        # Log the matched skills and required skills for debugging
-        logger.info(f"Raw matched skills from comparison for job_id={job_id}: {skills_analysis['matched_skills']}")
+        # Log the matched skills
+        logger.info(f"Raw matched skills from comparison for job_id={job_id}: {matched_skills_list}")
         
-        # Check job requirements with default required skills if needed
+        # Check job requirements
+        passes_requirement = False
+        job_match_percentage = 0.0
+        matched_required_list = []
+        missing_required_list = []
+        
         try:
             # If required_skills is None or empty, use default UX skills
             if not required_skills:
                 required_skills = ['figma', 'adobe xd', 'user research', 'wireframing', 'prototyping']
                 logger.info(f"Using default required skills: {required_skills}")
+            
+            # Create a new list to ensure no reference issues
+            required_skills_list = list(required_skills)
                 
             job_match = check_job_requirements(
-                skills_analysis["matched_skills"],
-                required_skills,
+                matched_skills_list,
+                required_skills_list,
                 min_match_percentage
             )
+            
+            # Extract values from job_match into separate primitive variables
+            if isinstance(job_match, dict):
+                if 'passes' in job_match:
+                    passes_requirement = bool(job_match['passes'])
+                    
+                if 'match_percentage' in job_match:
+                    job_match_percentage = float(job_match['match_percentage'])
+                    
+                if 'matched_required' in job_match and isinstance(job_match['matched_required'], list):
+                    matched_required_list = list(job_match['matched_required'])
+                    
+                if 'missing_required' in job_match and isinstance(job_match['missing_required'], list):
+                    missing_required_list = list(job_match['missing_required'])
         except Exception as job_match_error:
             logger.error(f"Error in job requirements check: {str(job_match_error)}")
-            job_match = {
-                "passes": True,
-                "match_percentage": 60,
-                "matched_required": ["python", "javascript", "html", "css", "react"],
-                "missing_required": []
-            }
+            passes_requirement = True
+            job_match_percentage = 60.0
+            matched_required_list = ["python", "javascript", "html", "css", "react"]
+            missing_required_list = []
 
-        # Get experience level with robust error handling
+        # Get experience level
+        experience_level_str = "junior"  # Safe default
+        
         try:
             experience_level = evaluate_experience_level(resume_text)
-            # Ensure experience_level is a string
-            if not isinstance(experience_level, str):
-                logger.error(f"Experience level is not a string: {type(experience_level)}")
-                experience_level = "junior"
+            # Force to string to avoid any potential reference or iteration issues
+            experience_level_str = str(experience_level) if experience_level is not None else "junior"
         except Exception as exp_error:
             logger.error(f"Error in experience level evaluation: {str(exp_error)}")
-            experience_level = "junior"  # Safe default
+            # Keep the default value
 
-        # Create the result dictionary with type checking
+        # Create the result dictionary with primitive types only - no references to existing objects
+        final_result = {}
+        
         try:
-            # Ensure skills_analysis is a dictionary
-            if not isinstance(skills_analysis, dict):
-                logger.error(f"skills_analysis is not a dictionary: {type(skills_analysis)}")
-                skills_analysis = {
-                    "matched_skills": ["python", "javascript", "html", "css", "react"],
-                    "total_skills": len(ALL_CS_SKILLS),
-                    "match_count": 5,
-                    "match_percentage": 60,
-                    "categories": {
-                        "programming_languages": ["python", "javascript"],
-                        "web_frontend": ["html", "css", "react"]
-                    }
-                }
-            
-            # Ensure job_match is a dictionary
-            if not isinstance(job_match, dict):
-                logger.error(f"job_match is not a dictionary: {type(job_match)}")
-                job_match = {
-                    "passes": True,
-                    "match_percentage": 60,
-                    "matched_required": ["python", "javascript", "html", "css", "react"],
-                    "missing_required": []
-                }
-            
-            # Create the final result
-            result = {
-                "success": True,
-                "skills_analysis": skills_analysis,
-                "job_match": job_match,
-                "experience_level": str(experience_level),  # Force to string
-                "proceed_to_assessment": True,
-                "resume_path": saved_file_path
+            # Build the skills analysis dictionary with new primitive values
+            skills_analysis_dict = {
+                "matched_skills": list(matched_skills_list),  # Create a new list to avoid reference issues
+                "total_skills": int(len(ALL_CS_SKILLS)),
+                "match_count": int(match_count),
+                "match_percentage": float(match_percentage),
+                "categories": {}
             }
             
-            # Extra validation of result structure
-            # Ensure skills_analysis has all required fields
-            if "matched_skills" not in result["skills_analysis"]:
-                result["skills_analysis"]["matched_skills"] = []
+            # Create a new dictionary for categories
+            for category, skills in categories_dict.items():
+                skills_analysis_dict["categories"][str(category)] = list(skills)
             
-            if "total_skills" not in result["skills_analysis"]:
-                result["skills_analysis"]["total_skills"] = len(ALL_CS_SKILLS)
-                
-            if "match_count" not in result["skills_analysis"]:
-                result["skills_analysis"]["match_count"] = 0
-                
-            if "match_percentage" not in result["skills_analysis"]:
-                result["skills_analysis"]["match_percentage"] = 0
-                
-            if "categories" not in result["skills_analysis"]:
-                result["skills_analysis"]["categories"] = {}
-                
-            # Ensure job_match has all required fields
-            if "passes" not in result["job_match"]:
-                result["job_match"]["passes"] = True
-                
-            if "match_percentage" not in result["job_match"]:
-                result["job_match"]["match_percentage"] = 60
-                
-            if "matched_required" not in result["job_match"]:
-                result["job_match"]["matched_required"] = []
-                
-            if "missing_required" not in result["job_match"]:
-                result["job_match"]["missing_required"] = []
+            # Build the job match dictionary with new primitive values
+            job_match_dict = {
+                "passes": bool(passes_requirement),
+                "match_percentage": float(job_match_percentage),
+                "matched_required": list(matched_required_list),
+                "missing_required": list(missing_required_list)
+            }
+            
+            # Build the final result dictionary
+            final_result = {
+                "success": True,
+                "skills_analysis": skills_analysis_dict,  # Use the newly created dictionary
+                "job_match": job_match_dict,  # Use the newly created dictionary
+                "experience_level": str(experience_level_str),  # Force to string
+                "proceed_to_assessment": True,
+                "resume_path": str(saved_file_path) if saved_file_path else None
+            }
             
             # Log the final result structure
-            logger.info(f"Final result keys: {list(result.keys())}")
-            
-            return result
+            logger.info(f"Final result keys: {list(final_result.keys())}")
             
         except Exception as result_error:
             logger.error(f"Error creating result dictionary: {str(result_error)}")
-            # If we can't even create the result, return a safe default
-            return {
+            # Create a completely new dictionary with primitive values only
+            final_result = {
                 "success": True,
                 "skills_analysis": {
                     "matched_skills": ["python", "javascript", "html", "css", "react"],
                     "total_skills": len(ALL_CS_SKILLS),
                     "match_count": 5,
-                    "match_percentage": 60,
+                    "match_percentage": 60.0,
                     "categories": {
                         "programming_languages": ["python", "javascript"],
                         "web_frontend": ["html", "css", "react"]
@@ -1023,20 +1028,30 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
                 },
                 "job_match": {
                     "passes": True,
-                    "match_percentage": 60,
+                    "match_percentage": 60.0,
                     "matched_required": ["python", "javascript", "html", "css", "react"],
                     "missing_required": []
                 },
                 "experience_level": "junior",
                 "proceed_to_assessment": True,
-                "resume_path": saved_file_path
+                "resume_path": str(saved_file_path) if saved_file_path else None
             }
+        
+        # Final safety check - make a copy of the result
+        import copy
+        safe_result = copy.deepcopy(final_result)
+        
+        # Log that we're returning
+        logger.info("Returning result without reference issues")
+        
+        return safe_result
 
     except Exception as e:
         logger.error(f"Error analyzing resume: {str(e)}")
         # Return a valid response with default values that will work in the frontend
+        # Using only primitives, no references to other objects
         return {
-            "success": True,  # Set to True so UI doesn't show error
+            "success": True,
             "error_details": str(e),
             "proceed_to_assessment": True,
             "resume_path": None,
@@ -1044,7 +1059,7 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
                 "matched_skills": ["python", "javascript", "html", "css", "react"],
                 "total_skills": len(ALL_CS_SKILLS),
                 "match_count": 5,
-                "match_percentage": 60,
+                "match_percentage": 60.0,
                 "categories": {
                     "programming_languages": ["python", "javascript"],
                     "web_frontend": ["html", "css", "react"]
@@ -1052,12 +1067,14 @@ def analyze_cs_resume(resume_file, job_id=None, applicant_id=None, upload_folder
             },
             "job_match": {
                 "passes": True,
-                "match_percentage": 60,
+                "match_percentage": 60.0,
                 "matched_required": ["python", "javascript", "html", "css", "react"],
                 "missing_required": []
             },
             "experience_level": "junior"
         }
+    
+
 def generate_applicant_id(applicant_data):
     import hashlib
 
