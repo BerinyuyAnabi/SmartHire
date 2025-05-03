@@ -55,9 +55,10 @@ function Assessment() {
         console.log("Questions array before normalization:", questionsArray);
         
         // Normalize the question structure to match what the component expects
+        // Keep the original 'question' field instead of renaming to questionText
         const normalizedQuestions = questionsArray.map(q => ({
           id: q.id || `q_${Math.random().toString(36).substr(2, 9)}`,
-          questionText: q.question_text || q.questionText || q.question || '', // Added q.question as fallback
+          question: q.question || q.question_text || q.questionText || '', // Prioritize 'question' field
           options: q.options || [],
           type: q.question_type || q.type || 'multiple-choice'
         }));
@@ -360,6 +361,11 @@ function Assessment() {
   const currentQuestion = questions[currentQuestionIndex];
   const progressPercentage = calculateProgress();
 
+  // Get the question text - look for either question or questionText property
+  const getQuestionText = (question) => {
+    return question.question || question.questionText || '';
+  };
+
   // Function to safely render question text - properly handle code blocks, etc.
   const renderQuestionText = (text) => {
     // If text contains code blocks indicated by ```
@@ -441,7 +447,7 @@ function Assessment() {
 
         {/* Question Text - FIXED HERE */}
         <div className={`question ${isAnimating ? 'fade-out' : 'fade-in'}`}>
-          {renderQuestionText(currentQuestion.questionText || '')}
+          {renderQuestionText(getQuestionText(currentQuestion))}
         </div>
 
         {/* Answer Section */}
