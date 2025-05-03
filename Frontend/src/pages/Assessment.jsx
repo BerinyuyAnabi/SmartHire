@@ -56,15 +56,18 @@ function Assessment() {
         
         // Normalize the question structure to match what the component expects
         // Keep the original 'question' field instead of renaming to questionText
-        const normalizedQuestions = questionsArray.map(q => ({
-          id: q.id || `q_${Math.random().toString(36).substr(2, 9)}`,
-          question: q.question || '', 
-          options: q.options || [],
-          type: q.question_type || q.type || 'multiple-choice'
+        const normalizedQuestions = questionsArray.map(q => {
+          console.log("Processing question:", q);
+          console.log("Question has fields:", Object.keys(q));
+          console.log("Question content:", q.question_text || q.question || "NOT FOUND");
           
-        }));
-
-        
+          return {
+            id: q.id || `q_${Math.random().toString(36).substr(2, 9)}`,
+            question: q.question_text || q.question || '',
+            options: q.options || [],
+            type: q.question_type || q.type || 'multiple-choice'
+          };
+        });
         
         console.log(`Loaded ${normalizedQuestions.length} questions after normalization:`, normalizedQuestions);
         setQuestions(normalizedQuestions);
@@ -366,7 +369,7 @@ function Assessment() {
 
   // Get the question text - look for either question or questionText property
   const getQuestionText = (question) => {
-    return question.question || '';
+    return question.question || question.question_text || question.questionText || 'Nothing here to display';
   };
 
   // Function to safely render question text - properly handle code blocks, etc.
@@ -422,16 +425,6 @@ function Assessment() {
             ></div>
           </div>
           <span className="progress-percentage">{progressPercentage}%</span>
-          <button 
-            className="preview-btn"
-            onClick={() => alert("Question Navigator: This feature will be available in a future update.")}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            Preview
-          </button>
         </div>
       </div>
 
@@ -448,7 +441,7 @@ function Assessment() {
           </div>
         </div>
 
-        {/* Question Text - FIXED HERE */}
+        {/* Question Text */}
         <div className={`question ${isAnimating ? 'fade-out' : 'fade-in'}`}>
           {renderQuestionText(getQuestionText(currentQuestion))}
         </div>
