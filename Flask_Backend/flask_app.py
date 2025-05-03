@@ -1797,6 +1797,207 @@ def get_public_assessment(assessment_id):
         return jsonify({"error": str(e)}), 500
 
 
+#     @app.route('/api/public/assessments/<int:assessment_id>/submit', methods=['POST'])
+# def submit_public_assessment(assessment_id):
+#     try:
+#         data = request.get_json()
+#         applicant_id = data.get('applicant_id')
+#         answers = data.get('answers', [])
+        
+#         if not applicant_id:
+#             return jsonify({"error": "Applicant ID is required"}), 400
+        
+#         if not answers:
+#             return jsonify({"error": "No answers provided"}), 400
+            
+#         conn = get_db_connection()
+#         cursor = conn.cursor(dictionary=True)
+        
+#         # First determine if this is a session-based assessment
+#         cursor.execute("""
+#             SELECT * FROM assessment_sessions 
+#             WHERE id = %s
+#         """, (assessment_id,))
+        
+#         session = cursor.fetchone()
+        
+#         if session:
+#             # Update assessment session status
+#             cursor.execute("""
+#                 UPDATE assessment_sessions 
+#                 SET status = 'completed', completed_at = %s
+#                 WHERE id = %s AND applicant_id = %s
+#             """, (datetime.now(), assessment_id, applicant_id))
+            
+#             # For assessments using question_data JSON from question bank
+#             if session.get('question_data'):
+#                 try:
+#                     # Parse the stored questions
+#                     questions_from_bank = json.loads(session['question_data'])
+#                     correct_count = 0
+#                     total_questions = len(answers)
+                    
+#                     # Process each answer
+#                     for answer_data in answers:
+#                         question_id = answer_data.get('question_id')
+#                         answer = answer_data.get('answer')
+                        
+#                         if not question_id or not answer:
+#                             continue
+                        
+#                         # Map question_id (which is just an index) to the actual question
+#                         try:
+#                             # Adjust for 1-based indexing used in the frontend
+#                             question_index = int(question_id) - 1
+#                             if 0 <= question_index < len(questions_from_bank):
+#                                 question = questions_from_bank[question_index]
+                                
+#                                 # Check if answer is correct
+#                                 is_correct = (question.get('correct_answer') == answer)
+                                
+#                                 # Save the answer in assessment_answers table
+#                                 cursor.execute("""
+#                                     INSERT INTO assessment_answers 
+#                                     (assessment_id, question_id, applicant_id, answer, is_correct, submitted_at) 
+#                                     VALUES (%s, %s, %s, %s, %s, %s)
+#                                 """, (
+#                                     assessment_id, 
+#                                     question_id,  # Store the original question_id for reference
+#                                     applicant_id, 
+#                                     answer,
+#                                     is_correct,
+#                                     datetime.now()
+#                                 ))
+                                
+#                                 if is_correct:
+#                                     correct_count += 1
+#                         except (ValueError, IndexError):
+#                             logger.warning(f"Invalid question_id: {question_id}")
+                    
+#                     # Calculate score
+#                     score = 0
+#                     if total_questions > 0:
+#                         score = (correct_count / total_questions) * 100
+                        
+#                     # Update applicant status based on score (optional)
+#                     if score >= 70:  # Example passing threshold
+#                         cursor.execute(
+#                             "UPDATE applicants SET status = 'Shortlisted' WHERE id = %s",
+#                             (applicant_id,)
+#                         )
+                
+#                 except json.JSONDecodeError:
+#                     logger.error("Could not parse question_data JSON")
+#             else:
+#                 # Traditional approach with questions in assessment_questions table
+#                 correct_count = 0
+#                 total_questions = len(answers)
+                
+#                 for answer_data in answers:
+#                     question_id = answer_data.get('question_id')
+#                     answer = answer_data.get('answer')
+                    
+#                     if not question_id or not answer:
+#                         continue
+                        
+#                     # Check if this is a correct answer
+#                     cursor.execute("""
+#                         SELECT correct_answer, question_type 
+#                         FROM assessment_questions 
+#                         WHERE id = %s
+#                     """, (question_id,))
+                    
+#                     question = cursor.fetchone()
+                    
+#                     is_correct = False
+#                     if question:
+#                         if question['question_type'] == 'multiple-choice':
+#                             is_correct = (question['correct_answer'] == answer)
+#                         else:
+#                             # For text answers, mark as needing review
+#                             is_correct = None
+                            
+#                     # Save the answer
+#                     cursor.execute("""
+#                         INSERT INTO assessment_answers 
+#                         (assessment_id, question_id, applicant_id, answer, is_correct, submitted_at) 
+#                         VALUES (%s, %s, %s, %s, %s, %s)
+#                     """, (
+#                         assessment_id, 
+#                         question_id, 
+#                         applicant_id, 
+#                         answer,
+#                         is_correct,
+#                         datetime.now()
+#                     ))
+                    
+#                     if is_correct:
+#                         correct_count += 1
+                
+#                 # Calculate score if possible
+#                 score = 0
+#                 if total_questions > 0:
+#                     score = (correct_count / total_questions) * 100
+                    
+#                 # Update applicant status based on score (optional)
+#                 if score >= 70:  # Example passing threshold
+#                     cursor.execute(
+#                         "UPDATE applicants SET status = 'Shortlisted' WHERE id = %s",
+#                         (applicant_id,)
+#                     )
+#         else:
+#             # Handle submission for older assessment format (backwards compatibility)
+#             for answer_data in answers:
+#                 question_id = answer_data.get('question_id')
+#                 answer = answer_data.get('answer')
+                
+#                 if not question_id or not answer:
+#                     continue
+                
+#                 # Look up in assessments table
+#                 cursor.execute("""
+#                     SELECT id, correct_answer 
+#                     FROM assessments 
+#                     WHERE id = %s
+#                 """, (question_id,))
+                
+#                 question = cursor.fetchone()
+                
+#                 if question:
+#                     is_correct = (question['correct_answer'] == answer)
+                    
+#                     # Save the answer
+#                     cursor.execute("""
+#                         INSERT INTO assessment_answers 
+#                         (assessment_id, question_id, applicant_id, answer, is_correct, submitted_at) 
+#                         VALUES (%s, %s, %s, %s, %s, %s)
+#                     """, (
+#                         assessment_id, 
+#                         question_id, 
+#                         applicant_id, 
+#                         answer,
+#                         is_correct,
+#                         datetime.now()
+#                     ))
+        
+#         conn.commit()
+#         cursor.close()
+#         conn.close()
+        
+#         return jsonify({
+#             "message": "Assessment submitted successfully",
+#             "applicant_id": applicant_id,
+#             "assessment_id": assessment_id
+#         })
+        
+#     except Exception as e:
+#         logger.error(f"Error submitting assessment: {str(e)}")
+#         import traceback
+#         error_details = traceback.format_exc()
+#         logger.error(f"Traceback: {error_details}")
+#         return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/public/assessments/<int:assessment_id>/submit', methods=['POST'])
 def submit_public_assessment(assessment_id):
     try:
@@ -1821,6 +2022,9 @@ def submit_public_assessment(assessment_id):
         
         session = cursor.fetchone()
         
+        # This variable will hold the proper assessment_id to use with answers
+        actual_assessment_id = None
+        
         if session:
             # Update assessment session status
             cursor.execute("""
@@ -1828,6 +2032,29 @@ def submit_public_assessment(assessment_id):
                 SET status = 'completed', completed_at = %s
                 WHERE id = %s AND applicant_id = %s
             """, (datetime.now(), assessment_id, applicant_id))
+            
+            # Check if we already created a bridge record in assessments table
+            cursor.execute("""
+                SELECT id FROM assessments 
+                WHERE question_text = %s
+            """, (f"Session {assessment_id}",))
+            
+            bridge_assessment = cursor.fetchone()
+            
+            if bridge_assessment:
+                actual_assessment_id = bridge_assessment['id']
+            else:
+                # Create a bridge record in assessments table to satisfy the foreign key
+                cursor.execute("""
+                    INSERT INTO assessments (question_text, question_type, options, correct_answer)
+                    VALUES (%s, %s, %s, %s)
+                """, (
+                    f"Session {assessment_id}",  # Use session ID in question_text to identify
+                    'multiple-choice',
+                    '[]',
+                    ''
+                ))
+                actual_assessment_id = cursor.lastrowid
             
             # For assessments using question_data JSON from question bank
             if session.get('question_data'):
@@ -1855,14 +2082,14 @@ def submit_public_assessment(assessment_id):
                                 # Check if answer is correct
                                 is_correct = (question.get('correct_answer') == answer)
                                 
-                                # Save the answer in assessment_answers table
+                                # Save the answer using the bridge assessment ID
                                 cursor.execute("""
                                     INSERT INTO assessment_answers 
                                     (assessment_id, question_id, applicant_id, answer, is_correct, submitted_at) 
                                     VALUES (%s, %s, %s, %s, %s, %s)
                                 """, (
-                                    assessment_id, 
-                                    question_id,  # Store the original question_id for reference
+                                    actual_assessment_id,  # Use the ID from the assessments table
+                                    question_id,
                                     applicant_id, 
                                     answer,
                                     is_correct,
@@ -1917,13 +2144,13 @@ def submit_public_assessment(assessment_id):
                             # For text answers, mark as needing review
                             is_correct = None
                             
-                    # Save the answer
+                    # Save the answer using the bridge assessment ID
                     cursor.execute("""
                         INSERT INTO assessment_answers 
                         (assessment_id, question_id, applicant_id, answer, is_correct, submitted_at) 
                         VALUES (%s, %s, %s, %s, %s, %s)
                     """, (
-                        assessment_id, 
+                        actual_assessment_id, # Use the bridge assessment ID
                         question_id, 
                         applicant_id, 
                         answer,
@@ -1947,6 +2174,8 @@ def submit_public_assessment(assessment_id):
                     )
         else:
             # Handle submission for older assessment format (backwards compatibility)
+            actual_assessment_id = assessment_id  # For older format, use the ID directly
+            
             for answer_data in answers:
                 question_id = answer_data.get('question_id')
                 answer = answer_data.get('answer')
@@ -1972,7 +2201,7 @@ def submit_public_assessment(assessment_id):
                         (assessment_id, question_id, applicant_id, answer, is_correct, submitted_at) 
                         VALUES (%s, %s, %s, %s, %s, %s)
                     """, (
-                        assessment_id, 
+                        actual_assessment_id, 
                         question_id, 
                         applicant_id, 
                         answer,
@@ -1996,6 +2225,6 @@ def submit_public_assessment(assessment_id):
         error_details = traceback.format_exc()
         logger.error(f"Traceback: {error_details}")
         return jsonify({"error": str(e)}), 500
-    
+
 if __name__ == '__main__':
     app.run(debug=True)
