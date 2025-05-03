@@ -2257,6 +2257,7 @@ def submit_public_assessment(assessment_id):
         })
         
     except Exception as e:
+        import traceback  
         logger.error(f"Error submitting assessment: {str(e)}")
         import traceback
         error_details = traceback.format_exc()
