@@ -448,3 +448,17 @@
     padding: 2.5rem; /* Adjusted from 2rem */
   }
 }
+
+.question-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+.question-additional {
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+  color: #555;
+}
