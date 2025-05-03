@@ -1,6 +1,6 @@
-// Updated Admin.js with better mobile toggle functionality
+// Updated Admin.js with fixed authentication logic to prevent infinite loops
 
-import { useState, useEffect, createContext } from 'react';
+import { useState, useEffect, createContext, useRef } from 'react';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import "../css/Admin.css";
 import "../css/AdminExt.css";
@@ -23,6 +23,11 @@ function Admin() {
   const [currentAdmin, setCurrentAdmin] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
+  // Use a ref to track if authentication check is in progress
+  const authCheckInProgress = useRef(false);
+  // Use a ref to prevent multiple simultaneous auth checks
+  const isInitialAuthCheck = useRef(true);
+  
   // Toggle sidebar function for mobile
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -37,15 +42,23 @@ function Admin() {
     }
   };
   
-  // Check authentication on component mount and when pathname changes
+  // Check authentication on component mount
   useEffect(() => {
     const checkAuth = async () => {
-      // Don't set loading to true during navigation to avoid flashing
-      const isInitialLoad = !currentAdmin;
-      if (isInitialLoad) {
+      // Prevent concurrent auth checks
+      if (authCheckInProgress.current) {
+        return;
+      }
+      
+      authCheckInProgress.current = true;
+      
+      // Only show loading on initial check, not background verifications
+      if (isInitialAuthCheck.current) {
         setLoading(true);
       }
-      setError(null); // Clear any previous errors
+      
+      // Clear any previous errors
+      setError(null);
       
       try {
         console.log("Checking authentication...");
@@ -76,12 +89,18 @@ function Admin() {
         }
       } catch (error) {
         console.error('Authentication check failed:', error);
-        setError('Authentication failed. Please log in again.');
-        navigate('/login');
-      } finally {
-        if (isInitialLoad) {
-          setLoading(false);
+        
+        // Only navigate to login on initial check, not on background verification
+        if (isInitialAuthCheck.current) {
+          setError('Authentication failed. Please log in again.');
+          navigate('/login');
         }
+      } finally {
+        if (isInitialAuthCheck.current) {
+          setLoading(false);
+          isInitialAuthCheck.current = false;
+        }
+        authCheckInProgress.current = false;
       }
     };
     
@@ -92,15 +111,16 @@ function Admin() {
     const email = sessionStorage.getItem('adminEmail');
     
     if (isLoggedIn && isAdmin && userId) {
-      // If we have session storage data, use it first but verify with server
+      // If we have session storage data, use it first
       setCurrentAdmin({
         id: userId,
         is_admin: true,
         email: email || ''
       });
       setLoading(false);
+      isInitialAuthCheck.current = false;
       
-      // Still verify with server in background
+      // Background verification - only do this once on load
       checkAuth();
     } else {
       // Otherwise do the full auth check
@@ -165,7 +185,7 @@ function Admin() {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [navigate, currentAdmin, sidebarOpen]); 
+  }, [navigate]); // Remove dependencies that might cause re-runs
 
   const handleLogout = async () => {
     setLoading(true);
