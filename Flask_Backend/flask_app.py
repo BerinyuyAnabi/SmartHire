@@ -2064,32 +2064,68 @@ def submit_public_assessment(assessment_id):
                     correct_count = 0
                     total_questions = len(answers)
                     
+                    # First, ensure we have bridge records in assessment_questions for each question
+                    question_id_map = {}  # Maps frontend question_id to database question_id
+                    
+                    for i, question_data in enumerate(questions_from_bank):
+                        frontend_question_id = i + 1  # Frontend uses 1-based indexing
+                        
+                        # Check if we already have a bridge question for this
+                        cursor.execute("""
+                            SELECT id FROM assessment_questions 
+                            WHERE session_id = %s AND question_index = %s
+                        """, (assessment_id, frontend_question_id))
+                        
+                        existing_question = cursor.fetchone()
+                        
+                        if existing_question:
+                            question_id_map[str(frontend_question_id)] = existing_question['id']
+                        else:
+                            # Create a bridge record in assessment_questions
+                            cursor.execute("""
+                                INSERT INTO assessment_questions (
+                                    session_id, question_index, question_text, question_type, 
+                                    options, correct_answer
+                                ) VALUES (%s, %s, %s, %s, %s, %s)
+                            """, (
+                                assessment_id,
+                                frontend_question_id,
+                                question_data.get('question', ''),
+                                'multiple-choice',
+                                json.dumps(question_data.get('options', [])),
+                                question_data.get('correct_answer', '')
+                            ))
+                            question_id_map[str(frontend_question_id)] = cursor.lastrowid
+                    
                     # Process each answer
                     for answer_data in answers:
-                        question_id = answer_data.get('question_id')
+                        frontend_question_id = answer_data.get('question_id')
                         answer = answer_data.get('answer')
                         
-                        if not question_id or not answer:
+                        if not frontend_question_id or not answer:
                             continue
                         
-                        # Map question_id (which is just an index) to the actual question
-                        try:
-                            # Adjust for 1-based indexing used in the frontend
-                            question_index = int(question_id) - 1
-                            if 0 <= question_index < len(questions_from_bank):
-                                question = questions_from_bank[question_index]
+                        # Get the database question_id from our map
+                        if str(frontend_question_id) in question_id_map:
+                            db_question_id = question_id_map[str(frontend_question_id)]
+                            
+                            # Find the original question to check correctness
+                            try:
+                                question_index = int(frontend_question_id) - 1
+                                is_correct = False
                                 
-                                # Check if answer is correct
-                                is_correct = (question.get('correct_answer') == answer)
+                                if 0 <= question_index < len(questions_from_bank):
+                                    question = questions_from_bank[question_index]
+                                    is_correct = (question.get('correct_answer') == answer)
                                 
-                                # Save the answer using the bridge assessment ID
+                                # Save the answer using both bridge IDs
                                 cursor.execute("""
                                     INSERT INTO assessment_answers 
                                     (assessment_id, question_id, applicant_id, answer, is_correct, submitted_at) 
                                     VALUES (%s, %s, %s, %s, %s, %s)
                                 """, (
-                                    actual_assessment_id,  # Use the ID from the assessments table
-                                    question_id,
+                                    actual_assessment_id,  # Bridge assessment ID
+                                    db_question_id,        # Bridge question ID
                                     applicant_id, 
                                     answer,
                                     is_correct,
@@ -2098,8 +2134,8 @@ def submit_public_assessment(assessment_id):
                                 
                                 if is_correct:
                                     correct_count += 1
-                        except (ValueError, IndexError):
-                            logger.warning(f"Invalid question_id: {question_id}")
+                            except (ValueError, IndexError) as e:
+                                logger.warning(f"Invalid question_id or index: {frontend_question_id}, Error: {str(e)}")
                     
                     # Calculate score
                     score = 0
@@ -2113,8 +2149,9 @@ def submit_public_assessment(assessment_id):
                             (applicant_id,)
                         )
                 
-                except json.JSONDecodeError:
-                    logger.error("Could not parse question_data JSON")
+                except Exception as e:
+                    logger.error(f"Error processing question data: {str(e)}")
+                    logger.error(traceback.format_exc())
             else:
                 # Traditional approach with questions in assessment_questions table
                 correct_count = 0
