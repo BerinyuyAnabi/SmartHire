@@ -160,6 +160,20 @@
   line-height: 1.7; /* Increased from 1.6 */
 }
 
+/* Code Block Styling for Questions */
+.question .code-block {
+  background-color: var(--gray-100);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  margin: 1.5rem 0;
+  font-family: monospace;
+  font-size: 1.1rem;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  color: var(--gray-800);
+  border-left: 4px solid var(--primary);
+}
+
 .answer-section {
   padding: 0 3rem 2.5rem; /* Increased from 0 2.5rem 2rem */
 }
@@ -265,8 +279,8 @@
 }
 
 .nav-button-assessment {
-  background-color: var(--primary);
-  color: var(--white);
+  background-color: var(--white);
+  color: var(--primary);
   border: 1px solid var(--gray-300);
   border-radius: 30px;
   padding: 1rem 2rem; /* Increased from 0.8rem 1.8rem */
@@ -280,8 +294,8 @@
 }
 
 .nav-button-assessment:hover:not(:disabled) {
-  background-color: var(--primary-dark);
-  color: var(--white);
+  background-color: var(--gray-100);
+  color: var(--primary-dark);
   transform: translateY(-3px); /* Increased from -2px */
 }
 
@@ -290,15 +304,28 @@
   cursor: not-allowed;
 }
 
-.next-button {
+.next-button, .submit-button {
   background-color: var(--primary);
   color: var(--white);
   border: none;
 }
 
-.next-button:hover:not(:disabled) {
+.next-button:hover:not(:disabled), .submit-button:hover:not(:disabled) {
   background-color: var(--primary-dark);
   color: var(--white);
+}
+
+/* Previous button styling */
+.previous-button {
+  background-color: var(--white);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.previous-button:hover:not(:disabled) {
+  background-color: var(--gray-100);
+  color: var(--primary-dark);
+  border-color: var(--primary-dark);
 }
 
 /* Added for question navigation dots - more spacious */
@@ -346,6 +373,70 @@
   to { opacity: 0; transform: translateY(-10px); }
 }
 
+/* Assessment loading/completed/error states styling */
+.assessment-loading,
+.assessment-completed,
+.assessment-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background-color: var(--white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  margin: auto 0;
+}
+
+.loading-spinner,
+.success-icon,
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--gray-200);
+  border-top: 5px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.success-icon {
+  color: #28a745;
+  font-size: 3.5rem;
+}
+
+.error-icon {
+  color: #dc3545;
+  font-size: 3.5rem;
+}
+
+.assessment-loading h2,
+.assessment-completed h2,
+.assessment-error h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: var(--gray-900);
+}
+
+.assessment-loading p,
+.assessment-completed p,
+.assessment-error p {
+  font-size: 1.1rem;
+  color: var(--gray-700);
+  margin-bottom: 1.5rem;
+}
+
 /* Media Queries for Responsiveness */
 @media (max-width: 992px) {
   .portal {
@@ -355,65 +446,5 @@
   
   .header-section {
     padding: 2.5rem; /* Adjusted from 2rem */
-  }
-}
-
-@media (max-width: 768px) {
-  .header-section {
-    padding: 2rem; /* Adjusted from 1.5rem */
-  }
-  
-  .question-info {
-    padding: 1.2rem 2rem; /* Adjusted from 1rem 1.5rem */
-  }
-  
-  .question {
-    padding: 2rem 2rem 1.5rem; /* Adjusted from 1.5rem 1.5rem 1rem */
-    font-size: 1.2rem; /* Adjusted from 1.1rem */
-  }
-  
-  .answer-section, .navigation-buttons {
-    padding: 0 2rem 2rem; /* Adjusted from 0 1.5rem 1.5rem */
-  }
-  
-  .option {
-    padding: 1.2rem 1.5rem; /* Adjusted from 1rem */
-  }
-}
-
-@media (max-width: 576px) {
-  .portal {
-    margin: 0;
-    max-width: 100%;
-    border-radius: 0;
-  }
-  
-  .header-section {
-    border-radius: 0;
-    padding: 1.5rem; /* Adjusted from 1.2rem */
-  }
-  
-  .question-info {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem; /* Adjusted from 0.8rem */
-  }
-  
-  .question {
-    padding: 1.5rem 1.5rem 1rem; /* Added more padding */
-    font-size: 1.1rem;
-  }
-  
-  .option {
-    padding: 1.2rem 1.5rem; /* Increased padding */
-  }
-  
-  .navigation-buttons {
-    padding: 1.5rem 1.5rem 2rem; /* Adjusted from 1rem 1.2rem 1.5rem */
-  }
-  
-  .nav-button-assessment {
-    padding: 0.8rem 1.5rem; /* Adjusted from 0.7rem 1.2rem */
-    font-size: 1rem; /* Adjusted from 0.9rem */
   }
 }

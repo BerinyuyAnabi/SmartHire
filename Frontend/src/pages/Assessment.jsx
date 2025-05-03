@@ -57,7 +57,7 @@ function Assessment() {
         // Normalize the question structure to match what the component expects
         const normalizedQuestions = questionsArray.map(q => ({
           id: q.id || `q_${Math.random().toString(36).substr(2, 9)}`,
-          questionText: q.question_text || q.question || '', // Store original property
+          questionText: q.question_text || q.questionText || q.question || '', // Added q.question as fallback
           options: q.options || [],
           type: q.question_type || q.type || 'multiple-choice'
         }));
@@ -259,7 +259,8 @@ function Assessment() {
       });
       
       if (!response.ok) {
-        throw new Error(`Submission failed: ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(`Submission failed: ${errorData.error || response.statusText}`);
       }
       
       const result = await response.json();
@@ -284,7 +285,7 @@ function Assessment() {
       
     } catch (error) {
       console.error("Error submitting assessment:", error);
-      alert("There was a problem submitting your assessment. Please try again.");
+      alert(`There was a problem submitting your assessment: ${error.message}. Please try again.`);
     } finally {
       setSubmitting(false);
     }
@@ -359,6 +360,41 @@ function Assessment() {
   const currentQuestion = questions[currentQuestionIndex];
   const progressPercentage = calculateProgress();
 
+  // Function to safely render question text - properly handle code blocks, etc.
+  const renderQuestionText = (text) => {
+    // If text contains code blocks indicated by ```
+    if (text.includes('```')) {
+      // Split by code blocks
+      const parts = text.split(/```(?:javascript|js)?([\s\S]*?)```/);
+      return parts.map((part, i) => {
+        if (i % 2 === 1) {
+          // This is code block content (odd indices)
+          return (
+            <pre key={i} className="code-block">
+              <code>{part.trim()}</code>
+            </pre>
+          );
+        } else {
+          // This is regular text (even indices)
+          return part.split('\n').map((line, j) => (
+            <span key={`${i}-${j}`}>
+              {line}
+              <br />
+            </span>
+          ));
+        }
+      });
+    } else {
+      // No code blocks, just split by newlines
+      return text.split('\n').map((line, i) => (
+        <span key={i}>
+          {line}
+          <br />
+        </span>
+      ));
+    }
+  };
+
   return (
     <div className="portal">
       {/* Header Section */}
@@ -405,7 +441,7 @@ function Assessment() {
 
         {/* Question Text - FIXED HERE */}
         <div className={`question ${isAnimating ? 'fade-out' : 'fade-in'}`}>
-          <p dangerouslySetInnerHTML={{ __html: currentQuestion.questionText.replace(/\n/g, '<br/>') }}></p>
+          {renderQuestionText(currentQuestion.questionText || '')}
         </div>
 
         {/* Answer Section */}
@@ -451,7 +487,7 @@ function Assessment() {
           
           {isLastQuestion() ? (
             <button 
-              className="nav-button-assessment submit-button"
+              className="nav-button-assessment next-button submit-button"
               onClick={handleSubmitAssessment}
               disabled={submitting}
             >
