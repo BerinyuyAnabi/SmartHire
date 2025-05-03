@@ -13,7 +13,6 @@ import ForgotPassword from './components/auth/ForgotPassword';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { Routes, Route, Navigate } from "react-router-dom";
 import ApplicantDetails from "./components/ApplicantDetails"
-import CSAssessmentWithCustomStyle from './components/assessment/CSAssessmentWithCustomStyle';
 
 
 function App() {

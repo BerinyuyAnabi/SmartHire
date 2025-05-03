@@ -1,4 +1,4 @@
-/* Assessment.css - Premium Design with Relaxed Card Layout */
+/* Assessment.css - Premium Design with Compact Layout */
 :root {
   --primary: #006d6d;
   --primary-light: #01a0a0;
@@ -22,209 +22,223 @@
   --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
   --transition: all 0.3s ease;
-  --border-radius: 12px; /* Increased from 8px */
-  --border-radius-lg: 16px; /* Increased from 12px */
-  --border-radius-xl: 20px; /* Increased from 16px */
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
 }
 
-/* Assessment Page Container */
-.portal {
-  background-color: var(--body-bg);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  max-width: 1000px; /* Increased from 900px */
-  margin: 2rem auto;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
-}
-
-/* Assessment Header */
-.header-section {
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-  padding: 3rem; /* Increased from 2.5rem */
-  color: var(--white);
-  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-  position: relative;
-}
-
-.header-section h1 {
-  font-size: 2.2rem; /* Increased from 2rem */
-  font-weight: 700;
-  margin-bottom: 1.2rem;
-  letter-spacing: -0.02em;
-}
-
-.progress-container-assessment {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem; /* Increased from 1rem */
-  margin-top: 2rem; /* Increased from 1.5rem */
-}
-
-.progress-bar-assessment {
-  flex-grow: 1;
-  height: 10px; /* Increased from 8px */
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background-color: var(--accent);
-  border-radius: 10px;
-  transition: width 0.5s ease;
-}
-
-.progress-percentage {
-  color: var(--white);
-  font-weight: 600;
-  font-size: 1rem; /* Increased from 0.9rem */
-  min-width: 40px;
-}
-
-.preview-btn {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: var(--white);
-  border: none;
-  border-radius: 30px;
-  padding: 0.6rem 1.4rem; /* Increased from 0.5rem 1.2rem */
-  font-size: 1rem; /* Increased from 0.9rem */
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 0.6rem; /* Increased from 0.5rem */
-}
-
-.preview-btn:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-.preview-btn svg {
-  width: 18px; /* Increased from 16px */
-  height: 18px; /* Increased from 16px */
-}
-
-/* Question Information Bar */
-.question-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.2rem 3rem; /* Increased from 1rem 2.5rem */
-  background-color: var(--white);
-  border-bottom: 1px solid var(--gray-200);
-  font-size: 1rem; /* Increased from 0.95rem */
-}
-
-.question-number {
-  font-weight: 600;
-  color: var(--primary);
-}
-
-.timer {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem; /* Increased from 0.5rem */
-  color: var(--gray-700);
-  font-weight: 600;
-  background-color: var(--gray-100);
-  padding: 0.6rem 1.2rem; /* Increased from 0.5rem 1rem */
-  border-radius: 30px;
-}
-
-.clock-icon {
-  color: var(--primary);
-}
-
-.timer-countdown {
-  color: var(--primary-dark);
-}
-
-/* Question Content */
-.assessment-content {
-  background-color: var(--white);
-  padding: 0;
-  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-  box-shadow: var(--shadow-md);
-}
-
-.question {
-  padding: 3rem 3rem 2rem; /* Increased from 2.5rem 2.5rem 1.5rem */
-  color: var(--gray-900);
-  font-size: 1.3rem; /* Increased from 1.2rem */
-  font-weight: 500;
-  line-height: 1.7; /* Increased from 1.6 */
-}
-
-/* Code Block Styling for Questions */
-.question .code-block {
-  background-color: var(--gray-100);
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  margin: 1.5rem 0;
-  font-family: monospace;
-  font-size: 1.1rem;
-  white-space: pre-wrap;
-  overflow-x: auto;
-  color: var(--gray-800);
-  border-left: 4px solid var(--primary);
-}
-
+/* Answer Section - Compact */
 .answer-section {
-  padding: 0 3rem 2.5rem; /* Increased from 0 2.5rem 2rem */
+  padding: 0 0 0.5rem;
 }
 
-/* Multiple Choice Options - MAIN CHANGES HERE */
+/* Responsive design - Maintain fixed card sizes */
+@media (max-width: 768px) {
+  .header-section {
+    padding: 0.8rem 1rem;
+  }
+  
+  .header-section h1 {
+    font-size: 1.3rem;
+  }
+  
+  .assessment-content {
+    height: calc(100vh - 130px);
+  }
+  
+  .question-container {
+    min-height: 80px;
+    max-height: 120px;
+  }
+  
+  .option {
+    min-height: 48px;
+    padding: 0.6rem 0.8rem;
+  }
+  
+  .option-text {
+    max-height: 80px;
+  }
+
+  .question-info, 
+  .question-answer-container, 
+  .navigation-buttons {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .error-message-container {
+    padding: 0 1rem;
+    bottom: 85px;
+  }
+  
+  .error-message {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .header-section h1 {
+    font-size: 1.2rem;
+  }
+  
+  .assessment-content {
+    height: calc(100vh - 125px);
+  }
+  
+  .question-container {
+    min-height: 70px;
+    max-height: 100px;
+  }
+  
+  .option {
+    min-height: 44px;
+  }
+  
+  .option-letter {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+  
+  .option-text {
+    font-size: 0.9rem;
+  }
+  
+  .nav-button-assessment {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.8rem;
+  }
+  
+  .question .code-block {
+    font-size: 0.8rem;
+  }
+  
+  .error-message-container {
+    bottom: 80px;
+  }
+  
+  .error-message-icon,
+  .error-message-close {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* For small height screens */
+@media (max-height: 600px) {
+  .header-section {
+    padding: 0.6rem 1rem;
+  }
+  
+  .header-section h1 {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .progress-container-assessment {
+    margin-top: 0.4rem;
+  }
+  
+  .question-info {
+    padding: 0.3rem 1rem;
+  }
+  
+  .assessment-content {
+    height: calc(100vh - 110px);
+  }
+  
+  .question-container {
+    height: 25%;
+    min-height: 60px;
+    max-height: 90px;
+  }
+  
+  .answer-container {
+    height: 65%;
+  }
+  
+  .question-answer-container {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .option {
+    padding: 0.5rem 0.8rem;
+  }
+  
+  .navigation-buttons {
+    padding: 0.6rem 1rem;
+  }
+  
+  .error-message-container {
+    bottom: 75px;
+  }
+}
+
+/* Bootstrap Integration for Mobile */
+@media (max-width: 768px) {
+  .portal {
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .options-container {
+    gap: 0.6rem;
+  }
+  
+  .nav-button-assessment {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Multiple Choice Options - Compact */
 .options-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Increased from 1rem for more spacing between options */
+  gap: 0.7rem;
 }
 
 .option {
   display: flex;
   align-items: center;
-  gap: 1.5rem; /* Increased from 1rem */
-  padding: 1.5rem 2rem; /* Increased from 1.2rem 1.5rem for more padding */
-  border: 2px solid var(--gray-300); /* Increased border width from 1px */
-  border-radius: var(--border-radius-lg); /* Using larger border radius */
+  gap: 0.8rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
   cursor: pointer;
   transition: var(--transition);
   background-color: var(--white);
-  /* Added box shadow for depth */
-  box-shadow: var(--shadow-sm);
 }
 
 .option:hover {
   border-color: var(--primary-light);
   background-color: var(--off-white);
-  transform: translateY(-3px); /* Increased from -2px */
-  box-shadow: var(--shadow-md); /* Increased shadow on hover */
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .option.selected {
-  background-color: rgba(0, 109, 109, 0.08); /* Slightly darker background */
+  background-color: rgba(0, 109, 109, 0.08);
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px var(--primary); /* Thicker focus ring */
+  box-shadow: 0 0 0 1px var(--primary);
 }
 
 .option-letter {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 45px; /* Increased from 36px */
-  height: 45px; /* Increased from 36px */
+  width: 30px;
+  height: 30px;
   background-color: var(--gray-100);
   color: var(--primary);
   font-weight: 600;
   border-radius: 50%;
   flex-shrink: 0;
   transition: var(--transition);
-  font-size: 1.1rem; /* Added font size */
+  font-size: 0.9rem;
 }
 
 .option.selected .option-letter {
@@ -234,69 +248,74 @@
 
 .option-text {
   color: var(--gray-800);
-  font-size: 1.1rem; /* Increased from 1rem */
-  line-height: 1.6; /* Increased from 1.5 */
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
-/* Text Input */
+/* Text Input - Compact with fixed height */
 .input-container {
-  margin-top: 1.5rem; /* Increased from 1rem */
+  margin-top: 0.7rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .input-container textarea {
   width: 100%;
-  padding: 1.5rem; /* Increased from 1.2rem */
-  border: 2px solid var(--gray-300); /* Increased from 1px */
-  border-radius: var(--border-radius-lg); /* Using larger border radius */
-  resize: vertical;
-  min-height: 200px; /* Increased from 180px */
+  padding: 0.8rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  resize: none; /* Prevent manual resizing */
+  height: calc(100% - 20px); /* Fixed height based on container */
   font-family: inherit;
-  font-size: 1.1rem; /* Increased from 1rem */
+  font-size: 0.95rem;
   color: var(--gray-800);
   background-color: var(--white);
   transition: var(--transition);
-  line-height: 1.7; /* Increased from 1.6 */
+  line-height: 1.6;
 }
 
 .input-container textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 109, 109, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 109, 109, 0.1);
 }
 
-.input-container textarea::placeholder {
-  color: var(--gray-500);
-}
-
-/* Navigation Buttons */
+/* Fixed Navigation Buttons - Always visible */
 .navigation-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: space-between;
-  padding: 2rem 3rem 3rem; /* Increased from 1.5rem 2.5rem 2.5rem */
+  padding: 0.75rem 1.5rem;
   background-color: var(--white);
-  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
   border-top: 1px solid var(--gray-200);
+  z-index: 100;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 }
 
+/* Navigation Buttons - Compact */
 .nav-button-assessment {
   background-color: var(--white);
   color: var(--primary);
   border: 1px solid var(--gray-300);
-  border-radius: 30px;
-  padding: 1rem 2rem; /* Increased from 0.8rem 1.8rem */
-  font-size: 1.05rem; /* Increased from 0.95rem */
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 0.6rem; /* Increased from 0.5rem */
+  gap: 0.4rem;
 }
 
 .nav-button-assessment:hover:not(:disabled) {
   background-color: var(--gray-100);
   color: var(--primary-dark);
-  transform: translateY(-3px); /* Increased from -2px */
+  transform: translateY(-2px);
 }
 
 .nav-button-assessment:disabled {
@@ -315,7 +334,6 @@
   color: var(--white);
 }
 
-/* Previous button styling */
 .previous-button {
   background-color: var(--white);
   color: var(--primary);
@@ -328,17 +346,26 @@
   border-color: var(--primary-dark);
 }
 
-/* Added for question navigation dots - more spacious */
+/* Question Navigation Dots - Compact */
 .question-navigation-dots {
   display: flex;
   justify-content: center;
-  gap: 0.8rem; /* Increased from 0.5rem if you had this before */
-  padding: 0 0 2rem 0; /* More bottom padding */
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0.5rem 0;
+  background-color: var(--white);
+  border-top: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--gray-200);
+  position: fixed;
+  bottom: 53px; /* Position above nav buttons */
+  left: 0;
+  right: 0;
+  z-index: 99;
 }
 
 .question-dot {
-  width: 14px; /* Increased from 10px if you had this before */
-  height: 14px; /* Increased from 10px if you had this before */
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background-color: var(--gray-300);
   cursor: pointer;
@@ -347,33 +374,138 @@
 
 .question-dot.active {
   background-color: var(--primary);
-  transform: scale(1.2); /* Slight increase in size for active dot */
+  transform: scale(1.2);
 }
 
 .question-dot.answered {
   background-color: var(--gray-500);
 }
 
-/* Additional animation classes */
+/* Animations */
 .fade-in {
-  animation: fadeIn 0.4s ease-in;
+  animation: fadeIn 0.3s ease-in;
 }
 
 .fade-out {
-  animation: fadeOut 0.4s ease-out;
+  animation: fadeOut 0.3s ease-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeOut {
   from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 0; transform: translateY(-5px); }
 }
 
-/* Assessment loading/completed/error states styling */
+/* Error Message Styling - Premium Design */
+.error-message-container {
+  position: fixed;
+  bottom: 90px; /* Position above the navigation buttons */
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding: 0 1.5rem;
+  animation: slideUpFade 0.3s ease-out;
+}
+
+.error-message {
+  background-color: #fff0f0;
+  border-left: 4px solid #e53935;
+  border-radius: var(--border-radius);
+  padding: 1rem 1.2rem;
+  color: #c62828;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.error-message-icon {
+  flex-shrink: 0;
+  margin-right: 0.8rem;
+  width: 24px;
+  height: 24px;
+  color: #e53935;
+}
+
+.error-message-text {
+  flex-grow: 1;
+}
+
+.error-message-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #c62828;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.8rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.error-message-close:hover {
+  opacity: 1;
+}
+
+/* Variants */
+.error-message.warning {
+  background-color: #fff8e1;
+  border-left-color: #ffa000;
+  color: #ff8f00;
+}
+
+.error-message.warning .error-message-icon,
+.error-message.warning .error-message-close {
+  color: #ff8f00;
+}
+
+.error-message.info {
+  background-color: #e1f5fe;
+  border-left-color: #039be5;
+  color: #0277bd;
+}
+
+.error-message.info .error-message-icon,
+.error-message.info .error-message-close {
+  color: #0277bd;
+}
+
+.error-message.success {
+  background-color: #e8f5e9;
+  border-left-color: #43a047;
+  color: #2e7d32;
+}
+
+.error-message.success .error-message-icon,
+.error-message.success .error-message-close {
+  color: #2e7d32;
+}
+
+@keyframes slideUpFade {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.error-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* States (Loading, Error, Completed) - Keep compact */
 .assessment-loading,
 .assessment-completed,
 .assessment-error {
@@ -381,29 +513,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  padding: 2rem 1.5rem;
   background-color: var(--white);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-md);
+  height: 100%;
   text-align: center;
-  margin: auto 0;
-}
-
-.loading-spinner,
-.success-icon,
-.error-icon {
-  font-size: 3rem;
-  margin-bottom: 1.5rem;
-  color: var(--primary);
 }
 
 .loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid var(--gray-200);
-  border-top: 5px solid var(--primary);
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--gray-200);
+  border-top: 4px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
 }
 
 @keyframes spin {
@@ -411,54 +534,249 @@
   100% { transform: rotate(360deg); }
 }
 
-.success-icon {
-  color: #28a745;
-  font-size: 3.5rem;
-}
-
-.error-icon {
-  color: #dc3545;
-  font-size: 3.5rem;
-}
-
-.assessment-loading h2,
+.assessment-error h2,
 .assessment-completed h2,
-.assessment-error h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-  color: var(--gray-900);
+.assessment-loading h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
-.assessment-loading p,
+.assessment-error p,
 .assessment-completed p,
-.assessment-error p {
-  font-size: 1.1rem;
-  color: var(--gray-700);
-  margin-bottom: 1.5rem;
+.assessment-loading p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
 }
 
-/* Media Queries for Responsiveness */
-@media (max-width: 992px) {
+/* Bootstrap Integration for Mobile */
+@media (max-width: 768px) {
   .portal {
-    margin: 1rem auto;
-    max-width: 95%;
+    max-width: 100%;
+    margin: 0;
   }
   
-  .header-section {
-    padding: 2.5rem; /* Adjusted from 2rem */
+  .options-container {
+    gap: 0.6rem;
   }
+  
+  .nav-button-assessment {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Assessment Page Container - Fixed height layout */
+.portal {
+  background-color: var(--body-bg);
+  height: 100vh; /* Use viewport height */
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden; /* Prevent scrolling on main container */
+  position: relative;
+}
+
+/* Assessment Header - Compact */
+.header-section {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  padding: 1rem 1.5rem;
+  color: var(--white);
+  border-radius: 0;
+  z-index: 10;
+}
+
+.header-section h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.02em;
+}
+
+.header-section p {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.progress-container-assessment {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.7rem;
+}
+
+.progress-bar-assessment {
+  flex-grow: 1;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--accent);
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+
+.progress-percentage {
+  color: var(--white);
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 40px;
+}
+
+/* Question Information Bar - Compact */
+.question-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 0.85rem;
+  z-index: 9;
+}
+
+.question-number {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--gray-700);
+  font-weight: 600;
+  background-color: var(--gray-100);
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+.clock-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Main Content Layout - Fixed height with flex */
+.assessment-content {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--white);
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  height: calc(100vh - 135px); /* Fixed height based on header */
+}
+
+/* Content + Nav Container - Ensure fixed positioning */
+.content-and-nav {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Scrollable Question and Answer Area - Fixed height */
+.question-answer-container {
+  height: calc(100% - 90px); /* Fixed height with space for navigation */
+  overflow-y: auto;
+  padding: 0.75rem 1.5rem;
+  position: relative;
+}
+
+/* Question Container - Fixed height */
+.question-container {
+  height: 30%; /* Fixed percentage height */
+  min-height: 100px;
+  max-height: 150px;
+  overflow-y: auto;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gray-200);
+  padding-bottom: 0.75rem;
+}
+
+/* Answer Container - Fixed height */
+.answer-container {
+  height: 60%; /* Fixed percentage height */
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+/* Question styling - Fixed height scrollable */
+.question {
+  padding: 0.4rem 0 0.6rem;
+  color: var(--gray-900);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow-y: auto;
 }
 
 .question-title {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
   color: #333;
 }
 
 .question-additional {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   line-height: 1.5;
   color: #555;
+  font-size: 0.95rem;
+}
+
+/* Options Container - Fixed height */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  overflow-y: auto;
+  height: 100%;
+  padding-right: 0.5rem; /* Space for scrollbar */
+}
+
+/* Multiple Choice Options - Uniform cards */
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  background-color: var(--white);
+  min-height: 54px; /* Fixed minimum height */
+  height: auto;
+}
+
+.option-text {
+  color: var(--gray-800);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  overflow-y: auto;
+  max-height: 100px; /* Maximum height with scrolling */
+}
+
+/* Code Block Styling - Compact */
+.question .code-block {
+  background-color: var(--gray-100);
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  margin: 0.75rem 0;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  color: var(--gray-800);
+  border-left: 3px solid var(--primary);
 }

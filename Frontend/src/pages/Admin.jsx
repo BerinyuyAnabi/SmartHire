@@ -198,10 +198,6 @@ function Admin() {
   return (
     <AdminContext.Provider value={{ currentAdmin }}>
       <div className="admin-portal">
-        {/* Mobile Sidebar Toggle Button */}
-        <button className="sidebar-toggle" onClick={toggleSidebar}>
-          <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-bars'}`}></i>
-        </button>
         
         {/* Sidebar */}
         <div className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
@@ -255,7 +251,6 @@ export default Admin;
 document.addEventListener('DOMContentLoaded', function() {
   // Add a toggle button to the DOM
   const toggleButton = document.createElement('button');
-  toggleButton.className = 'sidebar-toggle';
   toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
   document.body.appendChild(toggleButton);
   
