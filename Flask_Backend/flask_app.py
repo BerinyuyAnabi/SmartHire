@@ -1996,7 +1996,6 @@ def get_public_assessment(assessment_id):
 #         error_details = traceback.format_exc()
 #         logger.error(f"Traceback: {error_details}")
 #         return jsonify({"error": str(e)}), 500
-
 @app.route('/api/public/assessments/<int:assessment_id>/submit', methods=['POST'])
 def submit_public_assessment(assessment_id):
     try:
@@ -2081,20 +2080,21 @@ def submit_public_assessment(assessment_id):
                             question_id_map[str(frontend_question_id)] = existing_question['id']
                         else:
                             # Create a bridge record in assessment_questions
+                            # IMPORTANT: Only using columns that exist in the table
                             cursor.execute("""
                                 INSERT INTO assessment_questions (
-                                    session_id, question_index, question_text, question_type, 
-                                    options, correct_answer
-                                ) VALUES (%s, %s, %s, %s, %s, %s)
+                                    id, correct_answer, question_type, session_id, question_index
+                                ) VALUES (%s, %s, %s, %s, %s)
                             """, (
-                                assessment_id,
-                                frontend_question_id,
-                                question_data.get('question', ''),
+                                f"session_{assessment_id}_q{frontend_question_id}",  # Use a predictable ID format
+                                question_data.get('correct_answer', ''),
                                 'multiple-choice',
-                                json.dumps(question_data.get('options', [])),
-                                question_data.get('correct_answer', '')
+                                assessment_id,
+                                frontend_question_id
                             ))
-                            question_id_map[str(frontend_question_id)] = cursor.lastrowid
+                            
+                            # Use the manually generated id since we're not using auto-increment
+                            question_id_map[str(frontend_question_id)] = f"session_{assessment_id}_q{frontend_question_id}"
                     
                     # Process each answer
                     for answer_data in answers:
@@ -2134,7 +2134,9 @@ def submit_public_assessment(assessment_id):
                                 if is_correct:
                                     correct_count += 1
                             except (ValueError, IndexError) as e:
+                                import traceback
                                 logger.warning(f"Invalid question_id or index: {frontend_question_id}, Error: {str(e)}")
+                                logger.warning(traceback.format_exc())
                     
                     # Calculate score
                     score = 0
@@ -2149,7 +2151,7 @@ def submit_public_assessment(assessment_id):
                         )
                 
                 except Exception as e:
-                    import traceback  # Import traceback here to ensure it's available
+                    import traceback
                     logger.error(f"Error processing question data: {str(e)}")
                     logger.error(traceback.format_exc())
             else:
@@ -2257,11 +2259,11 @@ def submit_public_assessment(assessment_id):
         })
         
     except Exception as e:
-        import traceback  # Add import here as well for the main exception handler
+        import traceback
         logger.error(f"Error submitting assessment: {str(e)}")
         error_details = traceback.format_exc()
         logger.error(f"Traceback: {error_details}")
         return jsonify({"error": str(e)}), 500
-    
+        
 if __name__ == '__main__':
     app.run(debug=True)
