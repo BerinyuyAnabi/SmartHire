@@ -1096,3 +1096,162 @@ body {
   margin-bottom: 15px;
   line-height: 1.6;
 }
+
+/* Mobile Sidebar Toggle Styles */
+
+/* Toggle Button */
+.sidebar-toggle {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1050;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+  font-size: 1.2rem;
+  display: none; /* Hidden by default on desktop */
+}
+
+.sidebar-toggle:hover {
+  background-color: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+/* Mobile Sidebar State */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: flex; /* Show on mobile */
+  }
+  
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px; /* Start off-screen */
+    width: 260px;
+    height: 100vh;
+    z-index: 1040;
+    transition: transform 0.3s ease, left 0.3s ease;
+  }
+  
+  .admin-sidebar.open {
+    transform: translateX(280px);
+    left: 0;
+  }
+  
+  .admin-content {
+    margin-left: 0;
+    width: 100%;
+    padding-top: 70px; /* Add space for the toggle button */
+  }
+  
+  /* Overlay when sidebar is open */
+  body.sidebar-active::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1030;
+    animation: fade-in 0.3s ease forwards;
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  /* Adjust navbar for mobile */
+  .admin-navbar {
+    padding-left: 70px; /* Make room for the toggle button */
+  }
+}
+
+/* Enhanced Mobile Responsiveness */
+@media (max-width: 576px) {
+  .management-header {
+    padding: 15px;
+  }
+  
+  .management-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .actions-container {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .add-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .filter-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  .filter-group select {
+    width: 100%;
+  }
+  
+  .job-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .job-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .status-actions, .management-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  /* Make cards take full width */
+  .jobs-wrapper,
+  .assessments-wrapper {
+    grid-template-columns: 1fr;
+  }
+  
+  .app-btn {
+    font-size: 0.8rem;
+    padding: 10px 5px;
+  }
+  
+  .app-btn i {
+    margin-right: 5px;
+  }
+}
+
+/* Styles for sidebar when user is scrolling */
+.sidebar-scrolled {
+  top: 0;
+  height: 100vh;
+}

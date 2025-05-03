@@ -1,6 +1,9 @@
+// Updated Admin.js with better mobile toggle functionality
+
 import { useState, useEffect, createContext } from 'react';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import "../css/Admin.css";
+import "../css/AdminExt.css";
 
 // Admin Dashboard Components
 import AdminDashboard from '../components/admin/AdminDashboard';
@@ -23,6 +26,15 @@ function Admin() {
   // Toggle sidebar function for mobile
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+    document.body.classList.toggle('sidebar-active');
+  };
+  
+  // Close sidebar if clicking outside on mobile
+  const handleContentClick = () => {
+    if (window.innerWidth <= 768 && sidebarOpen) {
+      setSidebarOpen(false);
+      document.body.classList.remove('sidebar-active');
+    }
   };
   
   // Check authentication on component mount and when pathname changes
@@ -95,6 +107,30 @@ function Admin() {
       checkAuth();
     }
     
+    // Add window resize event to close sidebar on desktop
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setSidebarOpen(false);
+        document.body.classList.remove('sidebar-active');
+      }
+    };
+    
+    // Add scroll event to handle sidebar styling when scrolling
+    const handleScroll = () => {
+      const sidebar = document.querySelector('.admin-sidebar');
+      if (sidebar) {
+        if (window.scrollY > 60) {
+          sidebar.classList.add('sidebar-scrolled');
+        } else {
+          sidebar.classList.remove('sidebar-scrolled');
+        }
+      }
+    };
+    
+    // Add event listeners
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleScroll);
+    
     // Load Bootstrap and FontAwesome
     if (!document.getElementById('bootstrap-css')) {
       const bootstrapLink = document.createElement('link');
@@ -126,9 +162,10 @@ function Admin() {
     
     // Cleanup function to handle component unmount
     return () => {
-      // Any cleanup code here if needed
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
     };
-  }, [navigate]); 
+  }, [navigate, currentAdmin, sidebarOpen]); 
 
   const handleLogout = async () => {
     setLoading(true);
@@ -155,8 +192,6 @@ function Admin() {
       console.error('Logout failed:', error);
       setError('Logout failed. Please try again.');
       setLoading(false); // Make sure to set loading to false if there's an error
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -198,6 +233,14 @@ function Admin() {
   return (
     <AdminContext.Provider value={{ currentAdmin }}>
       <div className="admin-portal">
+        {/* Mobile Sidebar Toggle Button */}
+        <button 
+          className="sidebar-toggle" 
+          onClick={toggleSidebar}
+          aria-label="Toggle sidebar menu"
+        >
+          <i className={`fas fa-${sidebarOpen ? 'times' : 'bars'}`}></i>
+        </button>
         
         {/* Sidebar */}
         <div className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
@@ -207,19 +250,39 @@ function Admin() {
           </div>
           
           <nav className="admin-nav">
-            <Link to="/admin" className={`admin-nav-link ${isActive('/admin') ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
+            <Link 
+              to="/admin" 
+              className={`admin-nav-link ${isActive('/admin') ? 'active' : ''}`} 
+              onClick={() => setSidebarOpen(false)}
+            >
               <i className="fas fa-tachometer-alt"></i> Dashboard
             </Link>
-            <Link to="/admin/jobs" className={`admin-nav-link ${location.pathname.includes('/admin/jobs') ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
+            <Link 
+              to="/admin/jobs" 
+              className={`admin-nav-link ${location.pathname.includes('/admin/jobs') ? 'active' : ''}`} 
+              onClick={() => setSidebarOpen(false)}
+            >
               <i className="fas fa-briefcase"></i> Jobs
             </Link>
-            <Link to="/admin/applicants" className={`admin-nav-link ${location.pathname.includes('/admin/applicants') ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
+            <Link 
+              to="/admin/applicants" 
+              className={`admin-nav-link ${location.pathname.includes('/admin/applicants') ? 'active' : ''}`} 
+              onClick={() => setSidebarOpen(false)}
+            >
               <i className="fas fa-users"></i> Applicants
             </Link>
-            <Link to="/admin/assessments" className={`admin-nav-link ${location.pathname.includes('/admin/assessments') ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
+            <Link 
+              to="/admin/assessments" 
+              className={`admin-nav-link ${location.pathname.includes('/admin/assessments') ? 'active' : ''}`} 
+              onClick={() => setSidebarOpen(false)}
+            >
               <i className="fas fa-clipboard-check"></i> Assessments
             </Link>
-            <Link to="/admin/users" className={`admin-nav-link ${location.pathname.includes('/admin/users') ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
+            <Link 
+              to="/admin/users" 
+              className={`admin-nav-link ${location.pathname.includes('/admin/users') ? 'active' : ''}`} 
+              onClick={() => setSidebarOpen(false)}
+            >
               <i className="fas fa-user-shield"></i> Admin Users
             </Link>
           </nav>
@@ -231,7 +294,8 @@ function Admin() {
           </div>
         </div>
         
-        <div className="admin-content">
+        {/* Main Content */}
+        <div className="admin-content" onClick={handleContentClick}>
           <Routes>
             <Route path="/" element={<AdminDashboard />} />
             <Route path="/jobs/*" element={<JobsManagement />} />
@@ -246,46 +310,3 @@ function Admin() {
 }
 
 export default Admin;
-
-// Add this script to handle the sidebar toggle functionality on mobile
-document.addEventListener('DOMContentLoaded', function() {
-  // Add a toggle button to the DOM
-  const toggleButton = document.createElement('button');
-  toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
-  document.body.appendChild(toggleButton);
-  
-  // Get the sidebar and content elements
-  const sidebar = document.querySelector('.admin-sidebar');
-  const content = document.querySelector('.admin-content');
-  
-  // Add toggle functionality
-  toggleButton.addEventListener('click', function() {
-    sidebar.classList.toggle('open');
-    document.body.classList.toggle('sidebar-active');
-    
-    // Change the icon based on the sidebar state
-    if (sidebar.classList.contains('open')) {
-      toggleButton.innerHTML = '<i class="fas fa-times"></i>';
-    } else {
-      toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
-    }
-  });
-  
-  // Close sidebar when clicking outside on mobile
-  content.addEventListener('click', function() {
-    if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-      sidebar.classList.remove('open');
-      document.body.classList.remove('sidebar-active');
-      toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
-    }
-  });
-  
-  // Close sidebar when window is resized to desktop size
-  window.addEventListener('resize', function() {
-    if (window.innerWidth > 768) {
-      sidebar.classList.remove('open');
-      document.body.classList.remove('sidebar-active');
-      toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
-    }
-  });
-});
