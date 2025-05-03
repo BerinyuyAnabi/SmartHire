@@ -1729,8 +1729,8 @@ def get_public_assessment(assessment_id):
                     formatted_questions = []
                     for i, q in enumerate(questions_from_bank):
                         formatted_questions.append({
-                            "id": i + 1,  # Generate sequential IDs
-                            "question_text": q.get('question', ''),  # Note: in question bank it's 'question' not 'question_text'
+                            "id": i + 1,
+                            "question_text": q.get('question'),
                             "question_type": "multiple-choice",
                             "options": q.get('options', []),
                             "correct_answer": q.get('correct_answer', '')

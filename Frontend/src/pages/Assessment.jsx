@@ -58,10 +58,13 @@ function Assessment() {
         // Keep the original 'question' field instead of renaming to questionText
         const normalizedQuestions = questionsArray.map(q => ({
           id: q.id || `q_${Math.random().toString(36).substr(2, 9)}`,
-          question: q.question || q.question_text || q.questionText || '', // Prioritize 'question' field
+          question: q.question || '', 
           options: q.options || [],
           type: q.question_type || q.type || 'multiple-choice'
+          
         }));
+
+        
         
         console.log(`Loaded ${normalizedQuestions.length} questions after normalization:`, normalizedQuestions);
         setQuestions(normalizedQuestions);
@@ -363,7 +366,7 @@ function Assessment() {
 
   // Get the question text - look for either question or questionText property
   const getQuestionText = (question) => {
-    return question.question || question.questionText || '';
+    return question.question || '';
   };
 
   // Function to safely render question text - properly handle code blocks, etc.
