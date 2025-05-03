@@ -20,6 +20,7 @@ function Assessment() {
   const [error, setError] = useState(null);
   const [assessmentCompleted, setAssessmentCompleted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   // Load assessment questions from the server based on assessmentId
   useEffect(() => {
@@ -83,22 +84,23 @@ function Assessment() {
         console.log("Loading sample questions for development/demo");
         
         // Sample questions based on the question_bank.py structure
+        // Sample questions based on the question_bank.py structure
         const sampleQuestions = [
           {
             id: "prog_1",
-            questionText: "What is the time complexity of binary search on a sorted array?",
+            question: "What is the time complexity of binary search on a sorted array?", // Change questionText to question
             options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
             type: "multiple-choice"
           },
           {
             id: "fe_1",
-            questionText: "Which of the following is NOT a JavaScript framework or library?",
+            question: "Which of the following is NOT a JavaScript framework or library?", // Change questionText to question
             options: ["React", "Angular", "Vue", "Servlet"],
             type: "multiple-choice"
           },
           {
             id: "be_1",
-            questionText: "What does REST stand for in the context of API design?",
+            question: "What does REST stand for in the context of API design?", // Change questionText to question
             options: [
               "Reactive State Transfer",
               "Representational State Transfer",
@@ -109,13 +111,13 @@ function Assessment() {
           },
           {
             id: "db_1",
-            questionText: "Which of the following is a NoSQL database?",
+            question: "Which of the following is a NoSQL database?", // Change questionText to question
             options: ["MySQL", "PostgreSQL", "Oracle", "MongoDB"],
             type: "multiple-choice"
           },
           {
             id: "devops_1",
-            questionText: "What is the main purpose of container technology like Docker?",
+            question: "What is the main purpose of container technology like Docker?", // Change questionText to question
             options: [
               "To virtualize entire operating systems",
               "To package applications with their dependencies for consistent deployment",
@@ -126,12 +128,11 @@ function Assessment() {
           },
           {
             id: "code_1",
-            questionText: "Review the following code snippet and explain what it does:\n\n```javascript\nfunction mystery(arr) {\n  return arr.reduce((a, b) => a + b, 0) / arr.length;\n}\n```",
+            question: "Review the following code snippet and explain what it does:\n\n```javascript\nfunction mystery(arr) {\n  return arr.reduce((a, b) => a + b, 0) / arr.length;\n}\n```", // Change questionText to question
             type: "text",
             placeholder: "Write your explanation here..."
           }
-        ];
-        
+        ];        
         setQuestions(sampleQuestions);
         setIsLoading(false);
       }
@@ -233,17 +234,32 @@ function Assessment() {
     if (submitting) return;
     
     setSubmitting(true);
-    
-    // Convert answers object to array format for submission
-    const answersArray = Object.entries(answers).map(([index, value]) => {
-      const questionId = questions[parseInt(index)]?.id || `question_${index}`;
-      return {
-        question_id: questionId,
-        answer: value
-      };
-    });
+    setErrorMessage(null);
     
     try {
+      console.log("Original questions:", questions);
+      
+      // Format the answers correctly for the backend
+      const answersArray = Object.entries(answers).map(([index, value]) => {
+        const questionIndex = parseInt(index);
+        const question = questions[questionIndex];
+        
+        // Extract the ID directly from the question object
+        const questionId = question?.id;
+        
+        console.log(`Mapping answer at index ${index} to question ID ${questionId}`, question);
+        
+        if (!questionId) {
+          console.error(`No question ID found for index ${index}`);
+          throw new Error(`Question ID not found for question at index ${index}`);
+        }
+        
+        return {
+          question_id: questionId,
+          answer: value
+        };
+      });
+      
       console.log("Submitting assessment answers:", answersArray);
       
       // Submit answers to the server
@@ -260,11 +276,33 @@ function Assessment() {
       
       if (!response.ok) {
         const errorData = await response.json();
+        
+        // Check for the specific foreign key constraint error
+        if (errorData.error && errorData.error.includes("foreign key constraint fails")) {
+          setErrorMessage({
+            type: "error",
+            text: "There's a mismatch between your answers and the server's questions. Please refresh the page and try again."
+          });
+          console.error("Foreign key constraint error:", errorData.error);
+        } else {
+          setErrorMessage({
+            type: "error",
+            text: `Submission failed: ${errorData.error || response.statusText}`
+          });
+        }
+        
         throw new Error(`Submission failed: ${errorData.error || response.statusText}`);
       }
       
+      // Success path
       const result = await response.json();
       console.log("Assessment submission result:", result);
+      
+      // Show success message
+      setErrorMessage({
+        type: "success",
+        text: "Assessment submitted successfully!"
+      });
       
       // Clear saved answers after successful submission
       localStorage.removeItem(`assessment_${assessmentId}_answers`);
@@ -281,11 +319,18 @@ function Assessment() {
             result
           } 
         });
-      }, 1000);
+      }, 1500);
       
     } catch (error) {
       console.error("Error submitting assessment:", error);
-      alert(`There was a problem submitting your assessment: ${error.message}. Please try again.`);
+      
+      // If we haven't already set a specific error message above
+      if (!errorMessage) {
+        setErrorMessage({
+          type: "error",
+          text: error.message || "There was a problem submitting your assessment. Please try again."
+        });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -534,6 +579,38 @@ function Assessment() {
             />
           ))}
         </div>
+
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="error-message-container">
+            <div className={`error-message ${errorMessage.type || 'error'}`}>
+              {errorMessage.type === 'error' && (
+                <svg className="error-message-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              )}
+              {errorMessage.type === 'success' && (
+                <svg className="error-message-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              )}
+              <span className="error-message-text">{errorMessage.text}</span>
+              <button 
+                className="error-message-close" 
+                onClick={() => setErrorMessage(null)}
+                aria-label="Close"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
