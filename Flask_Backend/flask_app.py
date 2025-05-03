@@ -1997,7 +1997,6 @@ def get_public_assessment(assessment_id):
 #         logger.error(f"Traceback: {error_details}")
 #         return jsonify({"error": str(e)}), 500
 
-
 @app.route('/api/public/assessments/<int:assessment_id>/submit', methods=['POST'])
 def submit_public_assessment(assessment_id):
     try:
@@ -2150,6 +2149,7 @@ def submit_public_assessment(assessment_id):
                         )
                 
                 except Exception as e:
+                    import traceback  # Import traceback here to ensure it's available
                     logger.error(f"Error processing question data: {str(e)}")
                     logger.error(traceback.format_exc())
             else:
@@ -2257,12 +2257,11 @@ def submit_public_assessment(assessment_id):
         })
         
     except Exception as e:
-        import traceback  
+        import traceback  # Add import here as well for the main exception handler
         logger.error(f"Error submitting assessment: {str(e)}")
-        import traceback
         error_details = traceback.format_exc()
         logger.error(f"Traceback: {error_details}")
         return jsonify({"error": str(e)}), 500
-
+    
 if __name__ == '__main__':
     app.run(debug=True)
