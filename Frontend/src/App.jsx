@@ -51,7 +51,7 @@ function App() {
       <Route path="/debug/bookmarked-jobs" element={<BookmarkedJobsViewer/>} />
       <Route path="/debug/pdf" element={<PDFDiagnosticTool/>} />
 
-      <Route path="/assessment/:assessmentId" element={<CSAssessmentWithCustomStyle />} />
+      <Route path="/assessment/:assessmentId" element={<Assessment />} />
       {/* Protected routes
       <Route path='/job-posting' element={
         <ProtectedRoute>
