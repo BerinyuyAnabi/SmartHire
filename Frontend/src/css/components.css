@@ -2879,3 +2879,42 @@
   }
 }
 
+/* Modal Footer Visibility Fix */
+
+/* Modal container with proper overflow handling */
+.modal-container {
+    background-color: var(--white);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 6px 10px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--gray-200);
+    overflow: hidden; /* This ensures the rounded corners are maintained */
+  }
+  
+  /* Modal content area - apply overflow only to the body */
+  .modal-body, 
+  .custom-modal-body {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 100px;
+    max-height: calc(90vh - 140px); /* Adjust based on your header and footer height */
+  }
+  
+  /* Fix header and footer in position */
+  .modal-header,
+  .custom-modal-header {
+    flex-shrink: 0; /* Prevents the header from shrinking */
+  }
+  
+  .modal-footer,
+  .custom-modal-footer {
+    flex-shrink: 0; /* Prevents the footer from shrinking */
+    background-color: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+    padding: 20px 28px;
+  }
