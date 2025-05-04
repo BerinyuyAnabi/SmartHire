@@ -2886,14 +2886,13 @@
     background-color: var(--white);
     border-radius: 12px;
     width: 90%;
-    max-width: 910px;
+    max-width: 940px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     animation: slideIn 0.3s ease;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 6px 10px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--gray-200);
-    overflow: hidden; /* This ensures the rounded corners are maintained */
+    overflow: hidden; 
   }
   
   /* Modal content area - apply overflow only to the body */
