@@ -1260,20 +1260,6 @@
   to { opacity: 1; }
 }
 
-.modal-container {
-  background-color: var(--white);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  animation: slideIn 0.3s ease-in-out;
-  position: relative;
-  overflow: hidden;
-}
-
 @keyframes slideIn {
   from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -1394,7 +1380,7 @@
   margin: 0 0 10px;
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--gray-900);
+  color: white;
   letter-spacing: -0.01em;
 }
 
@@ -1862,8 +1848,8 @@
     border-radius: 12px;
     overflow: hidden;
     width: 90%;
-    max-width: 800px;
-    max-height: 85vh;
+    max-width: 900px;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     animation: slideIn 0.3s ease;
@@ -2573,7 +2559,7 @@
 
 .company-name {
   font-size: 1.1rem;
-  color: var(--gray-700);
+  color: wheat;
   font-weight: 500;
 }
 
@@ -2892,3 +2878,58 @@
     gap: 10px;
   }
 }
+
+/* Sidebar Logout Button Fix */
+
+/* Structure the admin-nav to have proper flex layout */
+.admin-nav {
+    flex: 1;
+    padding: 20px 0 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  /* Create a container for the main navigation links */
+  .admin-nav-links {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Create a container for the logout link at bottom */
+  .admin-nav-footer {
+    margin-top: auto;
+    padding: 10px 16px 20px;
+  }
+  
+  /* Style the logout button distinctly */
+  .admin-nav-link.logout {
+    margin: 0;
+    padding: 12px 20px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border-left: none;
+    color: var(--white);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+  
+  .admin-nav-link.logout:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--white);
+    transform: translateY(-2px);
+    border-left: none;
+  }
+  
+  .admin-nav-link.logout i {
+    margin-right: 10px;
+    color: var(--accent);
+  }
+  
+  .admin-nav-link.logout:hover i {
+    transform: none;
+  }
