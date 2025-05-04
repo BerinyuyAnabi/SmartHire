@@ -944,9 +944,9 @@ function JobDetailModal({ onHide, jobId, onEdit }) {
         </div>
         
         <div className="modal-footer custom-modal-footer">
-          <button className="back-button" onClick={onHide}>
+          {/* <button className="back-button" onClick={onHide}>
             <i className="fas fa-arrow-left"></i> Back to Jobs
-          </button>
+          </button> */}
           <button className="edit-button" onClick={handleEditClick}>
             <i className="fas fa-edit"></i> Edit Job
           </button>

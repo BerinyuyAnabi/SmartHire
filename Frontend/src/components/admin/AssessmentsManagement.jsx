@@ -878,11 +878,11 @@ function AssessmentResponsesModal({ onHide, assessmentId }) {
         )}
       </div>
       
-        <div className="modal-footer custom-modal-footer">
+        {/* <div className="modal-footer custom-modal-footer">
           <button className="back-button" onClick={onHide}>
             <i className="fas fa-arrow-left"></i> Back to Assessments
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
