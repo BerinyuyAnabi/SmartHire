@@ -2,8 +2,8 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * A simple modal component that doesn't use React portals
- * but still handles body scrolling and modal lifecycle
+ * An improved modal component that uses CSS classes instead of inline styles
+ * for better styling consistency and visual appeal
  */
 function SimpleModal({ children, isOpen, onClose }) {
   const modalRef = useRef(null);
@@ -50,49 +50,8 @@ function SimpleModal({ children, isOpen, onClose }) {
   if (!isOpen) return null;
   
   return (
-    <div 
-      className="modal-wrapper"
-      ref={modalRef}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 1000,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}
-    >
-      <div 
-        className="modal-backdrop"
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1001
-        }}
-      />
-      <div 
-        className="modal-content"
-        onClick={e => e.stopPropagation()} 
-        style={{
-          backgroundColor: 'white',
-          borderRadius: '4px',
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-          maxWidth: '90%',
-          maxHeight: '90%',
-          overflow: 'auto',
-          position: 'relative',
-          zIndex: 1002,
-          animation: 'modalFadeIn 0.3s ease-out'
-        }}
-      >
+    <div className="modal-overlay" ref={modalRef}>
+      <div className="modal-container">
         {children}
       </div>
     </div>

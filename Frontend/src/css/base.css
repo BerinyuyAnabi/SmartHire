@@ -71,8 +71,8 @@ body.sidebar-active::before {
 }
 
 @keyframes slideIn {
-    from { transform: translateY(-10px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 /*--------------------------------------
@@ -101,115 +101,105 @@ body.sidebar-active::before {
 
 /* Dashboard grid layouts */
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: var(--space-lg);
-    margin-bottom: var(--space-lg);
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+}
 
-  .stats-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-md);
-    margin-bottom: var(--space-lg);
-  }
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
 
-  .actions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: var(--space-md);
-  }
-  
-  /* Jobs grid */
-  .jobs-wrapper {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: var(--space-md);
-  }
-  
-  /* Assessments grid */
-  .assessments-wrapper {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: var(--space-md);
-  }
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* Jobs grid */
+.jobs-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+/* Assessments grid */
+.assessments-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+}
 
 /* Applicants list */
 .applicants-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    background-color: var(--white);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-    padding: var(--space-md);
-    border: 1px solid var(--gray-200);
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
 /* Detail layouts */
 .detail-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-lg);
+  gap: 30px;
 }
 
 /* Assessment responses layout */
 .assessment-responses-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
-  }
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
 
 /* Status chart layout */
 .status-chart {
-    margin-top: var(--space-md);
-    padding: var(--space-md) var(--space-lg);
-    background-color: var(--white);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
-  }
+  margin-top: 20px;
+  padding: 25px 30px 30px;
+}
 
-  .status-bars {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    padding: var(--space-sm) 0;
-  }
+.status-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
 /* Response stats layout */
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-sm);
-    margin: var(--space-md) 0;
-  }
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+}
 
 /*--------------------------------------
   3. SIDEBAR STYLES
 --------------------------------------*/
 .admin-sidebar {
-    width: 260px;
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    color: var(--white);
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-md);
-    position: fixed;
-    height: calc(100vh - 60px); /* Adjust height for the navbar */
-    top: 60px; /* Position below navbar */
-    left: 0;
-    z-index: 100;
-    transition: var(--transition);
-  }
+  width: 260px;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-md);
+  position: fixed;
+  height: calc(100vh - 60px); /* Adjust height for the navbar */
+  top: 60px; /* Position below navbar */
+  left: 0;
+  z-index: 100;
+  transition: var(--transition);
+}
 
-  .admin-sidebar-header {
-    padding: var(--space-md) var(--space-md);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.admin-sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
 
 .admin-sidebar-header h2 {
   margin: 0;
@@ -239,47 +229,36 @@ body.sidebar-active::before {
 }
 
 .admin-nav {
-    flex: 1;
-    padding: var(--space-md) 0;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Creates space for logout at bottom */
-  }
-  
-.admin-nav-links {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
+  flex: 1;
+  padding: 20px 0;
+  overflow-y: auto;
+}
 
 .admin-nav-link {
-    display: flex;
-    align-items: center;
-    padding: 14px var(--space-md);
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    transition: var(--transition);
-    border-left: 3px solid transparent;
-    margin-bottom: 5px;
-    font-weight: 500;
-  }
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: var(--transition);
+  border-left: 3px solid transparent;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
 
 .admin-nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--white);
-    border-left: 3px solid var(--accent);
-    transform: translateX(3px);
-  }
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+  border-left: 3px solid var(--accent);
+  transform: translateX(3px);
+}
 
-
-.admin-nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--white);
-    border-left: 3px solid var(--accent);
-    transform: translateX(3px);
-  }
-  
+.admin-nav-link.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  border-left: 3px solid var(--accent);
+  font-weight: 600;
+}
 
 .admin-nav-link i {
   margin-right: 12px;
@@ -288,37 +267,17 @@ body.sidebar-active::before {
   text-align: center;
   transition: var(--transition);
 }
-.admin-nav-link.active {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: var(--white);
-    border-left: 3px solid var(--accent);
-    font-weight: 600;
-  }
 
 .admin-nav-link.active i, 
 .admin-nav-link:hover i {
   transform: scale(1.1);
 }
 
-/* Logout positioned at bottom of sidebar */
-.logout-container {
-    margin-top: auto;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: var(--space-sm);
-  }
-
 .admin-nav-link.logout {
-    background-color: rgba(0, 0, 0, 0.2);
-    margin-top: var(--space-sm);
-    border-radius: var(--border-radius);
-    margin: var(--space-sm) var(--space-sm);
-    padding: var(--space-sm);
-    color: var(--white);
-  }
-
-  .admin-nav-link.logout:hover {
-    background-color: rgba(0, 0, 0, 0.3);
-  }
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+}
 
 /* Sidebar scrolled state */
 .sidebar-scrolled {
@@ -351,17 +310,6 @@ body.sidebar-active::before {
 .sidebar-toggle:hover {
   background-color: var(--primary-dark);
   transform: scale(1.05);
-}
-
-/* Add more consistent card sizing */
-.job-card,
-.applicant-card,
-.assessment-card,
-.dashboard-card,
-.stat-card {
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
 }
 
 /*--------------------------------------
@@ -414,9 +362,9 @@ body.sidebar-active::before {
 .error-container,
 .error-message,
 .not-found {
-  padding: var(--space-md);
+  padding: 20px;
   border-radius: var(--border-radius);
-  margin-bottom: var(--space-md);
+  margin-bottom: 20px;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
@@ -456,19 +404,19 @@ body.sidebar-active::before {
 }
 
 .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-xl) var(--space-lg);
-    color: var(--gray-600);
-    text-align: center;
-    background-color: var(--white);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-    margin: var(--space-md) 0;
-    border: 1px dashed var(--gray-300);
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  color: var(--gray-600);
+  text-align: center;
+  background-color: var(--white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin: 20px 0;
+  border: 1px dashed var(--gray-300);
+}
 
 .empty-state i {
   font-size: 3.5rem;
@@ -508,17 +456,17 @@ body.sidebar-active::before {
 --------------------------------------*/
 /* Management Header */
 .management-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-lg);
-    background-color: var(--white);
-    padding: var(--space-md) var(--space-lg);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
-    transition: var(--transition);
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background-color: var(--white);
+  padding: 20px 25px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  transition: var(--transition);
+}
 
 .management-header:hover {
   box-shadow: var(--shadow-md);
@@ -552,13 +500,13 @@ body.sidebar-active::before {
 
 /* Card headers */
 .card-header {
-    padding: var(--space-md) var(--space-lg);
-    border-bottom: 1px solid var(--gray-200);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .card-header h3 {
   margin: 0;
   font-size: 1.2rem;
@@ -1023,8 +971,8 @@ body.sidebar-active::before {
     margin-left: 0;
     width: 100%;
     padding-top: 70px; /* Add space for the toggle button */
-    padding-left: var(--space-md);
-    padding-right: var(--space-md);
+    padding-left: 20px;
+    padding-right: 20px;
   }
   
   .stats-cards {
