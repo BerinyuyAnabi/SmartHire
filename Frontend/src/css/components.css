@@ -2886,7 +2886,7 @@
     background-color: var(--white);
     border-radius: 12px;
     width: 90%;
-    max-width: 900px;
+    max-width: 910px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
@@ -2918,3 +2918,101 @@
     border-top: 1px solid var(--gray-200);
     padding: 20px 28px;
   }
+
+  /* Modal Footer Fix to prevent buttons from being cut off */
+
+/* Set up proper flexbox structure for modals */
+.modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; /* Limit overall height */
+}
+
+/* Make header non-scrollable */
+.modal-header.custom-modal-header {
+  padding: 22px 28px;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+/* Make body scrollable but constrained */
+.modal-body.custom-modal-body {
+  padding: 28px;
+  overflow-y: auto; /* Only the body scrolls */
+  flex: 1; /* Takes available space */
+  min-height: 200px; /* Ensures minimum space for content */
+  max-height: calc(90vh - 145px); /* Reserves space for header and footer */
+}
+
+/* Make footer non-scrollable and always visible */
+.modal-footer.custom-modal-footer {
+  padding: 20px 28px;
+  background-color: var(--gray-50);
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0; /* Prevent footer from shrinking */
+  position: sticky; /* Experimental: helps in some browsers */
+  bottom: 0; /* Stick to the bottom */
+  z-index: 2; /* Ensure it's above content */
+}
+
+/* Ensure modal dialog is properly sized */
+.modal-dialog.job-form-modal,
+.modal-dialog.job-detail-modal,
+.modal-dialog.assessment-form-modal,
+.modal-dialog.assessment-responses-modal {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure specific overflow control for the detail content */
+.detail-content {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 24px;
+  width: 100%;
+  overflow: visible; /* Allow content to be visible */
+}
+
+/* Make sure buttons are always visible */
+.modal-footer.custom-modal-footer button {
+  position: relative; /* Ensure proper stacking */
+  z-index: 3; /* Higher than footer */
+}
+
+/* Specific styling for the job detail modal */
+.job-detail-modal .modal-body.custom-modal-body {
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Fix for nested scrollable areas */
+.applicants-list {
+  padding: 20px 24px;
+  max-height: 40vh; /* Limit height relative to viewport */
+  overflow-y: auto;
+}
+
+/* Ensure scrolling works properly on mobile */
+@media (max-width: 768px) {
+  .modal-body.custom-modal-body {
+    max-height: calc(90vh - 160px); /* Adjust for larger footer on mobile */
+  }
+  
+  .modal-footer.custom-modal-footer {
+    flex-wrap: wrap;
+    padding: 16px 20px;
+  }
+}
