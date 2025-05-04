@@ -2468,6 +2468,7 @@
   padding: 22px 28px;
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
   border-bottom: none;
+  overflow-x: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2892,7 +2893,10 @@
     flex-direction: column;
     animation: slideIn 0.3s ease;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 6px 10px rgba(0, 0, 0, 0.15);
-    overflow: hidden; 
+    overflow: hidden;
+    max-height: 90vh;   
+    width: 100%; 
+    min-width: 0;
   }
   
   /* Modal content area - apply overflow only to the body */
@@ -3015,3 +3019,107 @@
     padding: 16px 20px;
   }
 }
+
+/* Modal Width Fitting Improvements */
+
+/* Ensure modal content always fits its container */
+.modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--gray-200);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh; /* Limit overall height */
+    width: 100%; /* Ensure it takes full width of its parent */
+    min-width: 0; /* Allows content to shrink below min-content if needed */
+  }
+  
+  /* Make modal body handle width constraints properly */
+  .modal-body.custom-modal-body {
+    padding: 28px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    flex: 1;
+    min-height: 200px;
+    max-height: calc(90vh - 145px);
+    width: 100%; /* Take full width */
+    min-width: 0; /* Allow content to shrink */
+  }
+  
+  /* Ensure detail content respects container width */
+  .detail-content {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 24px;
+    width: 100%;
+    min-width: 0; /* Allow grid to shrink */
+  }
+  
+  /* Make content in grid cells respect width */
+  .job-detail-card,
+  .job-applicants-section {
+    min-width: 0; /* Allow content to shrink */
+    width: 100%;
+  }
+  
+  /* Prevent text overflow in various elements */
+  .job-detail-header h3,
+  .company-name,
+  .info-item,
+  .job-detail-section p,
+  .detail-list li,
+  .applicant-details h4,
+  .applicant-meta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal; /* Allow text to wrap */
+    word-wrap: break-word; /* Break long words */
+    max-width: 100%; /* Respect parent container */
+  }
+  
+  /* Make input fields responsive to container width */
+  input,
+  select,
+  textarea,
+  .array-field input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Adjust grid for narrower viewports */
+  @media (max-width: 768px) {
+    .detail-content {
+      grid-template-columns: 1fr; /* Single column on smaller screens */
+    }
+    
+    .job-detail-info {
+      grid-template-columns: 1fr; /* Single column for info items */
+    }
+    
+    /* Responsive footer buttons */
+    .modal-footer.custom-modal-footer {
+      flex-wrap: wrap;
+    }
+    
+    .modal-footer.custom-modal-footer button {
+      min-width: 0; /* Allow buttons to shrink */
+      white-space: nowrap; /* Keep button text on one line */
+    }
+  }
+  
+  /* Handle really small screens */
+  @media (max-width: 480px) {
+    .modal-body.custom-modal-body {
+      padding: 16px;
+    }
+    
+    .job-detail-section {
+      padding: 16px;
+    }
+    
+    .job-detail-header {
+      padding: 16px;
+    }
+  }
