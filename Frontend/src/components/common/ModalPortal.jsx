@@ -1,5 +1,5 @@
 // src/components/common/ModalPortal.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 /**
@@ -7,52 +7,72 @@ import { createPortal } from 'react-dom';
  * by properly managing modal mount/unmount cycles.
  */
 function ModalPortal({ children, isOpen }) {
-  const [portalNode, setPortalNode] = useState(null);
+  const [mounted, setMounted] = useState(false);
+  const portalNodeRef = useRef(null);
   
   useEffect(() => {
     // Only create the portal node when the modal is opening
-    if (isOpen && !portalNode) {
-      const node = document.createElement('div');
-      node.className = 'modal-portal-container';
-      document.body.appendChild(node);
+    if (isOpen && !mounted) {
+      // Create the portal container if it doesn't exist
+      if (!portalNodeRef.current) {
+        const node = document.createElement('div');
+        node.className = 'modal-portal-container';
+        node.setAttribute('data-modal-portal', 'true');
+        portalNodeRef.current = node;
+      }
       
-      // Important: Mark the new node with a data attribute so we can identify it later
-      node.setAttribute('data-modal-portal', 'true');
+      // Append the node to document body only if it's not already there
+      if (!document.body.contains(portalNodeRef.current)) {
+        document.body.appendChild(portalNodeRef.current);
+      }
       
-      setPortalNode(node);
-      
-      // Important: Prevent background scrolling
+      // Prevent background scrolling
       document.body.style.overflow = 'hidden';
       document.body.classList.add('modal-open');
+      
+      setMounted(true);
+    } else if (!isOpen && mounted) {
+      // Reset body styles first
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+      
+      // Set mounted to false, actual DOM node removal happens in the cleanup function
+      setMounted(false);
     }
     
-    // Clean up function that runs when modal closes or component unmounts
+    // Cleanup function that runs when component unmounts
     return () => {
-      if (portalNode) {
-        // Important: Check to ensure this node still exists in the DOM and is our node
-        if (document.body.contains(portalNode) && 
-            portalNode.getAttribute('data-modal-portal') === 'true') {
-          
-          try {
-            document.body.removeChild(portalNode);
-          } catch (error) {
-            console.warn('Could not remove portal node:', error);
-            // If removal fails, at least hide the node
-            portalNode.style.display = 'none';
+      if (portalNodeRef.current) {
+        // Reset body styles
+        document.body.style.overflow = '';
+        document.body.classList.remove('modal-open');
+        
+        // Safe node removal, only if it's still in the DOM and a child of document.body
+        try {
+          if (document.body.contains(portalNodeRef.current)) {
+            document.body.removeChild(portalNodeRef.current);
+          }
+        } catch (error) {
+          console.warn('Could not remove portal node:', error);
+          // If removal fails, at least hide the node
+          if (portalNodeRef.current) {
+            portalNodeRef.current.style.display = 'none';
           }
         }
         
-        setPortalNode(null);
-        document.body.style.overflow = '';
-        document.body.classList.remove('modal-open');
+        // Clear the ref
+        portalNodeRef.current = null;
+        setMounted(false);
       }
     };
-  }, [isOpen, portalNode]);
+  }, [isOpen, mounted]);
   
-  // Only render into the portal if the node exists and modal is open
-  if (!isOpen || !portalNode) return null;
+  // Only render into the portal if node exists and modal is open
+  if (!isOpen || !mounted || !portalNodeRef.current) {
+    return null;
+  }
   
-  return createPortal(children, portalNode);
+  return createPortal(children, portalNodeRef.current);
 }
 
 export default ModalPortal;

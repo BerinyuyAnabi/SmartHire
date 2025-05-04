@@ -1,7 +1,9 @@
 // src/components/admin/ApplicantsManagement.js
 import React, { useState, useEffect, useContext } from 'react';
 import { AdminContext } from '../../pages/Admin';
-import ModalPortal from '../common/ModalPortal';
+// Import the modal component you prefer to use:
+// import ModalPortal from '../common/ModalPortal'; // Option 1 with createPortal
+import SimpleModal from '../common/SimpleModal'; // Option 2 without createPortal
 
 function ApplicantsManagement() {
   const { currentAdmin } = useContext(AdminContext);
@@ -12,6 +14,16 @@ function ApplicantsManagement() {
   const [search, setSearch] = useState("");
   const [selectedApplicantId, setSelectedApplicantId] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  
+  // Create a ref to track component mount state
+  const isMounted = React.useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   useEffect(() => {
     fetchApplicants();
@@ -29,12 +41,21 @@ function ApplicantsManagement() {
       }
       
       const data = await response.json();
-      setApplicants(data);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setApplicants(data);
+      }
     } catch (error) {
       console.error('Error fetching applicants:', error);
-      setError('Failed to load applicants. Please try again.');
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('Failed to load applicants. Please try again.');
+      }
     } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
   
@@ -53,15 +74,19 @@ function ApplicantsManagement() {
         throw new Error('Failed to update applicant status');
       }
       
-      // Update local state
-      setApplicants(prevApplicants => 
-        prevApplicants.map(app => 
-          app.id === applicantId ? { ...app, status: newStatus } : app
-        )
-      );
+      // Update local state - only if component is still mounted
+      if (isMounted.current) {
+        setApplicants(prevApplicants => 
+          prevApplicants.map(app => 
+            app.id === applicantId ? { ...app, status: newStatus } : app
+          )
+        );
+      }
     } catch (error) {
       console.error('Error updating applicant status:', error);
-      setError('Failed to update status. Please try again.');
+      if (isMounted.current) {
+        setError('Failed to update status. Please try again.');
+      }
     }
   };
   
@@ -80,13 +105,17 @@ function ApplicantsManagement() {
         throw new Error('Failed to delete applicant');
       }
       
-      // Remove from local state
-      setApplicants(prevApplicants => 
-        prevApplicants.filter(app => app.id !== applicantId)
-      );
+      // Remove from local state - only if component is still mounted
+      if (isMounted.current) {
+        setApplicants(prevApplicants => 
+          prevApplicants.filter(app => app.id !== applicantId)
+        );
+      }
     } catch (error) {
       console.error('Error deleting applicant:', error);
-      setError('Failed to delete applicant. Please try again.');
+      if (isMounted.current) {
+        setError('Failed to delete applicant. Please try again.');
+      }
     }
   };
   
@@ -109,8 +138,15 @@ function ApplicantsManagement() {
   };
 
   const closeDetailModal = () => {
+    // First hide the modal UI
     setShowDetailModal(false);
-    // No need for setTimeout here - ModalPortal component will handle unmounting
+    
+    // Then clear the selected ID after a short delay to ensure smooth animation
+    setTimeout(() => {
+      if (isMounted.current) {
+        setSelectedApplicantId(null);
+      }
+    }, 300);
   };
   
   if (!currentAdmin) return <div className="loading">Checking permissions...</div>;
@@ -273,7 +309,8 @@ function ApplicantsManagement() {
         )}
       </div>
       
-      {/* Use ModalPortal for the Applicant Detail Modal */}
+      {/* Option 1: Use ModalPortal */}
+      {/* 
       <ModalPortal isOpen={showDetailModal}>
         <div className="modal-wrapper">
           <div className="modal-backdrop" onClick={closeDetailModal}>
@@ -301,6 +338,34 @@ function ApplicantsManagement() {
           </div>
         </div>
       </ModalPortal>
+      */}
+      
+      {/* Option 2: Use SimpleModal */}
+      {showDetailModal && (
+        <SimpleModal isOpen={true} onClose={closeDetailModal}>
+          <div className="applicant-detail-modal">
+            <div className="custom-modal-header">
+              <h2 className="modal-title">Applicant Profile</h2>
+              <button onClick={closeDetailModal} className="btn-close">×</button>
+            </div>
+            
+            <div className="custom-modal-body">
+              {selectedApplicantId && (
+                <ApplicantDetail 
+                  applicantId={selectedApplicantId} 
+                  onClose={closeDetailModal} 
+                />
+              )}
+            </div>
+            
+            <div className="custom-modal-footer">
+              <button onClick={closeDetailModal} className="cancel-button">
+                <i className="fas fa-times"></i> Close
+              </button>
+            </div>
+          </div>
+        </SimpleModal>
+      )}
     </div>
   );
 }
@@ -312,6 +377,16 @@ function ApplicantDetail({ applicantId, onClose }) {
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Create a ref to track component mount state
+  const isMounted = React.useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   useEffect(() => {
     const fetchApplicantDetails = async () => {
@@ -330,13 +405,19 @@ function ApplicantDetail({ applicantId, onClose }) {
           answersResponse.json()
         ]);
         
-        setApplicant(applicantData);
-        setAssessmentAnswers(answersData);
+        // Only update state if component is still mounted
+        if (isMounted.current) {
+          setApplicant(applicantData);
+          setAssessmentAnswers(answersData);
+          setLoading(false);
+        }
       } catch (error) {
         console.error('Error fetching applicant details:', error);
-        setError('Failed to load applicant details');
-      } finally {
-        setLoading(false);
+        // Only update state if component is still mounted
+        if (isMounted.current) {
+          setError('Failed to load applicant details');
+          setLoading(false);
+        }
       }
     };
     
