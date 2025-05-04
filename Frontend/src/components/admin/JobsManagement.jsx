@@ -1,6 +1,6 @@
 // src/components/admin/JobsManagement.js
-import React, { useState, useEffect } from 'react';
-import ModalPortal from '../common/ModalPortal';
+import React, { useState, useEffect, useRef } from 'react';
+import SimpleModal from '../common/SimpleModal';
 
 function JobsManagement() {
   const [jobs, setJobs] = useState([]);
@@ -14,6 +14,16 @@ function JobsManagement() {
   const [showJobDetail, setShowJobDetail] = useState(false);
   const [currentJobId, setCurrentJobId] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Create a ref to track component mount state
+  const isMounted = useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   useEffect(() => {
     fetchJobs();
@@ -31,12 +41,20 @@ function JobsManagement() {
       }
       
       const data = await response.json();
-      setJobs(data);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setJobs(data);
+        setLoading(false);
+      }
     } catch (error) {
       console.error('Error fetching jobs:', error);
-      setError('Failed to load jobs. Please try again.');
-    } finally {
-      setLoading(false);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('Failed to load jobs. Please try again.');
+        setLoading(false);
+      }
     }
   };
   
@@ -55,11 +73,16 @@ function JobsManagement() {
         throw new Error('Failed to delete job');
       }
       
-      // Remove from local state
-      setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
+      // Remove from local state - only if component is still mounted
+      if (isMounted.current) {
+        setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
+      }
     } catch (error) {
       console.error('Error deleting job:', error);
-      setError('Failed to delete job. Please try again.');
+      
+      if (isMounted.current) {
+        setError('Failed to delete job. Please try again.');
+      }
     }
   };
   
@@ -83,11 +106,24 @@ function JobsManagement() {
   
   const handleFormClose = () => {
     setShowJobForm(false);
-    fetchJobs(); // Refresh the list
+    // Add a delay before resetting the job ID and refreshing
+    setTimeout(() => {
+      if (isMounted.current) {
+        setCurrentJobId(null);
+        setIsEditMode(false);
+        fetchJobs(); // Refresh the list
+      }
+    }, 300); // Small delay to allow modal animation to complete
   };
   
   const handleDetailClose = () => {
     setShowJobDetail(false);
+    // Add a delay before resetting the job ID
+    setTimeout(() => {
+      if (isMounted.current) {
+        setCurrentJobId(null);
+      }
+    }, 300); // Small delay to allow modal animation to complete
   };
 
   // Filter jobs based on search and filter criteria
@@ -224,23 +260,27 @@ function JobsManagement() {
         )}
       </div>
       
-      {/* Job Form Modal using ModalPortal */}
-      <ModalPortal isOpen={showJobForm}>
-        <JobFormModal
-          onHide={handleFormClose}
-          jobId={currentJobId}
-          isEdit={isEditMode}
-        />
-      </ModalPortal>
+      {/* Job Form Modal using SimpleModal */}
+      <SimpleModal isOpen={showJobForm} onClose={handleFormClose}>
+        <div className="job-form-modal">
+          <JobFormModal
+            onHide={handleFormClose}
+            jobId={currentJobId}
+            isEdit={isEditMode}
+          />
+        </div>
+      </SimpleModal>
       
-      {/* Job Detail Modal using ModalPortal */}
-      <ModalPortal isOpen={showJobDetail}>
-        <JobDetailModal
-          onHide={handleDetailClose}
-          jobId={currentJobId}
-          onEdit={handleEditJob}
-        />
-      </ModalPortal>
+      {/* Job Detail Modal using SimpleModal */}
+      <SimpleModal isOpen={showJobDetail} onClose={handleDetailClose}>
+        <div className="job-detail-modal">
+          <JobDetailModal
+            onHide={handleDetailClose}
+            jobId={currentJobId}
+            onEdit={handleEditJob}
+          />
+        </div>
+      </SimpleModal>
     </div>
   );
 }
@@ -261,6 +301,16 @@ function JobFormModal({ onHide, jobId, isEdit }) {
     qualifications: [''],
     offers: ['']
   });
+  
+  // Create a ref to track component mount state
+  const isMounted = useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   useEffect(() => {
     if (jobId && isEdit) {
@@ -296,6 +346,9 @@ function JobFormModal({ onHide, jobId, isEdit }) {
       
       const jobData = await response.json();
       
+      // Check if component is still mounted before updating state
+      if (!isMounted.current) return;
+      
       // Convert responsibilities, qualifications, and offers from API format to form format
       const responsibilities = jobData.responsibilities?.map(r => r.responsibility_text) || [''];
       const qualifications = jobData.qualifications?.map(q => q.qualification_text) || [''];
@@ -309,9 +362,15 @@ function JobFormModal({ onHide, jobId, isEdit }) {
       });
     } catch (error) {
       console.error('Error fetching job data:', error);
-      setError('Failed to load job data for editing');
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('Failed to load job data for editing');
+      }
     } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
   
@@ -382,12 +441,18 @@ function JobFormModal({ onHide, jobId, isEdit }) {
         throw new Error(`Failed to ${jobId ? 'update' : 'create'} job posting`);
       }
       
-      onHide(); // Close modal and refresh list
+      // Only call onHide if component is still mounted
+      if (isMounted.current) {
+        onHide(); // Close modal and refresh list
+      }
     } catch (error) {
       console.error('Error saving job:', error);
-      setError(`Failed to ${jobId ? 'update' : 'create'} job posting. Please try again.`);
-    } finally {
-      setLoading(false);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError(`Failed to ${jobId ? 'update' : 'create'} job posting. Please try again.`);
+        setLoading(false);
+      }
     }
   };
   
@@ -407,7 +472,7 @@ function JobFormModal({ onHide, jobId, isEdit }) {
           {loading ? (
             <div className="loading">Loading job data...</div>
           ) : (
-            <form className="job-form">
+            <form className="job-form" onSubmit={handleSubmit}>
               <div className="form-section">
                 <h3>Basic Information</h3>
                 
@@ -648,6 +713,16 @@ function JobDetailModal({ onHide, jobId, onEdit }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
+  // Create a ref to track component mount state
+  const isMounted = useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
   useEffect(() => {
     if (jobId) {
       fetchData();
@@ -671,6 +746,10 @@ function JobDetailModal({ onHide, jobId, onEdit }) {
       }
 
       const jobData = await jobResponse.json();
+      
+      // Check if component is still mounted before updating state
+      if (!isMounted.current) return;
+      
       setJob(jobData);
 
       // Then try to get the applicants
@@ -682,6 +761,9 @@ function JobDetailModal({ onHide, jobId, onEdit }) {
           }
         });
 
+        // Check if component is still mounted before updating state
+        if (!isMounted.current) return;
+
         if (applicantsResponse.ok) {
           const applicantsData = await applicantsResponse.json();
           setApplicants(applicantsData);
@@ -691,13 +773,24 @@ function JobDetailModal({ onHide, jobId, onEdit }) {
         }
       } catch (appError) {
         console.warn("Error fetching applicants:", appError);
-        setApplicants([]);
+        
+        // Only update state if component is still mounted
+        if (isMounted.current) {
+          setApplicants([]);
+        }
       }
     } catch (error) {
       console.error("Error in job details fetch:", error);
-      setError(error.message || "Failed to load job details");
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError(error.message || "Failed to load job details");
+      }
     } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
 

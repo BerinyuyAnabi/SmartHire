@@ -1,9 +1,7 @@
 // src/components/admin/ApplicantsManagement.js
 import React, { useState, useEffect, useContext } from 'react';
 import { AdminContext } from '../../pages/Admin';
-// Import the modal component you prefer to use:
-// import ModalPortal from '../common/ModalPortal'; // Option 1 with createPortal
-import SimpleModal from '../common/SimpleModal'; // Option 2 without createPortal
+import SimpleModal from '../common/SimpleModal';
 
 function ApplicantsManagement() {
   const { currentAdmin } = useContext(AdminContext);
@@ -309,63 +307,33 @@ function ApplicantsManagement() {
         )}
       </div>
       
-      {/* Option 1: Use ModalPortal */}
-      {/* 
-      <ModalPortal isOpen={showDetailModal}>
-        <div className="modal-wrapper">
-          <div className="modal-backdrop" onClick={closeDetailModal}>
-            <div className="modal-content applicant-detail-modal" onClick={e => e.stopPropagation()}>
-              <div className="custom-modal-header">
-                <h2 className="modal-title">Applicant Profile</h2>
-                <button onClick={closeDetailModal} className="btn-close">×</button>
-              </div>
-              
-              <div className="custom-modal-body">
-                {selectedApplicantId && (
-                  <ApplicantDetail 
-                    applicantId={selectedApplicantId} 
-                    onClose={closeDetailModal} 
-                  />
-                )}
-              </div>
-              
-              <div className="custom-modal-footer">
-                <button onClick={closeDetailModal} className="cancel-button">
-                  <i className="fas fa-times"></i> Close
-                </button>
-              </div>
-            </div>
+      {/* Updated SimpleModal implementation */}
+      <SimpleModal 
+        isOpen={showDetailModal} 
+        onClose={closeDetailModal}
+      >
+        <div className="applicant-detail-modal">
+          <div className="custom-modal-header">
+            <h2 className="modal-title">Applicant Profile</h2>
+            <button onClick={closeDetailModal} className="btn-close">×</button>
+          </div>
+          
+          <div className="custom-modal-body">
+            {selectedApplicantId && (
+              <ApplicantDetail 
+                applicantId={selectedApplicantId} 
+                onClose={closeDetailModal} 
+              />
+            )}
+          </div>
+          
+          <div className="custom-modal-footer">
+            <button onClick={closeDetailModal} className="cancel-button">
+              <i className="fas fa-times"></i> Close
+            </button>
           </div>
         </div>
-      </ModalPortal>
-      */}
-      
-      {/* Option 2: Use SimpleModal */}
-      {showDetailModal && (
-        <SimpleModal isOpen={true} onClose={closeDetailModal}>
-          <div className="applicant-detail-modal">
-            <div className="custom-modal-header">
-              <h2 className="modal-title">Applicant Profile</h2>
-              <button onClick={closeDetailModal} className="btn-close">×</button>
-            </div>
-            
-            <div className="custom-modal-body">
-              {selectedApplicantId && (
-                <ApplicantDetail 
-                  applicantId={selectedApplicantId} 
-                  onClose={closeDetailModal} 
-                />
-              )}
-            </div>
-            
-            <div className="custom-modal-footer">
-              <button onClick={closeDetailModal} className="cancel-button">
-                <i className="fas fa-times"></i> Close
-              </button>
-            </div>
-          </div>
-        </SimpleModal>
-      )}
+      </SimpleModal>
     </div>
   );
 }

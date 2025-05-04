@@ -1,5 +1,5 @@
 // src/components/admin/AdminDashboard.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function AdminDashboard() {
@@ -21,6 +21,16 @@ function AdminDashboard() {
     topJobs: []
   });
   
+  // Create a ref to track component mount state
+  const isMounted = useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -37,12 +47,23 @@ function AdminDashboard() {
       }
       
       const data = await response.json();
-      setDashboardData(data);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setDashboardData(data);
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      setError('Failed to load dashboard information');
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('Failed to load dashboard information');
+      }
     } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
   

@@ -1,6 +1,6 @@
 // src/components/admin/AssessmentsManagement.js
-import React, { useState, useEffect } from 'react';
-import ModalPortal from '../common/ModalPortal';
+import React, { useState, useEffect, useRef } from 'react';
+import SimpleModal from '../common/SimpleModal';
 
 function AssessmentsManagement() {
   const [assessments, setAssessments] = useState([]);
@@ -14,6 +14,16 @@ function AssessmentsManagement() {
   const [showResponses, setShowResponses] = useState(false);
   const [currentAssessmentId, setCurrentAssessmentId] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Create a ref to track component mount state
+  const isMounted = useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   useEffect(() => {
     fetchAssessments();
@@ -31,12 +41,20 @@ function AssessmentsManagement() {
       }
       
       const data = await response.json();
-      setAssessments(data);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setAssessments(data);
+        setLoading(false);
+      }
     } catch (error) {
       console.error('Error fetching assessments:', error);
-      setError('Failed to load assessments. Please try again.');
-    } finally {
-      setLoading(false);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('Failed to load assessments. Please try again.');
+        setLoading(false);
+      }
     }
   };
   
@@ -55,13 +73,18 @@ function AssessmentsManagement() {
         throw new Error('Failed to delete assessment');
       }
       
-      // Remove from local state
-      setAssessments(prevAssessments => 
-        prevAssessments.filter(assessment => assessment.id !== assessmentId)
-      );
+      // Remove from local state - only if component is still mounted
+      if (isMounted.current) {
+        setAssessments(prevAssessments => 
+          prevAssessments.filter(assessment => assessment.id !== assessmentId)
+        );
+      }
     } catch (error) {
       console.error('Error deleting assessment:', error);
-      setError('Failed to delete assessment. Please try again.');
+      
+      if (isMounted.current) {
+        setError('Failed to delete assessment. Please try again.');
+      }
     }
   };
   
@@ -85,11 +108,24 @@ function AssessmentsManagement() {
   
   const handleFormClose = () => {
     setShowAssessmentForm(false);
-    fetchAssessments(); // Refresh the list
+    // Add a delay before resetting the assessment ID and refreshing
+    setTimeout(() => {
+      if (isMounted.current) {
+        setCurrentAssessmentId(null);
+        setIsEditMode(false);
+        fetchAssessments(); // Refresh the list
+      }
+    }, 300); // Small delay to allow modal animation to complete
   };
   
   const handleResponsesClose = () => {
     setShowResponses(false);
+    // Add a delay before resetting the assessment ID
+    setTimeout(() => {
+      if (isMounted.current) {
+        setCurrentAssessmentId(null);
+      }
+    }, 300); // Small delay to allow modal animation to complete
   };
   
   // Filter assessments based on search and filter criteria
@@ -220,22 +256,26 @@ function AssessmentsManagement() {
         )}
       </div>
       
-      {/* Assessment Form Modal using ModalPortal */}
-      <ModalPortal isOpen={showAssessmentForm}>
-        <AssessmentFormModal
-          onHide={handleFormClose}
-          assessmentId={currentAssessmentId}
-          isEdit={isEditMode}
-        />
-      </ModalPortal>
+      {/* Assessment Form Modal using SimpleModal */}
+      <SimpleModal isOpen={showAssessmentForm} onClose={handleFormClose}>
+        <div className="assessment-form-modal">
+          <AssessmentFormModal
+            onHide={handleFormClose}
+            assessmentId={currentAssessmentId}
+            isEdit={isEditMode}
+          />
+        </div>
+      </SimpleModal>
       
-      {/* Assessment Responses Modal using ModalPortal */}
-      <ModalPortal isOpen={showResponses}>
-        <AssessmentResponsesModal
-          onHide={handleResponsesClose}
-          assessmentId={currentAssessmentId}
-        />
-      </ModalPortal>
+      {/* Assessment Responses Modal using SimpleModal */}
+      <SimpleModal isOpen={showResponses} onClose={handleResponsesClose}>
+        <div className="assessment-responses-modal">
+          <AssessmentResponsesModal
+            onHide={handleResponsesClose}
+            assessmentId={currentAssessmentId}
+          />
+        </div>
+      </SimpleModal>
     </div>
   );
 }
@@ -250,6 +290,16 @@ function AssessmentFormModal({ onHide, assessmentId, isEdit }) {
     options: ['', '', '', ''],
     correct_answer: []
   });
+  
+  // Create a ref to track component mount state
+  const isMounted = useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   useEffect(() => {
     if (assessmentId && isEdit) {
@@ -279,6 +329,9 @@ function AssessmentFormModal({ onHide, assessmentId, isEdit }) {
       
       const assessmentData = await response.json();
       
+      // Check if component is still mounted before updating state
+      if (!isMounted.current) return;
+      
       // Convert options and correct_answer from string to array if needed
       let parsedOptions = assessmentData.options;
       let parsedCorrectAnswer = assessmentData.correct_answer;
@@ -302,9 +355,15 @@ function AssessmentFormModal({ onHide, assessmentId, isEdit }) {
       });
     } catch (error) {
       console.error('Error fetching assessment data:', error);
-      setError('Failed to load assessment data for editing');
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('Failed to load assessment data for editing');
+      }
     } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
   
@@ -423,12 +482,18 @@ function AssessmentFormModal({ onHide, assessmentId, isEdit }) {
         throw new Error(`Failed to ${assessmentId ? 'update' : 'create'} assessment`);
       }
       
-      onHide(); // Close modal and trigger refresh
+      // Only call onHide if component is still mounted
+      if (isMounted.current) {
+        onHide(); // Close modal and trigger refresh
+      }
     } catch (error) {
       console.error('Error saving assessment:', error);
-      setError(`Failed to ${assessmentId ? 'update' : 'create'} assessment. Please try again.`);
-    } finally {
-      setLoading(false);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError(`Failed to ${assessmentId ? 'update' : 'create'} assessment. Please try again.`);
+        setLoading(false);
+      }
     }
   };
   
@@ -448,7 +513,7 @@ function AssessmentFormModal({ onHide, assessmentId, isEdit }) {
         {loading ? (
           <div className="loading">Loading assessment data...</div>
         ) : (
-          <form className="assessment-form">
+          <form className="assessment-form" onSubmit={handleSubmit}>
             <div className="form-section">
               <div className="form-group">
                 <label htmlFor="question_text">Question Text*</label>
@@ -591,6 +656,16 @@ function AssessmentResponsesModal({ onHide, assessmentId }) {
     correctPercentage: 0
   });
   
+  // Create a ref to track component mount state
+  const isMounted = useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
   useEffect(() => {
     if (assessmentId) {
       fetchData();
@@ -614,6 +689,9 @@ function AssessmentResponsesModal({ onHide, assessmentId }) {
         answersResponse.json()
       ]);
       
+      // Check if component is still mounted before updating state
+      if (!isMounted.current) return;
+      
       setAssessment(assessmentData);
       setAnswers(answersData);
       
@@ -629,9 +707,16 @@ function AssessmentResponsesModal({ onHide, assessmentId }) {
       }
     } catch (error) {
       console.error('Error fetching assessment responses:', error);
-      setError('Failed to load assessment responses');
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('Failed to load assessment responses');
+      }
     } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
   

@@ -51,7 +51,7 @@ function SimpleModal({ children, isOpen, onClose }) {
   
   return (
     <div 
-      className="modal-wrapper" 
+      className="modal-wrapper"
       ref={modalRef}
       style={{
         position: 'fixed',
@@ -66,7 +66,7 @@ function SimpleModal({ children, isOpen, onClose }) {
       }}
     >
       <div 
-        className="modal-backdrop" 
+        className="modal-backdrop"
         onClick={onClose}
         style={{
           position: 'fixed',

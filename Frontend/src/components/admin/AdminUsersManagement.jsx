@@ -1,5 +1,5 @@
 // src/components/admin/AdminUsersManagement.js
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { AdminContext } from '../../pages/Admin'; // Import the context
 
@@ -10,6 +10,16 @@ function AdminUsersManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
+  
+  // Create a ref to track component mount state
+  const isMounted = useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   useEffect(() => {
     // Fetch admin users
@@ -25,12 +35,23 @@ function AdminUsersManagement() {
         }
         
         const data = await response.json();
-        setAdminUsers(data);
+        
+        // Only update state if component is still mounted
+        if (isMounted.current) {
+          setAdminUsers(data);
+        }
       } catch (error) {
         console.error('Error fetching admin users:', error);
-        setError('Failed to load admin users. Please try again.');
+        
+        // Only update state if component is still mounted
+        if (isMounted.current) {
+          setError('Failed to load admin users. Please try again.');
+        }
       } finally {
-        setLoading(false);
+        // Only update state if component is still mounted
+        if (isMounted.current) {
+          setLoading(false);
+        }
       }
     };
     
@@ -58,13 +79,19 @@ function AdminUsersManagement() {
         throw new Error('Failed to delete admin user');
       }
       
-      // Remove from local state
-      setAdminUsers(prevUsers => 
-        prevUsers.filter(user => user.id !== userId)
-      );
+      // Remove from local state - only if component is still mounted
+      if (isMounted.current) {
+        setAdminUsers(prevUsers => 
+          prevUsers.filter(user => user.id !== userId)
+        );
+      }
     } catch (error) {
       console.error('Error deleting admin user:', error);
-      setError('Failed to delete admin user. Please try again.');
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('Failed to delete admin user. Please try again.');
+      }
     }
   };
   
@@ -182,6 +209,16 @@ function AdminUserForm() {
     confirmPassword: ''
   });
   
+  // Create a ref to track component mount state
+  const isMounted = useRef(true);
+  
+  // Set the isMounted ref to false when the component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
   useEffect(() => {
     if (userId && userId !== 'new') {
       // Fetch existing admin user data for editing
@@ -201,6 +238,9 @@ function AdminUserForm() {
       
       const userData = await response.json();
       
+      // Only update state if component is still mounted
+      if (!isMounted.current) return;
+      
       // Don't include password in edit form
       setFormData({
         email: userData.email,
@@ -209,9 +249,16 @@ function AdminUserForm() {
       });
     } catch (error) {
       console.error('Error fetching admin user data:', error);
-      setError('Failed to load admin user data for editing');
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('Failed to load admin user data for editing');
+      }
     } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
   
@@ -284,12 +331,22 @@ function AdminUserForm() {
         throw new Error(errorData.error || `Failed to ${userId ? 'update' : 'create'} admin user`);
       }
       
-      navigate('/admin/users');
+      // Check if component is still mounted before navigating
+      if (isMounted.current) {
+        navigate('/admin/users');
+      }
     } catch (error) {
       console.error('Error saving admin user:', error);
-      setError(error.message || `Failed to ${userId ? 'update' : 'create'} admin user. Please try again.`);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError(error.message || `Failed to ${userId ? 'update' : 'create'} admin user. Please try again.`);
+      }
     } finally {
-      setSubmitting(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setSubmitting(false);
+      }
     }
   };
   
