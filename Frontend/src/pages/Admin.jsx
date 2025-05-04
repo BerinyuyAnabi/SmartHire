@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useRef } from 'react';
+import React, { useState, useEffect, createContext, useRef, Suspense } from 'react';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import "../css/Admin.css";
 
@@ -26,6 +26,13 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     console.error("Caught error:", error, errorInfo);
   }
+
+  componentDidUpdate(prevProps) {
+    // Reset the error state when the location changes (new route)
+    if (this.props.resetKey !== prevProps.resetKey && this.state.hasError) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
   
   render() {
     if (this.state.hasError) {
@@ -45,6 +52,13 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+// Loading component for Suspense fallback
+const LoadingSpinner = () => (
+  <div className="suspense-loading">
+    <div className="loading-spinner">Loading component...</div>
+  </div>
+);
+
 function Admin() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,6 +66,9 @@ function Admin() {
   const [error, setError] = useState(null);
   const [currentAdmin, setCurrentAdmin] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Key for resetting ErrorBoundary when location changes
+  const errorBoundaryKey = location.pathname;
 
   // Create a ref to track component mount state
   const isMounted = useRef(true);
@@ -203,6 +220,19 @@ function Admin() {
     }
   }, [navigate]);
 
+  // Reset any potential DOM states when location changes
+  useEffect(() => {
+    // Force a clean state for the next component
+    return () => {
+      // Cleanup any potential leftover modals, etc.
+      document.body.classList.remove('modal-open');
+      const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+      modalBackdrops.forEach(backdrop => {
+        backdrop.remove();
+      });
+    };
+  }, [location.pathname]);
+
   const handleLogout = async () => {
     if (isMounted.current) {
       setLoading(true);
@@ -299,14 +329,16 @@ function Admin() {
         </div>
 
         <div className="admin-content">
-          <ErrorBoundary>
-            <Routes>
-              <Route path="/" element={<AdminDashboard />} />
-              <Route path="jobs/*" element={<JobsManagement />} />
-              <Route path="applicants/*" element={<ApplicantsManagement />} />
-              <Route path="assessments/*" element={<AssessmentsManagement />} />
-              <Route path="users/*" element={<AdminUsersManagement />} />
-            </Routes>
+          <ErrorBoundary key={errorBoundaryKey} resetKey={errorBoundaryKey}>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route path="/" element={<AdminDashboard />} />
+                <Route path="jobs/*" element={<JobsManagement />} />
+                <Route path="applicants/*" element={<ApplicantsManagement />} />
+                <Route path="assessments/*" element={<AssessmentsManagement />} />
+                <Route path="users/*" element={<AdminUsersManagement />} />
+              </Routes>
+            </Suspense>
           </ErrorBoundary>
         </div>
       </div>
