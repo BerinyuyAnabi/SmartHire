@@ -3,7 +3,6 @@
 import { useState, useEffect, createContext, useRef } from 'react';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import "../css/Admin.css";
-import "../css/AdminExt.css";
 
 // Admin Dashboard Components
 import AdminDashboard from '../components/admin/AdminDashboard';
