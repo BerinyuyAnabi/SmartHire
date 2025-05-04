@@ -2140,3 +2140,320 @@
   .view-all-btn:hover i {
     transform: translateX(3px);
   }
+
+
+  /* Assessment Modal Improvements - Targeting exact structure */
+
+/* Modal dialog container */
+.modal-dialog.assessment-form-modal,
+.modal-dialog.assessment-responses-modal {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Base modal content styling */
+.modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--white);
+}
+
+/* Modal header styling */
+.modal-header.custom-modal-header {
+  padding: 22px 28px;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: none;
+}
+
+.modal-header.custom-modal-header .modal-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--white);
+}
+
+.modal-header.custom-modal-header .btn-close {
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 1.3rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-header.custom-modal-header .btn-close:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Modal body styling */
+.modal-body.custom-modal-body {
+  padding: 28px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background-color: var(--white);
+}
+
+/* Form sections inside modal */
+.assessment-form .form-section {
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.assessment-form .form-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.assessment-form .form-section h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  position: relative;
+  padding-left: 12px;
+}
+
+.assessment-form .form-section h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background-color: var(--primary-light);
+  border-radius: 2px;
+}
+
+/* Input fields */
+.assessment-form textarea,
+.assessment-form select {
+  padding: 14px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.assessment-form textarea:focus,
+.assessment-form select:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(1, 160, 160, 0.1);
+  outline: none;
+}
+
+/* Option fields in multiple choice */
+.option-field {
+  background-color: var(--gray-50);
+  padding: 16px 20px;
+  border-radius: var(--border-radius);
+  margin-bottom: 12px;
+  border: 1px solid var(--gray-200);
+  transition: var(--transition);
+}
+
+.option-field:hover {
+  background-color: var(--gray-100);
+  border-color: var(--gray-300);
+}
+
+.option-input-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.option-input-group input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.option-input-group input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(1, 160, 160, 0.1);
+  outline: none;
+}
+
+.option-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Correct answer toggle */
+.correct-answer-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: var(--gray-100);
+  transition: var(--transition);
+}
+
+.correct-answer-toggle:hover {
+  background-color: var(--gray-200);
+}
+
+.correct-answer-toggle input {
+  width: auto !important;
+  margin: 0 !important;
+}
+
+/* Add option button */
+.add-option-btn {
+  margin-top: 20px;
+}
+
+/* Validation warning */
+.validation-warning {
+  margin-top: 20px;
+  padding: 15px 20px;
+  border-radius: var(--border-radius);
+  border-left: 4px solid #f0ad4e;
+}
+
+/* Modal footer */
+.modal-footer.custom-modal-footer {
+  padding: 20px 28px;
+  background-color: var(--gray-50);
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+/* Assessment responses content */
+.assessment-responses-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+}
+
+/* Question display */
+.question-display {
+  padding: 24px;
+  background-color: var(--gray-50);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--gray-200);
+  margin-bottom: 24px;
+}
+
+/* Response stats */
+.response-stats {
+  padding: 24px;
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.response-stats h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+/* Responses list container */
+.responses-list-container {
+  background-color: var(--white);
+  padding: 24px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.responses-list-container h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.responses-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Response item */
+.response-item {
+  padding: 20px;
+  margin-bottom: 16px;
+  border-radius: var(--border-radius);
+  background-color: var(--gray-50);
+  border: 1px solid var(--gray-200);
+}
+
+.response-item.correct {
+  border-left: 4px solid var(--success);
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
+.response-item.incorrect {
+  border-left: 4px solid var(--danger);
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.response-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (min-width: 992px) {
+  .assessment-responses-content {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-dialog.assessment-form-modal,
+  .modal-dialog.assessment-responses-modal {
+    width: 95%;
+  }
+  
+  .modal-body.custom-modal-body {
+    padding: 20px;
+  }
+  
+  .option-input-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .option-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+}
