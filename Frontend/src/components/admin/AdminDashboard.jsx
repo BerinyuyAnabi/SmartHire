@@ -66,8 +66,19 @@ function AdminDashboard() {
     navigate(`/admin/applicants/${applicantId}`);
   };
   
-  if (loading) return <div className="loading">Loading dashboard data...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (loading) return (
+    <div className="loading">
+      <i className="fas fa-circle-notch fa-spin"></i>
+      <span>Loading dashboard data...</span>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="error-message">
+      <i className="fas fa-exclamation-triangle"></i>
+      <span>{error}</span>
+    </div>
+  );
   
   return (
     <div className="admin-dashboard">
@@ -142,9 +153,16 @@ function AdminDashboard() {
         <div className="dashboard-card top-jobs">
           <div className="card-header">
             <h3>Top Jobs by Applications</h3>
+            <button 
+              className="view-all-btn" 
+              onClick={handleNavigateToJobs}
+            >
+              View All <i className="fas fa-chevron-right"></i>
+            </button>
           </div>
           {dashboardData.topJobs.length === 0 ? (
             <div className="empty-state">
+              <i className="fas fa-briefcase"></i>
               <p>No job applications yet</p>
             </div>
           ) : (
@@ -174,11 +192,12 @@ function AdminDashboard() {
               className="view-all-btn" 
               onClick={handleNavigateToJobs}
             >
-              View All
+              View All <i className="fas fa-chevron-right"></i>
             </button>
           </div>
           {dashboardData.recentJobs.length === 0 ? (
             <div className="empty-state">
+              <i className="fas fa-file-alt"></i>
               <p>No recent job postings</p>
             </div>
           ) : (
@@ -191,9 +210,9 @@ function AdminDashboard() {
                   <div className="item-details">
                     <h4>{job.job_name}</h4>
                     <div className="item-meta">
-                      <span className="company">{job.company_name}</span>
+                      <span className="company"><i className="fas fa-building"></i> {job.company_name}</span>
                       <span className="date">
-                        Posted: {new Date(job.created_at).toLocaleDateString()}
+                        <i className="fas fa-calendar-alt"></i> Posted: {new Date(job.created_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -210,11 +229,12 @@ function AdminDashboard() {
               className="view-all-btn" 
               onClick={handleNavigateToApplicants}
             >
-              View All
+              View All <i className="fas fa-chevron-right"></i>
             </button>
           </div>
           {dashboardData.recentApplicants.length === 0 ? (
             <div className="empty-state">
+              <i className="fas fa-user-friends"></i>
               <p>No recent applicants</p>
             </div>
           ) : (
@@ -227,11 +247,12 @@ function AdminDashboard() {
                   <div className="item-details">
                     <h4>{applicant.full_name}</h4>
                     <div className="item-meta">
-                      <span className="institution">{applicant.institution}</span>
-                      <span className="status">{applicant.status}</span>
+                      <span className="institution"><i className="fas fa-university"></i> {applicant.institution}</span>
+                      <span className={`status status-${applicant.status.toLowerCase()}`}><i className="fas fa-tag"></i> {applicant.status}</span>
                     </div>
                   </div>
                   <div className="applicant-date">
+                    <i className="fas fa-clock"></i>
                     {new Date(applicant.created_at).toLocaleDateString()}
                   </div>
                 </div>

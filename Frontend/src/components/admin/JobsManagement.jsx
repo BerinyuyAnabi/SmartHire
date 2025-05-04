@@ -1,14 +1,18 @@
 // src/components/admin/JobsManagement.js
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 
 function JobsManagement() {
-  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState({ type: "All", remote: "All" });
+  
+  // Modal state
+  const [showJobForm, setShowJobForm] = useState(false);
+  const [showJobDetail, setShowJobDetail] = useState(false);
+  const [currentJobId, setCurrentJobId] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   
   useEffect(() => {
     fetchJobs();
@@ -58,16 +62,31 @@ function JobsManagement() {
     }
   };
   
+  // Modal handlers
   const handleAddNewJob = () => {
-    navigate('/admin/jobs/new');
+    setCurrentJobId(null);
+    setIsEditMode(false);
+    setShowJobForm(true);
   };
   
   const handleEditJob = (jobId) => {
-    navigate(`/admin/jobs/edit/${jobId}`);
+    setCurrentJobId(jobId);
+    setIsEditMode(true);
+    setShowJobForm(true);
   };
   
   const handleViewJob = (jobId) => {
-    navigate(`/admin/jobs/${jobId}`);
+    setCurrentJobId(jobId);
+    setShowJobDetail(true);
+  };
+  
+  const handleFormClose = () => {
+    setShowJobForm(false);
+    fetchJobs(); // Refresh the list
+  };
+  
+  const handleDetailClose = () => {
+    setShowJobDetail(false);
   };
 
   // Filter jobs based on search and filter criteria
@@ -204,21 +223,32 @@ function JobsManagement() {
         )}
       </div>
       
-      <Routes>
-        <Route path="new" element={<JobForm />} />
-        <Route path="edit/:jobId" element={<JobForm />} />
-        <Route path=":jobId" element={<JobDetail />} />
-      </Routes>
+      {/* Job Form Modal */}
+      {showJobForm && (
+        <JobFormModal
+          show={showJobForm}
+          onHide={handleFormClose}
+          jobId={currentJobId}
+          isEdit={isEditMode}
+        />
+      )}
+      
+      {/* Job Detail Modal */}
+      {showJobDetail && (
+        <JobDetailModal
+          show={showJobDetail}
+          onHide={handleDetailClose}
+          jobId={currentJobId}
+          onEdit={handleEditJob}
+        />
+      )}
     </div>
   );
 }
 
-
-
-function JobForm() {
-  const { jobId } = useParams();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(jobId ? true : false);
+// Job Form Modal Component
+function JobFormModal({ show, onHide, jobId, isEdit }) {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     job_name: '',
@@ -234,13 +264,28 @@ function JobForm() {
   });
   
   useEffect(() => {
-    if (jobId && jobId !== 'new') {
-      // Fetch existing job data for editing
+    if (show && jobId && isEdit) {
       fetchJobData();
+    } else if (show && !jobId) {
+      // Reset form for new job
+      setFormData({
+        job_name: '',
+        company_name: '',
+        salary_range: '',
+        type: 'Full-time',
+        remote_type: 'Onsite',
+        location: '',
+        description: '',
+        responsibilities: [''],
+        qualifications: [''],
+        offers: ['']
+      });
+      setError(null);
     }
-  }, [jobId]);
+  }, [show, jobId, isEdit]);
   
   const fetchJobData = async () => {
+    setLoading(true);
     try {
       const response = await fetch(`/api/public/jobs/${jobId}`, {
         credentials: 'include'
@@ -322,11 +367,8 @@ function JobForm() {
         offers: formData.offers.filter(o => o.trim())
       };
       
-      const url = jobId && jobId !== 'new' 
-        ? `/api/public/jobs/${jobId}`
-        : '/api/jobs';
-        
-      const method = jobId && jobId !== 'new' ? 'PUT' : 'POST';
+      const url = jobId ? `/api/public/jobs/${jobId}` : '/api/jobs';
+      const method = jobId ? 'PUT' : 'POST';
       
       const response = await fetch(url, {
         method,
@@ -341,7 +383,7 @@ function JobForm() {
         throw new Error(`Failed to ${jobId ? 'update' : 'create'} job posting`);
       }
       
-      navigate('/admin/jobs');
+      onHide(); // Close modal and refresh list
     } catch (error) {
       console.error('Error saving job:', error);
       setError(`Failed to ${jobId ? 'update' : 'create'} job posting. Please try again.`);
@@ -350,475 +392,484 @@ function JobForm() {
     }
   };
   
-  const handleCancel = () => {
-    navigate('/admin/jobs');
-  };
-  
-  if (loading && jobId) return <div className="loading">Loading job data...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (!show) return null;
   
   return (
-    <div className="job-form-container">
-      <div className="form-header">
-        <h2>{jobId && jobId !== 'new' ? 'Edit Job Posting' : 'Create New Job Posting'}</h2>
+    <div className="modal fade show" style={{display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+      <div className="modal-dialog job-form-modal">
+        <div className="modal-content">
+          <div className="modal-header custom-modal-header">
+            <h2 className="modal-title">{isEdit ? 'Edit Job Posting' : 'Create New Job Posting'}</h2>
+            <button type="button" className="btn-close" onClick={onHide} aria-label="Close">
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div className="modal-body custom-modal-body">
+            {error && <div className="error-message">{error}</div>}
+            
+            {loading ? (
+              <div className="loading">Loading job data...</div>
+            ) : (
+              <form className="job-form">
+                <div className="form-section">
+                  <h3>Basic Information</h3>
+                  
+                  <div className="form-group">
+                    <label htmlFor="job_name">Job Title*</label>
+                    <input
+                      type="text"
+                      id="job_name"
+                      name="job_name"
+                      value={formData.job_name}
+                      onChange={handleChange}
+                      required
+                      placeholder="e.g., Senior Software Developer"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="company_name">Company Name</label>
+                    <input
+                      type="text"
+                      id="company_name"
+                      name="company_name"
+                      value={formData.company_name}
+                      onChange={handleChange}
+                      placeholder="e.g., Tech Innovations Inc."
+                    />
+                  </div>
+                  
+                  <div className="form-row">
+                    <div className="form-group half">
+                      <label htmlFor="type">Job Type</label>
+                      <select
+                        id="type"
+                        name="type"
+                        value={formData.type}
+                        onChange={handleChange}
+                      >
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Internship">Internship</option>
+                      </select>
+                    </div>
+                    
+                    <div className="form-group half">
+                      <label htmlFor="remote_type">Remote Type</label>
+                      <select
+                        id="remote_type"
+                        name="remote_type"
+                        value={formData.remote_type}
+                        onChange={handleChange}
+                      >
+                        <option value="Remote">Remote</option>
+                        <option value="Onsite">Onsite</option>
+                        <option value="Hybrid">Hybrid</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="form-row">
+                    <div className="form-group half">
+                      <label htmlFor="salary_range">Salary Range</label>
+                      <input
+                        type="text"
+                        id="salary_range"
+                        name="salary_range"
+                        value={formData.salary_range}
+                        onChange={handleChange}
+                        placeholder="e.g., $60,000 - $80,000"
+                      />
+                    </div>
+                    
+                    <div className="form-group half">
+                      <label htmlFor="location">Location</label>
+                      <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        value={formData.location}
+                        onChange={handleChange}
+                        placeholder="e.g., New York, NY"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="form-section">
+                  <h3>Job Description</h3>
+                  
+                  <div className="form-group">
+                    <label htmlFor="description">Description</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      rows="6"
+                      placeholder="Provide a detailed description of the job..."
+                    ></textarea>
+                  </div>
+                </div>
+                
+                <div className="form-section">
+                  <h3>Responsibilities</h3>
+                  
+                  {formData.responsibilities.map((responsibility, index) => (
+                    <div key={`resp-${index}`} className="array-field">
+                      <input
+                        type="text"
+                        value={responsibility}
+                        onChange={(e) => handleArrayChange('responsibilities', index, e.target.value)}
+                        placeholder="Enter a responsibility"
+                      />
+                      
+                      <div className="array-actions">
+                        {formData.responsibilities.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => removeArrayItem('responsibilities', index)}
+                            className="remove-btn"
+                          >
+                            <i className="fas fa-minus-circle"></i>
+                          </button>
+                        )}
+                        
+                        {index === formData.responsibilities.length - 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => addArrayItem('responsibilities')}
+                            className="add-btn"
+                          >
+                            <i className="fas fa-plus-circle"></i>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="form-section">
+                  <h3>Qualifications</h3>
+                  
+                  {formData.qualifications.map((qualification, index) => (
+                    <div key={`qual-${index}`} className="array-field">
+                      <input
+                        type="text"
+                        value={qualification}
+                        onChange={(e) => handleArrayChange('qualifications', index, e.target.value)}
+                        placeholder="Enter a qualification"
+                      />
+                      
+                      <div className="array-actions">
+                        {formData.qualifications.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => removeArrayItem('qualifications', index)}
+                            className="remove-btn"
+                          >
+                            <i className="fas fa-minus-circle"></i>
+                          </button>
+                        )}
+                        
+                        {index === formData.qualifications.length - 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => addArrayItem('qualifications')}
+                            className="add-btn"
+                          >
+                            <i className="fas fa-plus-circle"></i>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="form-section">
+                  <h3>Offers & Benefits</h3>
+                  
+                  {formData.offers.map((offer, index) => (
+                    <div key={`offer-${index}`} className="array-field">
+                      <input
+                        type="text"
+                        value={offer}
+                        onChange={(e) => handleArrayChange('offers', index, e.target.value)}
+                        placeholder="Enter an offer or benefit"
+                      />
+                      
+                      <div className="array-actions">
+                        {formData.offers.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => removeArrayItem('offers', index)}
+                            className="remove-btn"
+                          >
+                            <i className="fas fa-minus-circle"></i>
+                          </button>
+                        )}
+                        
+                        {index === formData.offers.length - 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => addArrayItem('offers')}
+                            className="add-btn"
+                          >
+                            <i className="fas fa-plus-circle"></i>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </form>
+            )}
+          </div>
+          
+          <div className="modal-footer custom-modal-footer">
+            <button type="button" onClick={onHide} className="cancel-button">
+              Cancel
+            </button>
+            <button 
+              type="button" 
+              onClick={handleSubmit} 
+              className="submit-button" 
+              disabled={loading || !formData.job_name.trim()}
+            >
+              {loading ? 'Saving...' : (isEdit ? 'Update Job' : 'Create Job')}
+            </button>
+          </div>
+        </div>
       </div>
-      
-      <form onSubmit={handleSubmit} className="job-form">
-        <div className="form-section">
-          <h3>Basic Information</h3>
-          
-          <div className="form-group">
-            <label htmlFor="job_name">Job Title*</label>
-            <input
-              type="text"
-              id="job_name"
-              name="job_name"
-              value={formData.job_name}
-              onChange={handleChange}
-              required
-              placeholder="e.g., Senior Software Developer"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="company_name">Company Name</label>
-            <input
-              type="text"
-              id="company_name"
-              name="company_name"
-              value={formData.company_name}
-              onChange={handleChange}
-              placeholder="e.g., Tech Innovations Inc."
-            />
-          </div>
-          
-          <div className="form-row">
-            <div className="form-group half">
-              <label htmlFor="type">Job Type</label>
-              <select
-                id="type"
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-              >
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Internship">Internship</option>
-              </select>
-            </div>
-            
-            <div className="form-group half">
-              <label htmlFor="remote_type">Remote Type</label>
-              <select
-                id="remote_type"
-                name="remote_type"
-                value={formData.remote_type}
-                onChange={handleChange}
-              >
-                <option value="Remote">Remote</option>
-                <option value="Onsite">Onsite</option>
-                <option value="Hybrid">Hybrid</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="form-row">
-            <div className="form-group half">
-              <label htmlFor="salary_range">Salary Range</label>
-              <input
-                type="text"
-                id="salary_range"
-                name="salary_range"
-                value={formData.salary_range}
-                onChange={handleChange}
-                placeholder="e.g., $60,000 - $80,000"
-              />
-            </div>
-            
-            <div className="form-group half">
-              <label htmlFor="location">Location</label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="e.g., New York, NY"
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div className="form-section">
-          <h3>Job Description</h3>
-          
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="6"
-              placeholder="Provide a detailed description of the job..."
-            ></textarea>
-          </div>
-        </div>
-        
-        <div className="form-section">
-          <h3>Responsibilities</h3>
-          
-          {formData.responsibilities.map((responsibility, index) => (
-            <div key={`resp-${index}`} className="array-field">
-              <input
-                type="text"
-                value={responsibility}
-                onChange={(e) => handleArrayChange('responsibilities', index, e.target.value)}
-                placeholder="Enter a responsibility"
-              />
-              
-              <div className="array-actions">
-                {formData.responsibilities.length > 1 && (
-                  <button 
-                    type="button" 
-                    onClick={() => removeArrayItem('responsibilities', index)}
-                    className="remove-btn"
-                  >
-                    <i className="fas fa-minus-circle"></i>
-                  </button>
-                )}
-                
-                {index === formData.responsibilities.length - 1 && (
-                  <button 
-                    type="button" 
-                    onClick={() => addArrayItem('responsibilities')}
-                    className="add-btn"
-                  >
-                    <i className="fas fa-plus-circle"></i>
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <div className="form-section">
-          <h3>Qualifications</h3>
-          
-          {formData.qualifications.map((qualification, index) => (
-            <div key={`qual-${index}`} className="array-field">
-              <input
-                type="text"
-                value={qualification}
-                onChange={(e) => handleArrayChange('qualifications', index, e.target.value)}
-                placeholder="Enter a qualification"
-              />
-              
-              <div className="array-actions">
-                {formData.qualifications.length > 1 && (
-                  <button 
-                    type="button" 
-                    onClick={() => removeArrayItem('qualifications', index)}
-                    className="remove-btn"
-                  >
-                    <i className="fas fa-minus-circle"></i>
-                  </button>
-                )}
-                
-                {index === formData.qualifications.length - 1 && (
-                  <button 
-                    type="button" 
-                    onClick={() => addArrayItem('qualifications')}
-                    className="add-btn"
-                  >
-                    <i className="fas fa-plus-circle"></i>
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <div className="form-section">
-          <h3>Offers & Benefits</h3>
-          
-          {formData.offers.map((offer, index) => (
-            <div key={`offer-${index}`} className="array-field">
-              <input
-                type="text"
-                value={offer}
-                onChange={(e) => handleArrayChange('offers', index, e.target.value)}
-                placeholder="Enter an offer or benefit"
-              />
-              
-              <div className="array-actions">
-                {formData.offers.length > 1 && (
-                  <button 
-                    type="button" 
-                    onClick={() => removeArrayItem('offers', index)}
-                    className="remove-btn"
-                  >
-                    <i className="fas fa-minus-circle"></i>
-                  </button>
-                )}
-                
-                {index === formData.offers.length - 1 && (
-                  <button 
-                    type="button" 
-                    onClick={() => addArrayItem('offers')}
-                    className="add-btn"
-                  >
-                    <i className="fas fa-plus-circle"></i>
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <div className="form-actions">
-          <button type="button" onClick={handleCancel} className="cancel-button">
-            Cancel
-          </button>
-          <button type="submit" className="submit-button" disabled={loading}>
-            {loading ? 'Saving...' : (jobId && jobId !== 'new' ? 'Update Job' : 'Create Job')}
-          </button>
-        </div>
-      </form>
     </div>
   );
 }
 
-function JobDetail() {
-  const { jobId } = useParams();
-  const navigate = useNavigate();
+// Job Detail Modal Component
+function JobDetailModal({ show, onHide, jobId, onEdit }) {
   const [job, setJob] = useState(null);
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
   useEffect(() => {
-    // Reset states
+    if (show && jobId) {
+      fetchData();
+    }
+  }, [show, jobId]);
+  
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
+    
+    try {
+      const jobResponse = await fetch(`/api/public/jobs/${jobId}`, {
+        headers: {
+          'Accept': 'application/json'
+        },
+        cache: 'no-store'
+      });
 
-    // Fetch job data
-    const fetchData = async () => {
+      if (!jobResponse.ok) {
+        throw new Error(`Job request failed with status: ${jobResponse.status}`);
+      }
+
+      const jobData = await jobResponse.json();
+      setJob(jobData);
+
+      // Then try to get the applicants
       try {
-        const jobResponse = await fetch(`/api/public/jobs/${jobId}`, {
-
+        const applicantsResponse = await fetch(`/api/jobs/${jobId}/applicants`, {
+          credentials: 'include',
           headers: {
             'Accept': 'application/json'
-          },
-          // Add cache busting parameter to avoid any caching issues
-          cache: 'no-store'
+          }
         });
 
-        if (!jobResponse.ok) {
-          throw new Error(`Job request failed with status: ${jobResponse.status}`);
-        }
-
-        const jobData = await jobResponse.json();
-        setJob(jobData);
-
-        // Then try to get the applicants
-        try {
-          const applicantsResponse = await fetch(`/api/jobs/${jobId}/applicants`, {
-            // Include credentials for admin-protected routes
-            credentials: 'include',
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
-
-          if (applicantsResponse.ok) {
-            const applicantsData = await applicantsResponse.json();
-            setApplicants(applicantsData);
-          } else {
-            // Just set empty applicants array if there's a problem
-            console.warn(`Couldn't fetch applicants: ${applicantsResponse.status}`);
-            setApplicants([]);
-          }
-        } catch (appError) {
-          // Still continue if we can't get applicants
-          console.warn("Error fetching applicants:", appError);
+        if (applicantsResponse.ok) {
+          const applicantsData = await applicantsResponse.json();
+          setApplicants(applicantsData);
+        } else {
+          console.warn(`Couldn't fetch applicants: ${applicantsResponse.status}`);
           setApplicants([]);
         }
-
-        // Success! We at least got the job data
-        setLoading(false);
-
-      } catch (error) {
-        console.error("Error in job details fetch:", error);
-        setError(error.message || "Failed to load job details");
-        setLoading(false);
+      } catch (appError) {
+        console.warn("Error fetching applicants:", appError);
+        setApplicants([]);
       }
-    };
-
-    fetchData();
-  }, [jobId]);
-
-  const handleBack = () => {
-    navigate('/admin/jobs');
+    } catch (error) {
+      console.error("Error in job details fetch:", error);
+      setError(error.message || "Failed to load job details");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEdit = () => {
-    navigate(`/admin/jobs/edit/${jobId}`);
+  const handleEditClick = () => {
+    onHide();
+    onEdit(jobId);
   };
 
   const handleViewApplicant = (applicantId) => {
-    navigate(`/admin/applicants/${applicantId}`);
+    // Navigate to applicant detail page
+    window.location.href = `/admin/applicants/${applicantId}`;
+    onHide(); // Close the modal
   };
-
-  if (loading) {
-    return <div className="loading">Loading job details...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="error-message">
-        <div>{error}</div>
-        <button onClick={handleBack} className="back-button">
-          <i className="fas fa-arrow-left"></i> Back to Jobs
-        </button>
-      </div>
-    );
-  }
-
-  if (!job) {
-    return <div className="not-found">Job not found</div>;
-  }
-
+  
+  if (!show) return null;
+  
   return (
-    <div className="job-detail-modal">
-      <div className="detail-header">
-        <button onClick={handleBack} className="back-button">
-          <i className="fas fa-arrow-left"></i> Back to Jobs
-        </button>
-        <h2>Job Details</h2>
-        <button onClick={handleEdit} className="edit-button">
-          <i className="fas fa-edit"></i> Edit
-        </button>
-      </div>
-
-      <div className="detail-content">
-        <div className="job-detail-card">
-          <div className="job-detail-header">
-            <h3>{job.job_name}</h3>
-            <div className="job-detail-meta">
-              <span className="company-name">{job.company_name}</span>
-              <div className="job-tags">
-                <span className="job-type">{job.type}</span>
-                <span className="job-remote">{job.remote_type}</span>
-              </div>
-            </div>
+    <div className="modal fade show" style={{display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+      <div className="modal-dialog job-detail-modal">
+        <div className="modal-content">
+          <div className="modal-header custom-modal-header">
+            <h2 className="modal-title">Job Details</h2>
+            <button type="button" className="btn-close" onClick={onHide} aria-label="Close">
+              <i className="fas fa-times"></i>
+            </button>
           </div>
-
-          <div className="job-detail-info">
-            <div className="info-item">
-              <i className="fas fa-map-marker-alt"></i>
-              <span>{job.location || "No location specified"}</span>
-            </div>
-
-            <div className="info-item">
-              <i className="fas fa-money-bill-wave"></i>
-              <span>{job.salary_range || "Salary not specified"}</span>
-            </div>
-
-            <div className="info-item">
-              <i className="fas fa-calendar-alt"></i>
-              <span>Posted on {new Date(job.created_at).toLocaleDateString()}</span>
-            </div>
-
-            <div className="info-item">
-              <i className="fas fa-users"></i>
-              <span>{job.applicants_count} applicants</span>
-            </div>
-          </div>
-
-          <div className="job-detail-section">
-            <h4>Description</h4>
-            <p>{job.description || "No description provided"}</p>
-          </div>
-
-          <div className="job-detail-section">
-            <h4>Responsibilities</h4>
-            {job.responsibilities && job.responsibilities.length > 0 ? (
-              <ul className="detail-list">
-                {job.responsibilities.map((resp, index) => (
-                  <li key={index}>{resp.responsibility_text}</li>
-                ))}
-              </ul>
+          
+          <div className="modal-body custom-modal-body">
+            {loading ? (
+              <div className="loading">Loading job details...</div>
+            ) : error ? (
+              <div className="error-message">{error}</div>
+            ) : !job ? (
+              <div className="not-found">Job not found</div>
             ) : (
-              <p>No responsibilities listed</p>
-            )}
-          </div>
-
-          <div className="job-detail-section">
-            <h4>Qualifications</h4>
-            {job.qualifications && job.qualifications.length > 0 ? (
-              <ul className="detail-list">
-                {job.qualifications.map((qual, index) => (
-                  <li key={index}>{qual.qualification_text}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No qualifications listed</p>
-            )}
-          </div>
-
-          <div className="job-detail-section">
-            <h4>Offers & Benefits</h4>
-            {job.offers && job.offers.length > 0 ? (
-              <ul className="detail-list">
-                {job.offers.map((offer, index) => (
-                  <li key={index}>{offer.offer_text}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No offers or benefits listed</p>
-            )}
-          </div>
-        </div>
-
-        <div className="job-applicants-section">
-          <h3>Applicants for this Job</h3>
-
-          {applicants.length > 0 ? (
-            <div className="applicants-list">
-              {applicants.map((applicant) => (
-                <div key={applicant.id} className="applicant-list-item">
-                  <div className="applicant-info" onClick={() => handleViewApplicant(applicant.id)}>
-                    <div className="applicant-avatar">
-                      <i className="fas fa-user-circle"></i>
-                    </div>
-                    <div className="applicant-details">
-                      <h4>{applicant.full_name}</h4>
-                      <p className="applicant-meta">{applicant.institution}</p>
-                      <span className={`status-indicator ${applicant.status.toLowerCase()}`}>
-                        {applicant.status}
-                      </span>
+              <div className="detail-content">
+                <div className="job-detail-card">
+                  <div className="job-detail-header">
+                    <h3>{job.job_name}</h3>
+                    <div className="job-detail-meta">
+                      <span className="company-name">{job.company_name}</span>
+                      <div className="job-tags">
+                        <span className="job-type">{job.type}</span>
+                        <span className="job-remote">{job.remote_type}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleViewApplicant(applicant.id)}
-                    className="view-applicant-button"
-                  >
-                    <i className="fas fa-eye"></i> View
-                  </button>
+                  <div className="job-detail-info">
+                    <div className="info-item">
+                      <i className="fas fa-map-marker-alt"></i>
+                      <span>{job.location || "No location specified"}</span>
+                    </div>
+
+                    <div className="info-item">
+                      <i className="fas fa-money-bill-wave"></i>
+                      <span>{job.salary_range || "Salary not specified"}</span>
+                    </div>
+
+                    <div className="info-item">
+                      <i className="fas fa-calendar-alt"></i>
+                      <span>Posted on {new Date(job.created_at).toLocaleDateString()}</span>
+                    </div>
+
+                    <div className="info-item">
+                      <i className="fas fa-users"></i>
+                      <span>{job.applicants_count} applicants</span>
+                    </div>
+                  </div>
+
+                  <div className="job-detail-section">
+                    <h4>Description</h4>
+                    <p>{job.description || "No description provided"}</p>
+                  </div>
+
+                  <div className="job-detail-section">
+                    <h4>Responsibilities</h4>
+                    {job.responsibilities && job.responsibilities.length > 0 ? (
+                      <ul className="detail-list">
+                        {job.responsibilities.map((resp, index) => (
+                          <li key={index}>{resp.responsibility_text}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No responsibilities listed</p>
+                    )}
+                  </div>
+
+                  <div className="job-detail-section">
+                    <h4>Qualifications</h4>
+                    {job.qualifications && job.qualifications.length > 0 ? (
+                      <ul className="detail-list">
+                        {job.qualifications.map((qual, index) => (
+                          <li key={index}>{qual.qualification_text}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No qualifications listed</p>
+                    )}
+                  </div>
+
+                  <div className="job-detail-section">
+                    <h4>Offers & Benefits</h4>
+                    {job.offers && job.offers.length > 0 ? (
+                      <ul className="detail-list">
+                        {job.offers.map((offer, index) => (
+                          <li key={index}>{offer.offer_text}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No offers or benefits listed</p>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="no-applicants">
-              <i className="fas fa-user-slash fa-2x"></i>
-              <p>No applicants yet for this job posting</p>
-            </div>
-          )}
+
+                <div className="job-applicants-section">
+                  <h3>Applicants for this Job</h3>
+
+                  {applicants.length > 0 ? (
+                    <div className="applicants-list">
+                      {applicants.map((applicant) => (
+                        <div key={applicant.id} className="applicant-list-item">
+                          <div className="applicant-info" onClick={() => handleViewApplicant(applicant.id)}>
+                            <div className="applicant-avatar">
+                              <i className="fas fa-user-circle"></i>
+                            </div>
+                            <div className="applicant-details">
+                              <h4>{applicant.full_name}</h4>
+                              <p className="applicant-meta">{applicant.institution}</p>
+                              <span className={`status-indicator ${applicant.status.toLowerCase()}`}>
+                                {applicant.status}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => handleViewApplicant(applicant.id)}
+                            className="view-applicant-button"
+                          >
+                            <i className="fas fa-eye"></i> View
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-applicants">
+                      <i className="fas fa-user-slash fa-2x"></i>
+                      <p>No applicants yet for this job posting</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="modal-footer custom-modal-footer">
+            <button className="back-button" onClick={onHide}>
+              <i className="fas fa-arrow-left"></i> Back to Jobs
+            </button>
+            <button className="edit-button" onClick={handleEditClick}>
+              <i className="fas fa-edit"></i> Edit Job
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
 export default JobsManagement;
