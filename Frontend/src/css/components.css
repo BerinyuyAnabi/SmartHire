@@ -193,10 +193,11 @@
 
 /* Form buttons */
 .submit-button {
-  padding: 12px 24px;
-  background-color: var(--primary);
-  color: white;
-}
+    padding: 12px 24px;
+    background-color: var(--primary);
+    color: white;
+    justify-content: center;
+  }
 
 .submit-button:hover {
   background-color: var(--primary-dark);
@@ -533,10 +534,11 @@
 
 /* Job Card */
 .job-header {
-  padding: 22px 25px;
-  border-bottom: 1px solid var(--gray-200);
-  position: relative;
-}
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--gray-200);
+    position: relative;
+  }
+  
 
 .job-header::after {
   content: '';
@@ -571,8 +573,9 @@
 }
 
 .job-details {
-  padding: 20px 25px;
-}
+    padding: var(--space-md) var(--space-lg);
+    flex: 1;
+  }
 
 .job-info {
   display: flex;
@@ -610,13 +613,13 @@
 }
 
 .job-footer {
-  padding: 16px 25px;
-  background-color: var(--gray-100);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid var(--gray-200);
-}
+    padding: var(--space-md) var(--space-lg);
+    background-color: var(--gray-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--gray-200);
+  }
 
 .created-date {
   font-size: 0.85rem;
@@ -750,8 +753,8 @@
 
 /* Applicant Card */
 .applicant-card {
-  padding: 25px;
-}
+    padding: var(--space-lg);
+  }
 
 .applicant-header {
   display: flex;
@@ -898,9 +901,9 @@
 }
 
 .assessment-content {
-  padding: 25px;
-  flex: 1;
-}
+    padding: var(--space-lg);
+    flex: 1;
+  }
 
 .question-text {
   margin: 0 0 20px;
@@ -1058,16 +1061,16 @@
   background-color: var(--white);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-md);
-  padding: 30px;
-  margin-top: 30px;
+  padding: var(--space-lg);
+  margin-top: var(--space-lg);
   border: 1px solid var(--gray-200);
 }
 
 .form-header {
-  margin-bottom: 25px;
-  border-bottom: 1px solid var(--gray-200);
-  padding-bottom: 15px;
-}
+    margin-bottom: var(--space-md);
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: var(--space-sm);
+  }
 
 .form-header h2 {
   margin: 0;
@@ -1090,8 +1093,8 @@
 
 /* Form input groups */
 .form-group {
-  margin-bottom: 20px;
-}
+    margin-bottom: var(--space-md);
+  }
 
 .form-group label {
   display: block;
@@ -1145,13 +1148,13 @@
 }
 
 .form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-  margin-top: 30px;
-  border-top: 1px solid var(--gray-200);
-  padding-top: 20px;
-}
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+    border-top: 1px solid var(--gray-200);
+    padding-top: var(--space-md);
+  }
 
 /* Array Field Styles */
 .array-field {
@@ -1265,8 +1268,8 @@
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-lg);
   width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
+  max-width: 600px;
+  max-height: 82vh;
   display: flex;
   flex-direction: column;
   animation: slideIn 0.3s ease-in-out;
@@ -1281,16 +1284,16 @@
 
 /* Custom modal parts */
 .custom-modal-header {
-  padding: 1.25rem 1.5rem;
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-  color: var(--white);
-  border-top-left-radius: var(--border-radius-lg);
-  border-top-right-radius: var(--border-radius-lg);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: none;
-}
+    padding: var(--space-md) var(--space-lg);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    color: var(--white);
+    border-top-left-radius: var(--border-radius-lg);
+    border-top-right-radius: var(--border-radius-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: none;
+  }
 
 .custom-modal-header .modal-title {
   margin: 0;
@@ -1316,24 +1319,23 @@
 
 .custom-modal-header .btn-close:hover {
   opacity: 1;
-  transform: rotate(90deg);
 }
 
 .custom-modal-body {
-  padding: 1.5rem;
-  overflow-y: auto;
-  flex: 1;
-  max-height: calc(90vh - 140px); /* Adjust for header and footer height */
-}
+    padding: var(--space-lg);
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(90vh - 140px);
+  }
 
 .custom-modal-footer {
-  padding: 1.25rem 1.5rem;
-  border-top: 1px solid var(--gray-200);
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  background-color: var(--gray-50);
-}
+    padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+    background-color: var(--gray-50);
+  }
 
 /* Profile content styling */
 .profile-header {
@@ -1627,24 +1629,24 @@
 }
 
 .admin-users-table th {
-  background-color: var(--primary);
-  color: var(--white);
-  text-align: left;
-  padding: 15px 20px;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
-  border-bottom: 3px solid var(--primary-dark);
-}
+    background-color: var(--primary);
+    color: var(--white);
+    text-align: left;
+    padding: var(--space-sm) var(--space-md);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border-bottom: 3px solid var(--primary-dark);
+  }
 
 .admin-users-table td {
-  padding: 15px 20px;
-  border-bottom: 1px solid var(--gray-200);
-  color: var(--gray-800);
-  font-size: 0.95rem;
-  transition: var(--transition);
-}
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--gray-200);
+    color: var(--gray-800);
+    font-size: 0.95rem;
+    transition: var(--transition);
+  }
 
 .admin-users-table tr:last-child td {
   border-bottom: none;
@@ -1800,6 +1802,22 @@
     width: 100%;
     justify-content: space-between;
   }
+
+    /* Modal adjustments */
+.modal-container {
+    width: 95%;
+    max-height: 90vh;
+    }
+      
+.custom-modal-body {
+    padding: var(--space-md);
+    max-height: calc(90vh - 140px);
+}
+      
+.custom-modal-header,
+.custom-modal-footer {
+    padding: var(--space-sm) var(--space-md);
+}
   
   /* Social media adjustments */
   .social-links {
