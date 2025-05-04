@@ -1,4 +1,4 @@
-// Updated Admin.js with fixed authentication logic to prevent infinite loops
+// Updated Admin.js with fixed DOM manipulation and authentication logic
 
 import { useState, useEffect, createContext, useRef } from 'react';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
@@ -27,6 +27,41 @@ function Admin() {
   // Use a ref to prevent multiple simultaneous auth checks
   const isInitialAuthCheck = useRef(true);
   
+  // Helper function for safely loading external resources
+  const safelyLoadResource = (resourceType, id, attributes) => {
+    // Check if this resource already exists
+    if (document.getElementById(id)) return;
+    
+    // Create the appropriate element based on resourceType
+    let element;
+    if (resourceType === 'script') {
+      element = document.createElement('script');
+    } else if (resourceType === 'style') {
+      element = document.createElement('link');
+      element.rel = 'stylesheet';
+    } else {
+      console.warn(`Unsupported resource type: ${resourceType}`);
+      return;
+    }
+    
+    // Set the ID to prevent duplicate loading
+    element.id = id;
+    
+    // Set all provided attributes
+    Object.entries(attributes).forEach(([key, value]) => {
+      element[key] = value;
+    });
+    
+    // Add the element to the document
+    if (resourceType === 'script') {
+      document.body.appendChild(element);
+    } else {
+      document.head.appendChild(element);
+    }
+    
+    console.log(`Loaded ${resourceType}: ${id}`);
+  };
+  
   // Toggle sidebar function for mobile
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -41,7 +76,59 @@ function Admin() {
     }
   };
   
-  // Check authentication on component mount
+  // Resource loading useEffect - separated from authentication
+  useEffect(() => {
+    console.log("Setting up resources");
+    
+    // Load stylesheets only once
+    safelyLoadResource('style', 'bootstrap-css', {
+      href: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
+      crossOrigin: 'anonymous'
+    });
+    
+    safelyLoadResource('style', 'fontawesome-css', {
+      href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+    });
+    
+    // Load Bootstrap JS
+    safelyLoadResource('script', 'bootstrap-js', {
+      src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js',
+      crossOrigin: 'anonymous'
+    });
+    
+    // Add window resize event to close sidebar on desktop
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setSidebarOpen(false);
+        document.body.classList.remove('sidebar-active');
+      }
+    };
+    
+    // Add scroll event to handle sidebar styling when scrolling
+    const handleScroll = () => {
+      const sidebar = document.querySelector('.admin-sidebar');
+      if (sidebar) {
+        if (window.scrollY > 60) {
+          sidebar.classList.add('sidebar-scrolled');
+        } else {
+          sidebar.classList.remove('sidebar-scrolled');
+        }
+      }
+    };
+    
+    // Add event listeners
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleScroll);
+    
+    // Cleanup function
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+      // Do NOT attempt to remove script or style tags here
+    };
+  }, []); // Empty dependency array means this runs once on mount
+  
+  // Separate useEffect for authentication
   useEffect(() => {
     const checkAuth = async () => {
       // Prevent concurrent auth checks
@@ -125,66 +212,7 @@ function Admin() {
       // Otherwise do the full auth check
       checkAuth();
     }
-    
-    // Add window resize event to close sidebar on desktop
-    const handleResize = () => {
-      if (window.innerWidth > 768) {
-        setSidebarOpen(false);
-        document.body.classList.remove('sidebar-active');
-      }
-    };
-    
-    // Add scroll event to handle sidebar styling when scrolling
-    const handleScroll = () => {
-      const sidebar = document.querySelector('.admin-sidebar');
-      if (sidebar) {
-        if (window.scrollY > 60) {
-          sidebar.classList.add('sidebar-scrolled');
-        } else {
-          sidebar.classList.remove('sidebar-scrolled');
-        }
-      }
-    };
-    
-    // Add event listeners
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleScroll);
-    
-    // Load Bootstrap and FontAwesome
-    if (!document.getElementById('bootstrap-css')) {
-      const bootstrapLink = document.createElement('link');
-      bootstrapLink.id = 'bootstrap-css';
-      bootstrapLink.rel = 'stylesheet';
-      bootstrapLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';
-      bootstrapLink.integrity = 'sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN';
-      bootstrapLink.crossOrigin = 'anonymous';
-      document.head.appendChild(bootstrapLink);
-    }
-    
-    if (!document.getElementById('fontawesome-css')) {
-      const faLink = document.createElement('link');
-      faLink.id = 'fontawesome-css';
-      faLink.rel = 'stylesheet';
-      faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
-      document.head.appendChild(faLink);
-    }
-    
-    // Load Bootstrap JS
-    if (!document.getElementById('bootstrap-js')) {
-      const bootstrapScript = document.createElement('script');
-      bootstrapScript.id = 'bootstrap-js';
-      bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';
-      bootstrapScript.integrity = 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL';
-      bootstrapScript.crossOrigin = 'anonymous';
-      document.body.appendChild(bootstrapScript);
-    }
-    
-    // Cleanup function to handle component unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [navigate]); // Remove dependencies that might cause re-runs
+  }, [navigate]);
 
   const handleLogout = async () => {
     setLoading(true);
@@ -313,15 +341,17 @@ function Admin() {
           </div>
         </div>
         
-        {/* Main Content */}
+        {/* Main Content - Added content-wrapper div */}
         <div className="admin-content" onClick={handleContentClick}>
-          <Routes>
-            <Route path="/" element={<AdminDashboard />} />
-            <Route path="/jobs/*" element={<JobsManagement />} />
-            <Route path="/applicants/*" element={<ApplicantsManagement />} />
-            <Route path="/assessments/*" element={<AssessmentsManagement />} />
-            <Route path="/users/*" element={<AdminUsersManagement />} />
-          </Routes>
+          <div className="content-wrapper">
+            <Routes>
+              <Route path="/" element={<AdminDashboard />} />
+              <Route path="/jobs/*" element={<JobsManagement />} />
+              <Route path="/applicants/*" element={<ApplicantsManagement />} />
+              <Route path="/assessments/*" element={<AssessmentsManagement />} />
+              <Route path="/users/*" element={<AdminUsersManagement />} />
+            </Routes>
+          </div>
         </div>
       </div>
     </AdminContext.Provider>

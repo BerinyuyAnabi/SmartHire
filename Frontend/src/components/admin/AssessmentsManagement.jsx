@@ -1,5 +1,6 @@
 // src/components/admin/AssessmentsManagement.js
 import React, { useState, useEffect } from 'react';
+import ModalPortal from '../common/ModalPortal';
 
 function AssessmentsManagement() {
   const [assessments, setAssessments] = useState([]);
@@ -219,26 +220,28 @@ function AssessmentsManagement() {
         )}
       </div>
       
-      {/* Assessment Form Modal */}
-      <AssessmentFormModal
-        show={showAssessmentForm}
-        onHide={handleFormClose}
-        assessmentId={currentAssessmentId}
-        isEdit={isEditMode}
-      />
+      {/* Assessment Form Modal using ModalPortal */}
+      <ModalPortal isOpen={showAssessmentForm}>
+        <AssessmentFormModal
+          onHide={handleFormClose}
+          assessmentId={currentAssessmentId}
+          isEdit={isEditMode}
+        />
+      </ModalPortal>
       
-      {/* Assessment Responses Modal */}
-      <AssessmentResponsesModal
-        show={showResponses}
-        onHide={handleResponsesClose}
-        assessmentId={currentAssessmentId}
-      />
+      {/* Assessment Responses Modal using ModalPortal */}
+      <ModalPortal isOpen={showResponses}>
+        <AssessmentResponsesModal
+          onHide={handleResponsesClose}
+          assessmentId={currentAssessmentId}
+        />
+      </ModalPortal>
     </div>
   );
 }
 
 // Assessment Form Modal Component
-function AssessmentFormModal({ show, onHide, assessmentId, isEdit }) {
+function AssessmentFormModal({ onHide, assessmentId, isEdit }) {
   const [loading, setLoading] = useState(assessmentId ? true : false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
@@ -249,9 +252,9 @@ function AssessmentFormModal({ show, onHide, assessmentId, isEdit }) {
   });
   
   useEffect(() => {
-    if (show && assessmentId && isEdit) {
+    if (assessmentId && isEdit) {
       fetchAssessmentData();
-    } else if (show && !assessmentId) {
+    } else if (!assessmentId) {
       // Reset form for new assessment
       setFormData({
         question_text: '',
@@ -261,7 +264,7 @@ function AssessmentFormModal({ show, onHide, assessmentId, isEdit }) {
       });
       setError(null);
     }
-  }, [show, assessmentId, isEdit]);
+  }, [assessmentId, isEdit]);
   
   const fetchAssessmentData = async () => {
     setLoading(true);
@@ -429,150 +432,146 @@ function AssessmentFormModal({ show, onHide, assessmentId, isEdit }) {
     }
   };
   
-  if (!show) return null;
-  
   return (
-    <div className="modal fade show" style={{display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
-      <div className="modal-dialog assessment-form-modal">
-        <div className="modal-content">
-          <div className="modal-header custom-modal-header">
-            <h2 className="modal-title">{isEdit ? 'Edit Assessment' : 'Create New Assessment'}</h2>
-            <button type="button" className="btn-close" onClick={onHide} aria-label="Close">
-              <i className="fas fa-times"></i>
-            </button>
-          </div>
-          
-          <div className="modal-body custom-modal-body">
-          {error && <div className="error-message">{error}</div>}
-          
-          {loading ? (
-            <div className="loading">Loading assessment data...</div>
-          ) : (
-            <form className="assessment-form">
-              <div className="form-section">
-                <div className="form-group">
-                  <label htmlFor="question_text">Question Text*</label>
-                  <textarea
-                    id="question_text"
-                    name="question_text"
-                    value={formData.question_text}
-                    onChange={handleChange}
-                    required
-                    placeholder="Enter your question here..."
-                    rows="4"
-                  ></textarea>
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="question_type">Question Type</label>
-                  <select
-                    id="question_type"
-                    name="question_type"
-                    value={formData.question_type}
-                    onChange={handleChange}
-                  >
-                    <option value="multiple-choice">Multiple Choice</option>
-                    <option value="essay">Essay</option>
-                  </select>
-                </div>
-              </div>
-              
-              {formData.question_type === 'multiple-choice' ? (
-                <div className="form-section">
-                  <h3>Answer Options</h3>
-                  
-                  {formData.options.map((option, index) => (
-                    <div key={`option-${index}`} className="option-field">
-                      <div className="option-input-group">
-                        <input
-                          type="text"
-                          value={option}
-                          onChange={(e) => handleOptionChange(index, e.target.value)}
-                          placeholder={`Option ${index + 1}`}
-                        />
-                        
-                        <div className="option-actions">
-                          <label className="correct-answer-toggle">
-                            <input
-                              type="checkbox"
-                              checked={formData.correct_answer.includes(option)}
-                              onChange={() => handleCorrectAnswerChange(option)}
-                              disabled={!option.trim()}
-                            />
-                            <span className="toggle-label">Correct</span>
-                          </label>
-                          
-                          {formData.options.length > 2 && (
-                            <button 
-                              type="button" 
-                              onClick={() => removeOption(index)}
-                              className="remove-option-btn"
-                            >
-                              <i className="fas fa-trash"></i>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <button 
-                    type="button" 
-                    onClick={addOption}
-                    className="add-option-btn"
-                  >
-                    <i className="fas fa-plus-circle"></i> Add Option
-                  </button>
-                  
-                  {formData.correct_answer.length === 0 && formData.options.some(opt => opt.trim()) && (
-                    <div className="validation-warning">
-                      <i className="fas fa-exclamation-triangle"></i>
-                      Please select at least one correct answer
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="form-section">
-                  <h3>Model Answer (Optional)</h3>
-                  <div className="form-group">
-                    <textarea
-                      id="essay_answer"
-                      name="essay_answer"
-                      value={formData.correct_answer || ''}
-                      onChange={(e) => handleEssayAnswerChange(e.target.value)}
-                      placeholder="Enter a model answer or grading criteria for reference (optional)..."
-                      rows="6"
-                    ></textarea>
-                    <div className="hint">
-                      <i className="fas fa-info-circle"></i>
-                      This model answer is for reference only and won't be automatically used for grading.
-                    </div>
-                  </div>
-                </div>
-              )}
-            </form>
-          )}
+    <div className="modal-dialog assessment-form-modal">
+      <div className="modal-content">
+        <div className="modal-header custom-modal-header">
+          <h2 className="modal-title">{isEdit ? 'Edit Assessment' : 'Create New Assessment'}</h2>
+          <button type="button" className="btn-close" onClick={onHide} aria-label="Close">
+            <i className="fas fa-times"></i>
+          </button>
         </div>
         
-          <div className="modal-footer custom-modal-footer">
-            <button type="button" onClick={onHide} className="cancel-button">
-              Cancel
-            </button>
-            <button 
-              type="button" 
-              onClick={handleSubmit} 
-              className="submit-button" 
-              disabled={
-                loading || 
-                !formData.question_text.trim() || 
-                (formData.question_type === 'multiple-choice' && 
-                 (formData.options.filter(opt => opt.trim()).length < 2 || 
-                  formData.correct_answer.length === 0))
-              }
-            >
-              {loading ? 'Saving...' : (isEdit ? 'Update Assessment' : 'Create Assessment')}
-            </button>
-          </div>
+        <div className="modal-body custom-modal-body">
+        {error && <div className="error-message">{error}</div>}
+        
+        {loading ? (
+          <div className="loading">Loading assessment data...</div>
+        ) : (
+          <form className="assessment-form">
+            <div className="form-section">
+              <div className="form-group">
+                <label htmlFor="question_text">Question Text*</label>
+                <textarea
+                  id="question_text"
+                  name="question_text"
+                  value={formData.question_text}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your question here..."
+                  rows="4"
+                ></textarea>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="question_type">Question Type</label>
+                <select
+                  id="question_type"
+                  name="question_type"
+                  value={formData.question_type}
+                  onChange={handleChange}
+                >
+                  <option value="multiple-choice">Multiple Choice</option>
+                  <option value="essay">Essay</option>
+                </select>
+              </div>
+            </div>
+            
+            {formData.question_type === 'multiple-choice' ? (
+              <div className="form-section">
+                <h3>Answer Options</h3>
+                
+                {formData.options.map((option, index) => (
+                  <div key={`option-${index}`} className="option-field">
+                    <div className="option-input-group">
+                      <input
+                        type="text"
+                        value={option}
+                        onChange={(e) => handleOptionChange(index, e.target.value)}
+                        placeholder={`Option ${index + 1}`}
+                      />
+                      
+                      <div className="option-actions">
+                        <label className="correct-answer-toggle">
+                          <input
+                            type="checkbox"
+                            checked={formData.correct_answer.includes(option)}
+                            onChange={() => handleCorrectAnswerChange(option)}
+                            disabled={!option.trim()}
+                          />
+                          <span className="toggle-label">Correct</span>
+                        </label>
+                        
+                        {formData.options.length > 2 && (
+                          <button 
+                            type="button" 
+                            onClick={() => removeOption(index)}
+                            className="remove-option-btn"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                <button 
+                  type="button" 
+                  onClick={addOption}
+                  className="add-option-btn"
+                >
+                  <i className="fas fa-plus-circle"></i> Add Option
+                </button>
+                
+                {formData.correct_answer.length === 0 && formData.options.some(opt => opt.trim()) && (
+                  <div className="validation-warning">
+                    <i className="fas fa-exclamation-triangle"></i>
+                    Please select at least one correct answer
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="form-section">
+                <h3>Model Answer (Optional)</h3>
+                <div className="form-group">
+                  <textarea
+                    id="essay_answer"
+                    name="essay_answer"
+                    value={formData.correct_answer || ''}
+                    onChange={(e) => handleEssayAnswerChange(e.target.value)}
+                    placeholder="Enter a model answer or grading criteria for reference (optional)..."
+                    rows="6"
+                  ></textarea>
+                  <div className="hint">
+                    <i className="fas fa-info-circle"></i>
+                    This model answer is for reference only and won't be automatically used for grading.
+                  </div>
+                </div>
+              </div>
+            )}
+          </form>
+        )}
+      </div>
+      
+        <div className="modal-footer custom-modal-footer">
+          <button type="button" onClick={onHide} className="cancel-button">
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            onClick={handleSubmit} 
+            className="submit-button" 
+            disabled={
+              loading || 
+              !formData.question_text.trim() || 
+              (formData.question_type === 'multiple-choice' && 
+               (formData.options.filter(opt => opt.trim()).length < 2 || 
+                formData.correct_answer.length === 0))
+            }
+          >
+            {loading ? 'Saving...' : (isEdit ? 'Update Assessment' : 'Create Assessment')}
+          </button>
         </div>
       </div>
     </div>
@@ -580,7 +579,7 @@ function AssessmentFormModal({ show, onHide, assessmentId, isEdit }) {
 }
 
 // Assessment Responses Modal Component
-function AssessmentResponsesModal({ show, onHide, assessmentId }) {
+function AssessmentResponsesModal({ onHide, assessmentId }) {
   const [assessment, setAssessment] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -593,10 +592,10 @@ function AssessmentResponsesModal({ show, onHide, assessmentId }) {
   });
   
   useEffect(() => {
-    if (show && assessmentId) {
+    if (assessmentId) {
       fetchData();
     }
-  }, [show, assessmentId]);
+  }, [assessmentId]);
   
   const fetchData = async () => {
     try {
@@ -642,166 +641,162 @@ function AssessmentResponsesModal({ show, onHide, assessmentId }) {
     onHide(); // Close the modal
   };
   
-  if (!show) return null;
-  
   return (
-    <div className="modal fade show" style={{display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
-      <div className="modal-dialog assessment-responses-modal">
-        <div className="modal-content">
-          <div className="modal-header custom-modal-header">
-            <h2 className="modal-title">Assessment Responses</h2>
-            <button type="button" className="btn-close" onClick={onHide} aria-label="Close">
-              <i className="fas fa-times"></i>
-            </button>
-          </div>
-          
-          <div className="modal-body custom-modal-body">
-          {loading ? (
-            <div className="loading">Loading assessment responses...</div>
-          ) : error ? (
-            <div className="error-message">{error}</div>
-          ) : !assessment ? (
-            <div className="not-found">Assessment not found</div>
-          ) : (
-            <div className="assessment-responses-content">
-              <div className="assessment-info">
-                <div className="question-display">
-                  <div className="question-type-badge">
-                    {assessment.question_type === 'multiple-choice' ? (
-                      <><i className="fas fa-tasks"></i> Multiple Choice</>
-                    ) : (
-                      <><i className="fas fa-pen"></i> Essay</>
-                    )}
-                  </div>
-                  <h3>{assessment.question_text}</h3>
-                  
-                  {assessment.question_type === 'multiple-choice' && assessment.options && (
-                    <div className="options-display">
-                      {JSON.parse(assessment.options).map((option, index) => {
-                        const isCorrect = JSON.parse(assessment.correct_answer).includes(option);
-                        return (
-                          <div key={index} className={`option ${isCorrect ? 'correct' : ''}`}>
-                            <span className="option-marker">{String.fromCharCode(65 + index)}.</span>
-                            <span className="option-text">{option}</span>
-                            {isCorrect && <i className="fas fa-check"></i>}
-                          </div>
-                        );
-                      })}
-                    </div>
+    <div className="modal-dialog assessment-responses-modal">
+      <div className="modal-content">
+        <div className="modal-header custom-modal-header">
+          <h2 className="modal-title">Assessment Responses</h2>
+          <button type="button" className="btn-close" onClick={onHide} aria-label="Close">
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div className="modal-body custom-modal-body">
+        {loading ? (
+          <div className="loading">Loading assessment responses...</div>
+        ) : error ? (
+          <div className="error-message">{error}</div>
+        ) : !assessment ? (
+          <div className="not-found">Assessment not found</div>
+        ) : (
+          <div className="assessment-responses-content">
+            <div className="assessment-info">
+              <div className="question-display">
+                <div className="question-type-badge">
+                  {assessment.question_type === 'multiple-choice' ? (
+                    <><i className="fas fa-tasks"></i> Multiple Choice</>
+                  ) : (
+                    <><i className="fas fa-pen"></i> Essay</>
                   )}
                 </div>
+                <h3>{assessment.question_text}</h3>
                 
-                {assessment.question_type === 'multiple-choice' && (
-                  <div className="response-stats">
-                    <h3>Response Statistics</h3>
-                    
-                    <div className="stats-grid">
-                      <div className="stat-card total">
-                        <span className="stat-value">{stats.totalResponses}</span>
-                        <span className="stat-label">Total Responses</span>
-                      </div>
-                      
-                      <div className="stat-card correct">
-                        <span className="stat-value">{stats.correctCount}</span>
-                        <span className="stat-label">Correct</span>
-                      </div>
-                      
-                      <div className="stat-card incorrect">
-                        <span className="stat-value">{stats.incorrectCount}</span>
-                        <span className="stat-label">Incorrect</span>
-                      </div>
-                      
-                      <div className="stat-card percentage">
-                        <span className="stat-value">{stats.correctPercentage}%</span>
-                        <span className="stat-label">Correct Rate</span>
-                      </div>
-                    </div>
-                    
-                    <div className="progress-bar-container">
-                      <div 
-                        className="progress-bar"
-                        style={{ width: `${stats.correctPercentage}%` }}
-                      ></div>
-                    </div>
+                {assessment.question_type === 'multiple-choice' && assessment.options && (
+                  <div className="options-display">
+                    {JSON.parse(assessment.options).map((option, index) => {
+                      const isCorrect = JSON.parse(assessment.correct_answer).includes(option);
+                      return (
+                        <div key={index} className={`option ${isCorrect ? 'correct' : ''}`}>
+                          <span className="option-marker">{String.fromCharCode(65 + index)}.</span>
+                          <span className="option-text">{option}</span>
+                          {isCorrect && <i className="fas fa-check"></i>}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
               
-              <div className="responses-list-container">
-                <h3>Individual Responses</h3>
-                
-                {answers.length === 0 ? (
-                  <div className="empty-state">
-                    <i className="fas fa-inbox fa-2x"></i>
-                    <p>No responses yet for this assessment</p>
+              {assessment.question_type === 'multiple-choice' && (
+                <div className="response-stats">
+                  <h3>Response Statistics</h3>
+                  
+                  <div className="stats-grid">
+                    <div className="stat-card total">
+                      <span className="stat-value">{stats.totalResponses}</span>
+                      <span className="stat-label">Total Responses</span>
+                    </div>
+                    
+                    <div className="stat-card correct">
+                      <span className="stat-value">{stats.correctCount}</span>
+                      <span className="stat-label">Correct</span>
+                    </div>
+                    
+                    <div className="stat-card incorrect">
+                      <span className="stat-value">{stats.incorrectCount}</span>
+                      <span className="stat-label">Incorrect</span>
+                    </div>
+                    
+                    <div className="stat-card percentage">
+                      <span className="stat-value">{stats.correctPercentage}%</span>
+                      <span className="stat-label">Correct Rate</span>
+                    </div>
                   </div>
-                ) : (
-                  <div className="responses-list">
-                    {answers.map((answer) => (
-                      <div 
-                        key={answer.id} 
-                        className={`response-item ${assessment.question_type === 'multiple-choice' ? 
-                          (answer.is_correct ? 'correct' : 'incorrect') : ''}`}
-                      >
-                        <div className="response-header">
-                          <div 
-                            className="applicant-info"
-                            onClick={() => handleViewApplicant(answer.applicant_id)}
-                          >
-                            <i className="fas fa-user-circle"></i>
-                            <span>{answer.applicant?.full_name || `Applicant #${answer.applicant_id}`}</span>
-                          </div>
-                          
-                          {assessment.question_type === 'multiple-choice' && (
-                            <div className="response-status">
-                              {answer.is_correct ? (
-                                <span className="correct-badge">
-                                  <i className="fas fa-check-circle"></i> Correct
-                                </span>
-                              ) : (
-                                <span className="incorrect-badge">
-                                  <i className="fas fa-times-circle"></i> Incorrect
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="response-content">
-                          <h4>Response:</h4>
-                          {assessment.question_type === 'multiple-choice' ? (
-                            <div className="selected-option">
-                              {answer.answer}
-                            </div>
-                          ) : (
-                            <div className="essay-response">
-                              <p>{answer.answer}</p>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="response-footer">
-                          <button 
-                            onClick={() => handleViewApplicant(answer.applicant_id)}
-                            className="view-applicant-btn"
-                          >
-                            <i className="fas fa-user"></i> View Applicant Profile
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                  
+                  <div className="progress-bar-container">
+                    <div 
+                      className="progress-bar"
+                      style={{ width: `${stats.correctPercentage}%` }}
+                    ></div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        
-          <div className="modal-footer custom-modal-footer">
-            <button className="back-button" onClick={onHide}>
-              <i className="fas fa-arrow-left"></i> Back to Assessments
-            </button>
+            
+            <div className="responses-list-container">
+              <h3>Individual Responses</h3>
+              
+              {answers.length === 0 ? (
+                <div className="empty-state">
+                  <i className="fas fa-inbox fa-2x"></i>
+                  <p>No responses yet for this assessment</p>
+                </div>
+              ) : (
+                <div className="responses-list">
+                  {answers.map((answer) => (
+                    <div 
+                      key={answer.id} 
+                      className={`response-item ${assessment.question_type === 'multiple-choice' ? 
+                        (answer.is_correct ? 'correct' : 'incorrect') : ''}`}
+                    >
+                      <div className="response-header">
+                        <div 
+                          className="applicant-info"
+                          onClick={() => handleViewApplicant(answer.applicant_id)}
+                        >
+                          <i className="fas fa-user-circle"></i>
+                          <span>{answer.applicant?.full_name || `Applicant #${answer.applicant_id}`}</span>
+                        </div>
+                        
+                        {assessment.question_type === 'multiple-choice' && (
+                          <div className="response-status">
+                            {answer.is_correct ? (
+                              <span className="correct-badge">
+                                <i className="fas fa-check-circle"></i> Correct
+                              </span>
+                            ) : (
+                              <span className="incorrect-badge">
+                                <i className="fas fa-times-circle"></i> Incorrect
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="response-content">
+                        <h4>Response:</h4>
+                        {assessment.question_type === 'multiple-choice' ? (
+                          <div className="selected-option">
+                            {answer.answer}
+                          </div>
+                        ) : (
+                          <div className="essay-response">
+                            <p>{answer.answer}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="response-footer">
+                        <button 
+                          onClick={() => handleViewApplicant(answer.applicant_id)}
+                          className="view-applicant-btn"
+                        >
+                          <i className="fas fa-user"></i> View Applicant Profile
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+        )}
+      </div>
+      
+        <div className="modal-footer custom-modal-footer">
+          <button className="back-button" onClick={onHide}>
+            <i className="fas fa-arrow-left"></i> Back to Assessments
+          </button>
         </div>
       </div>
     </div>

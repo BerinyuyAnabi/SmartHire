@@ -1,6 +1,7 @@
 // src/components/admin/ApplicantsManagement.js
 import React, { useState, useEffect, useContext } from 'react';
-import { AdminContext } from '../../pages/Admin'; 
+import { AdminContext } from '../../pages/Admin';
+import ModalPortal from '../common/ModalPortal';
 
 function ApplicantsManagement() {
   const { currentAdmin } = useContext(AdminContext);
@@ -109,10 +110,7 @@ function ApplicantsManagement() {
 
   const closeDetailModal = () => {
     setShowDetailModal(false);
-    // Small delay to ensure animations complete before removing from DOM
-    setTimeout(() => {
-      setSelectedApplicantId(null);
-    }, 300);
+    // No need for setTimeout here - ModalPortal component will handle unmounting
   };
   
   if (!currentAdmin) return <div className="loading">Checking permissions...</div>;
@@ -275,8 +273,8 @@ function ApplicantsManagement() {
         )}
       </div>
       
-      {/* Applicant Detail Modal */}
-      {showDetailModal && selectedApplicantId && (
+      {/* Use ModalPortal for the Applicant Detail Modal */}
+      <ModalPortal isOpen={showDetailModal}>
         <div className="modal-wrapper">
           <div className="modal-backdrop" onClick={closeDetailModal}>
             <div className="modal-content applicant-detail-modal" onClick={e => e.stopPropagation()}>
@@ -286,10 +284,12 @@ function ApplicantsManagement() {
               </div>
               
               <div className="custom-modal-body">
-                <ApplicantDetail 
-                  applicantId={selectedApplicantId} 
-                  onClose={closeDetailModal} 
-                />
+                {selectedApplicantId && (
+                  <ApplicantDetail 
+                    applicantId={selectedApplicantId} 
+                    onClose={closeDetailModal} 
+                  />
+                )}
               </div>
               
               <div className="custom-modal-footer">
@@ -300,7 +300,7 @@ function ApplicantsManagement() {
             </div>
           </div>
         </div>
-      )}
+      </ModalPortal>
     </div>
   );
 }
