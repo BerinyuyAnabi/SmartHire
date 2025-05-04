@@ -1,5 +1,3 @@
-// Updated Admin.js with fixed DOM manipulation and authentication logic
-
 import { useState, useEffect, createContext, useRef } from 'react';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import "../css/Admin.css";
@@ -13,7 +11,6 @@ import AdminUsersManagement from '../components/admin/AdminUsersManagement';
 
 // Create a context to share admin state with child components
 export const AdminContext = createContext(null);
-
 function Admin() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,12 +19,10 @@ function Admin() {
   const [currentAdmin, setCurrentAdmin] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // Use a ref to track if authentication check is in progress
   const authCheckInProgress = useRef(false);
   // Use a ref to prevent multiple simultaneous auth checks
   const isInitialAuthCheck = useRef(true);
   
-  // Helper function for safely loading external resources
   const safelyLoadResource = (resourceType, id, attributes) => {
     // Check if this resource already exists
     if (document.getElementById(id)) return;
