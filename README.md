@@ -9,7 +9,7 @@ SmartHire is an AI-powered recruitment system designed to streamline the hiring 
   Extracts and analyzes key candidate information using NLP techniques.
 
 **Intelligent Candidate Ranking**
-  Ranks candidates based on how closely their profiles match the job requirements using ML scoring models.
+  Ranks candidates based on how closely their profiles match the job requirements using ML  models.
 
 **Bias Mitigation**
   Promotes fairer hiring by minimizing demographic bias during screening.
@@ -25,7 +25,7 @@ SmartHire is an AI-powered recruitment system designed to streamline the hiring 
 
 * **Frontend**: HTML, CSS, JavaScript
 * **Backend**: Python (Flask)
-* **Machine Learning**: Scikit-learn
+* **Machine Learning**: Fetch APIs
 * **Database**: MySQL
 * **Deployment**: PythonAnywhere
 
